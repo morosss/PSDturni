@@ -1,0 +1,1034 @@
+/* ===========================
+   CSS Variables - Material Theme
+   =========================== */
+:root {
+    --primary-color: #c62828;
+    --primary-dark: #8e0000;
+    --primary-light: #ff5f52;
+    --secondary-color: #616161;
+    --secondary-dark: #373737;
+    --secondary-light: #8e8e8e;
+    --background: #fafafa;
+    --surface: #ffffff;
+    --error: #d32f2f;
+    --success: #388e3c;
+    --warning: #f57c00;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --divider: #bdbdbd;
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    --shadow-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    --shadow-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    --shadow-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===========================
+   Reset & Base
+   =========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ===========================
+   Screen Management
+   =========================== */
+.screen {
+    display: none;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* ===========================
+   Login Screen
+   =========================== */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary-color) 100%);
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-4);
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.hospital-logo {
+    margin-bottom: 20px;
+}
+
+.login-card h1 {
+    color: var(--primary-color);
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+}
+
+/* ===========================
+   Forms
+   =========================== */
+.form {
+    text-align: left;
+}
+
+.input-group {
+    margin-bottom: 24px;
+}
+
+.input-group label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.input-group input,
+.input-group select,
+.select-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    transition: var(--transition);
+    background-color: var(--surface);
+    color: var(--text-primary);
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.select-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.1);
+}
+
+.helper-text {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.error-message {
+    color: var(--error);
+    font-size: 14px;
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 4px;
+    background-color: rgba(211, 47, 47, 0.1);
+    display: none;
+}
+
+.error-message.active {
+    display: block;
+}
+
+.warning-box {
+    background-color: rgba(245, 124, 0, 0.1);
+    border-left: 4px solid var(--warning);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    color: var(--warning);
+}
+
+.success-message {
+    color: var(--success);
+    font-size: 14px;
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 4px;
+    background-color: rgba(56, 142, 60, 0.1);
+}
+
+/* ===========================
+   Buttons
+   =========================== */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-1);
+}
+
+.btn:hover {
+    box-shadow: var(--shadow-2);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
+}
+
+.btn-icon {
+    padding: 8px;
+    border-radius: 50%;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.btn-icon:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-icon .material-icons {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+.btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ===========================
+   App Header
+   =========================== */
+.app-header {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    font-size: 32px;
+}
+
+.app-header h1 {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.header-right .btn-icon .material-icons {
+    color: white;
+}
+
+.header-right .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ===========================
+   Navigation
+   =========================== */
+.navigation {
+    background-color: var(--surface);
+    box-shadow: var(--shadow-1);
+    display: flex;
+    overflow-x: auto;
+    position: sticky;
+    top: 64px;
+    z-index: 99;
+}
+
+.nav-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px 24px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--primary-color);
+}
+
+.nav-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.nav-btn .material-icons {
+    font-size: 24px;
+}
+
+/* ===========================
+   Main Content
+   =========================== */
+.main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.view-header h2 {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.view-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* ===========================
+   Calendar
+   =========================== */
+.calendar-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.calendar-controls h3 {
+    font-size: 20px;
+    font-weight: 500;
+    min-width: 200px;
+    text-align: center;
+}
+
+.calendar-grid {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    overflow-x: auto;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.calendar-table th,
+.calendar-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--divider);
+}
+
+.calendar-table th {
+    background-color: var(--secondary-color);
+    color: white;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.calendar-table td.date-cell {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.calendar-table td.weekend {
+    background-color: rgba(198, 40, 40, 0.05);
+}
+
+.calendar-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.shift-cell {
+    position: relative;
+}
+
+.shift-cell input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.shift-cell input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.shift-cell.error input {
+    border-color: var(--error);
+    background-color: rgba(211, 47, 47, 0.1);
+}
+
+.shift-cell.closed {
+    background-color: rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.shift-cell.closed::after {
+    content: 'CHIUSO';
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ===========================
+   Availability Calendar
+   =========================== */
+.availability-controls {
+    margin-bottom: 24px;
+}
+
+.month-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.month-selector label {
+    font-weight: 500;
+}
+
+.month-selector select {
+    padding: 8px 16px;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.availability-calendar {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.availability-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.availability-day {
+    border: 2px solid var(--divider);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.availability-day:hover {
+    border-color: var(--primary-color);
+}
+
+.availability-day.selected {
+    background-color: var(--error);
+    color: white;
+    border-color: var(--error);
+}
+
+.availability-day.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.day-number {
+    font-size: 20px;
+    font-weight: 700;
+    display: block;
+}
+
+.day-name {
+    font-size: 12px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* ===========================
+   Users Grid
+   =========================== */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.user-card {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    transition: var(--transition);
+}
+
+.user-card:hover {
+    box-shadow: var(--shadow-2);
+}
+
+.user-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.user-info h3 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.user-id {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.user-role {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.user-role.admin {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.user-role.user {
+    background-color: var(--secondary-light);
+    color: white;
+}
+
+.user-specialty {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.user-capabilities {
+    margin-top: 12px;
+}
+
+.user-capabilities h4 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.capability-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.capability-tag {
+    background-color: rgba(198, 40, 40, 0.1);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.user-actions button {
+    flex: 1;
+    padding: 8px 16px;
+}
+
+/* ===========================
+   Shifts Grid
+   =========================== */
+.shifts-grid {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    overflow-x: auto;
+}
+
+.shift-editor {
+    margin-bottom: 24px;
+}
+
+.shift-day-card {
+    background-color: var(--background);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.shift-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--divider);
+}
+
+.shift-day-header h4 {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.shift-assignments {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.shift-assignment {
+    background-color: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.shift-assignment label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.shift-assignment select,
+.shift-assignment input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.shift-assignment.error select,
+.shift-assignment.error input {
+    border-color: var(--error);
+    background-color: rgba(211, 47, 47, 0.1);
+}
+
+.error-tooltip {
+    background-color: var(--error);
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* ===========================
+   Auto Assign
+   =========================== */
+.auto-assign-controls {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.auto-assign-controls .input-group {
+    max-width: 300px;
+}
+
+.auto-assign-results {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-1);
+    padding: 24px;
+}
+
+.results-summary {
+    background-color: var(--background);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.results-summary h4 {
+    margin-bottom: 12px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* ===========================
+   Modals
+   =========================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-4);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content.modal-large {
+    max-width: 800px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--divider);
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.modal-content .form {
+    padding: 24px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.modal-actions .btn {
+    width: auto;
+}
+
+/* ===========================
+   Checkbox & Radio Groups
+   =========================== */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.checkbox-grid label:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.checkbox-grid input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+.radio-group {
+    display: flex;
+    gap: 16px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+    width: auto;
+    cursor: pointer;
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+@media (max-width: 768px) {
+    .header-content {
+        padding: 12px 16px;
+    }
+
+    .app-header h1 {
+        font-size: 18px;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .navigation {
+        top: 56px;
+    }
+
+    .nav-btn {
+        min-width: 80px;
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+
+    .nav-btn .material-icons {
+        font-size: 20px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .view-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-table {
+        font-size: 11px;
+    }
+
+    .calendar-table th,
+    .calendar-table td {
+        padding: 8px 4px;
+    }
+
+    .availability-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+    }
+}
+
+/* ===========================
+   Print Styles
+   =========================== */
+@media print {
+    .app-header,
+    .navigation,
+    .view-actions,
+    .form-actions {
+        display: none !important;
+    }
+
+    .calendar-grid {
+        box-shadow: none;
+    }
+
+    .calendar-table th {
+        background-color: #616161 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ===========================
+   Animations
+   =========================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ===========================
+   Utilities
+   =========================== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+
+.hidden {
+    display: none !important;
+}
