@@ -865,7 +865,7 @@ body {
 
 .shift-calendar-header {
     display: grid;
-    grid-template-columns: 120px repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 80px repeat(18, minmax(70px, 1fr));
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
     color: white;
     position: sticky;
@@ -894,7 +894,7 @@ body {
 
 .shift-calendar-row {
     display: grid;
-    grid-template-columns: 120px repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 80px repeat(18, minmax(70px, 1fr));
     border-bottom: 1px solid var(--divider);
     transition: background-color var(--transition-fast);
 }

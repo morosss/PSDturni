@@ -1041,7 +1041,20 @@ function openShiftModal(shiftKey, shiftType, dateKey, slot) {
         <div class="user-selection-grid">
     `;
 
-    AppState.users.forEach(user => {
+    // Sort users: available and enabled first
+    const sortedUsers = [...AppState.users].sort((a, b) => {
+        const aCanWork = a.capabilities.includes(shiftType);
+        const aUnavailable = isUserUnavailableForSlot(a.id, dateKey, slot);
+        const aScore = (aCanWork ? 2 : 0) + (aUnavailable ? 0 : 1);
+
+        const bCanWork = b.capabilities.includes(shiftType);
+        const bUnavailable = isUserUnavailableForSlot(b.id, dateKey, slot);
+        const bScore = (bCanWork ? 2 : 0) + (bUnavailable ? 0 : 1);
+
+        return bScore - aScore; // Higher score first
+    });
+
+    sortedUsers.forEach(user => {
         const canWork = user.capabilities.includes(shiftType);
         const isUnavailable = isUserUnavailableForSlot(user.id, dateKey, slot);
         const isSelected = assignedUserId === user.id;
@@ -1049,7 +1062,7 @@ function openShiftModal(shiftKey, shiftType, dateKey, slot) {
 
         html += `
             <div class="user-select-card ${!canWork || isUnavailable ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${colorClass}"
-                 onclick="${canWork && !isUnavailable ? `selectUserForShift('${shiftKey}', '${user.id}')` : ''}">
+                 onclick="selectUserForShift('${shiftKey}', '${user.id}')">
                 <div class="user-avatar-large">${user.code}</div>
                 <div class="user-select-info">
                     <div class="user-select-name">${user.code}</div>
@@ -1058,6 +1071,7 @@ function openShiftModal(shiftKey, shiftType, dateKey, slot) {
                 ${!canWork ? '<span class="badge badge-error">Non abilitato</span>' : ''}
                 ${isUnavailable ? '<span class="badge badge-warning">Non disponibile</span>' : ''}
                 ${isSelected ? '<span class="material-icons check-icon">check_circle</span>' : ''}
+                ${!canWork || isUnavailable ? '<span class="badge badge-info" style="background: #2196f3;">Override</span>' : ''}
             </div>
         `;
     });
