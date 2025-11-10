@@ -590,7 +590,7 @@ function renderAvailabilityDays() {
 
         html += `
             <div class="availability-day-card ${isWeekend ? 'weekend' : ''} ${disabledClass}">
-                <div class="day-header">
+                <div class="day-header ${!isPastDeadline ? 'clickable' : ''}" data-date="${dateKey}">
                     <span class="day-number">${day}</span>
                     <span class="day-name">${dayName}</span>
                 </div>
@@ -632,6 +632,31 @@ function renderAvailabilityDays() {
                 toggle.classList.toggle('available');
                 const icon = toggle.querySelector('.material-icons');
                 icon.textContent = toggle.classList.contains('unavailable') ? 'close' : 'check';
+            });
+        });
+
+        // Add click handlers for day headers to toggle all slots
+        document.querySelectorAll('.day-header.clickable').forEach(header => {
+            header.addEventListener('click', () => {
+                const dateKey = header.dataset.date;
+                const dayCard = header.closest('.availability-day-card');
+                const toggles = dayCard.querySelectorAll('.slot-toggle:not([disabled])');
+
+                // Check if all are available or not
+                const allUnavailable = Array.from(toggles).every(t => t.classList.contains('unavailable'));
+
+                // Toggle all to opposite state
+                toggles.forEach(toggle => {
+                    if (allUnavailable) {
+                        toggle.classList.remove('unavailable');
+                        toggle.classList.add('available');
+                        toggle.querySelector('.material-icons').textContent = 'check';
+                    } else {
+                        toggle.classList.remove('available');
+                        toggle.classList.add('unavailable');
+                        toggle.querySelector('.material-icons').textContent = 'close';
+                    }
+                });
             });
         });
     }
@@ -1019,9 +1044,9 @@ function openShiftModal(shiftKey, shiftType, dateKey, slot) {
         html += `
             <div class="user-select-card ${!canWork || isUnavailable ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${colorClass}"
                  onclick="${canWork && !isUnavailable ? `selectUserForShift('${shiftKey}', '${user.id}')` : ''}">
-                <div class="user-avatar-large">${getInitials(user.name)}</div>
+                <div class="user-avatar-large">${user.code}</div>
                 <div class="user-select-info">
-                    <div class="user-select-name">${user.name}</div>
+                    <div class="user-select-name">${user.code}</div>
                     <div class="user-select-specialty">${user.specialty}</div>
                 </div>
                 ${!canWork ? '<span class="badge badge-error">Non abilitato</span>' : ''}

@@ -1378,8 +1378,29 @@ body {
 }
 
 .availability-day-card.disabled {
-    opacity: 0.6;
     pointer-events: none;
+}
+
+.availability-day-card.disabled .slot-toggle {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: var(--text-tertiary);
+}
+
+.availability-day-card.disabled .slot-toggle.available {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.availability-day-card.disabled .slot-toggle.unavailable {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.availability-day-card.disabled .material-icons {
+    opacity: 0.6;
+}
+
+.availability-day-card.disabled .day-header {
+    background: linear-gradient(135deg, #888 0%, #666 100%);
 }
 
 .day-header {
@@ -1389,6 +1410,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.day-header.clickable {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.day-header.clickable:hover {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    transform: scale(1.02);
 }
 
 .day-number {
