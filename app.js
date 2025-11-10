@@ -556,10 +556,17 @@ function renderCalendar() {
                     displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
                 }
 
+                // Determine slot color class
+                const slotClass = slot.includes('MATT') || slot === '1' || slot === '2' || slot === '3' ? 'slot-matt' :
+                                  slot.includes('POM') ? 'slot-pom' :
+                                  slot === 'NTT' ? 'slot-ntt' :
+                                  slot === 'GG' ? 'slot-gg' :
+                                  slot === 'SS' || slot === 'SPEC' ? 'slot-spec' : '';
+
                 if (isClosed) {
                     html += `<td class="shift-cell closed"></td>`;
                 } else {
-                    html += `<td class="shift-cell"><input type="text" value="${displayValue}" readonly></td>`;
+                    html += `<td class="shift-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><input type="text" value="${displayValue}" readonly></td>`;
                 }
             });
         });

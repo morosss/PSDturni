@@ -543,13 +543,13 @@ body {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 13px;
+    font-size: 10px;
 }
 
 .calendar-table th,
 .calendar-table td {
-    padding: 14px 10px;
-    text-align: left;
+    padding: 4px 6px;
+    text-align: center;
 }
 
 .calendar-table th {
@@ -559,9 +559,10 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
-    letter-spacing: 0.3px;
-    font-size: 12px;
+    letter-spacing: 0.2px;
+    font-size: 9px;
     text-transform: uppercase;
+    padding: 6px 4px;
 }
 
 .calendar-table th:first-child {
@@ -591,18 +592,20 @@ body {
 
 .shift-cell {
     position: relative;
-    min-width: 100px;
+    min-width: 60px;
+    max-width: 80px;
 }
 
 .shift-cell input {
     width: 100%;
-    padding: 8px 10px;
-    border: 2px solid transparent;
+    padding: 3px 4px;
+    border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    font-size: 13px;
-    background: rgba(0, 0, 0, 0.02);
+    font-size: 10px;
+    font-weight: 600;
+    background: #FFFFFF;
     transition: all var(--transition-fast);
-    font-weight: 500;
+    text-align: center;
 }
 
 .shift-cell input:hover {
@@ -2410,4 +2413,57 @@ body {
 .overview-day-cell.unavail-matt.unavail-pom.unavail-ntt::before,
 .overview-day-cell.unavail-matt.unavail-pom.unavail-ntt::after {
     display: none;
+}
+
+/* Slot Color Coding (matching Excel) */
+.shift-cell.slot-matt input {
+    background-color: #FFFFFF !important; /* White for weekday morning */
+}
+
+.shift-cell.slot-pom input {
+    background-color: #FFF2CC !important; /* Light yellow for afternoon */
+}
+
+.shift-cell.slot-ntt input {
+    background-color: #D9D9D9 !important; /* Gray for night */
+}
+
+.shift-cell.slot-gg input {
+    background-color: #E7E6E6 !important; /* Light gray for all day */
+}
+
+.shift-cell.slot-spec input {
+    background-color: #CCCCFF !important; /* Light blue for special */
+}
+
+/* Weekend slot colors */
+.shift-cell.weekend-slot.slot-matt input {
+    background-color: #D0DAE6 !important; /* Blue-gray for weekend morning */
+}
+
+.shift-cell.weekend-slot.slot-pom input {
+    background-color: #C9D6E3 !important; /* Darker blue-gray for weekend afternoon */
+}
+
+.shift-cell.weekend-slot.slot-ntt input {
+    background-color: #BEC9D6 !important; /* Even darker for weekend night */
+}
+
+.shift-cell.weekend-slot.slot-gg input {
+    background-color: #C5D3E0 !important; /* Weekend all day */
+}
+
+.calendar-table td.date-cell {
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--text-primary);
+    background: var(--background);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    text-align: left;
+}
+
+.calendar-table td.weekend {
+    background: #ADB9CA !important; /* Weekend date cell background */
 }
