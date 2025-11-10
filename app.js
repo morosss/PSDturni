@@ -1441,7 +1441,19 @@ function runAutoAssignment() {
 // ===========================
 // PDF Export
 // ===========================
+let currentExportType = 'pdf'; // Track whether user clicked PDF or Excel
+
 function openPdfModal() {
+    currentExportType = 'pdf';
+    openExportModal();
+}
+
+function openExcelModal() {
+    currentExportType = 'excel';
+    openExportModal();
+}
+
+function openExportModal() {
     const select = document.getElementById('pdfMonth');
     const now = new Date();
     let html = '';
@@ -1454,6 +1466,18 @@ function openPdfModal() {
     }
 
     select.innerHTML = html;
+
+    // Update modal title and button text
+    const title = document.getElementById('exportModalTitle');
+    const submitText = document.getElementById('exportSubmitText');
+    if (currentExportType === 'pdf') {
+        title.textContent = 'Esporta PDF';
+        submitText.textContent = 'Scarica PDF';
+    } else {
+        title.textContent = 'Esporta Excel';
+        submitText.textContent = 'Scarica Excel';
+    }
+
     openModal('pdfModal');
 }
 
@@ -1462,9 +1486,14 @@ function handlePdfExport(e) {
 
     const select = document.getElementById('pdfMonth');
     const [year, month] = select.value.split('-').map(Number);
-    const pdfType = document.querySelector('input[name="pdfType"]:checked').value;
+    const exportType = document.querySelector('input[name="pdfType"]:checked').value;
 
-    generatePDF(year, month, pdfType);
+    if (currentExportType === 'pdf') {
+        generatePDF(year, month, exportType);
+    } else {
+        generateExcel(year, month, exportType);
+    }
+
     closeModal('pdfModal');
 }
 
@@ -1565,6 +1594,175 @@ function generatePDF(year, month, type) {
     doc.save(`turni_${ITALIAN_MONTHS[month]}_${year}_${type}.pdf`);
 }
 
+function generateExcel(year, month, type) {
+    const wb = XLSX.utils.book_new();
+    const daysInMonth = getDaysInMonth(year, month);
+
+    // Create data array for all shifts
+    const data = [];
+
+    // Header row 1: Shift types
+    const header1 = ['Data'];
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(() => {
+            header1.push(shiftType);
+        });
+    });
+    data.push(header1);
+
+    // Header row 2: Time slots
+    const header2 = [''];
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(slot => {
+            header2.push(slot);
+        });
+    });
+    data.push(header2);
+
+    // Data rows - one for each day
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dayName = DAY_NAMES[date.getDay()];
+        const dateKey = formatDate(year, month, day);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+        const row = [`${day} ${dayName}`];
+
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+            const ambulatoriKey = `${dateKey}_${shiftType}`;
+
+            // Weekend logic
+            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
+            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
+
+            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend) {
+                slots.forEach(() => row.push('CHIUSO'));
+            } else {
+                slots.forEach(slot => {
+                    const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                    const userId = AppState.shifts[shiftKey];
+                    if (!userId) {
+                        row.push('');
+                    } else {
+                        const user = AppState.users.find(u => u.id === userId);
+                        row.push(user ? (user.code || user.id.toUpperCase()) : '');
+                    }
+                });
+            }
+        });
+
+        data.push(row);
+    }
+
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Set column widths
+    const colWidths = [{ wch: 15 }]; // Date column
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(() => {
+            colWidths.push({ wch: 10 });
+        });
+    });
+    ws['!cols'] = colWidths;
+
+    // Merge cells for shift type headers
+    const merges = [];
+    let colIndex = 1;
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        if (slots.length > 1) {
+            merges.push({
+                s: { r: 0, c: colIndex },
+                e: { r: 0, c: colIndex + slots.length - 1 }
+            });
+        }
+        colIndex += slots.length;
+    });
+    ws['!merges'] = merges;
+
+    // Add styling
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    // Style header rows
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        for (let row = 0; row <= 1; row++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
+            ws[cellAddress].s = {
+                font: { bold: true, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: 'C62828' } },
+                alignment: { horizontal: 'center', vertical: 'center' }
+            };
+        }
+    }
+
+    // Style data cells based on time slot and weekend
+    for (let row = 2; row <= range.e.r; row++) {
+        const dateCell = ws[XLSX.utils.encode_cell({ r: row, c: 0 })];
+        const dayText = dateCell ? dateCell.v : '';
+        const isWeekend = dayText.includes('Sab') || dayText.includes('Dom');
+
+        // Date column styling
+        ws[XLSX.utils.encode_cell({ r: row, c: 0 })].s = {
+            font: { bold: true },
+            fill: { fgColor: { rgb: isWeekend ? 'ADB9CA' : 'FFFFFF' } },
+            alignment: { horizontal: 'left' }
+        };
+
+        let colIndex = 1;
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+            slots.forEach(slot => {
+                const cellAddress = XLSX.utils.encode_cell({ r: row, c: colIndex });
+                if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
+
+                let bgColor;
+                if (isWeekend) {
+                    // Weekend colors
+                    if (slot === 'MATT') bgColor = 'D0DAE6';
+                    else if (slot === 'POM') bgColor = 'C9D6E3';
+                    else if (slot === 'NTT') bgColor = 'BEC9D6';
+                    else if (slot === 'GG') bgColor = 'C5D3E0';
+                    else if (slot === 'SPEC') bgColor = 'C5D3E0';
+                } else {
+                    // Weekday colors
+                    if (slot === 'MATT') bgColor = 'FFFFFF';
+                    else if (slot === 'POM') bgColor = 'FFF2CC';
+                    else if (slot === 'NTT') bgColor = 'D9D9D9';
+                    else if (slot === 'GG') bgColor = 'E7E6E6';
+                    else if (slot === 'SPEC') bgColor = 'CCCCFF';
+                }
+
+                ws[cellAddress].s = {
+                    fill: { fgColor: { rgb: bgColor } },
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    border: {
+                        top: { style: 'thin', color: { rgb: '000000' } },
+                        bottom: { style: 'thin', color: { rgb: '000000' } },
+                        left: { style: 'thin', color: { rgb: '000000' } },
+                        right: { style: 'thin', color: { rgb: '000000' } }
+                    }
+                };
+
+                colIndex++;
+            });
+        });
+    }
+
+    // Add worksheet to workbook
+    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
+    XLSX.utils.book_append_sheet(wb, ws, `${ITALIAN_MONTHS[month]} ${year}`);
+
+    // Generate and download file
+    XLSX.writeFile(wb, `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`);
+    showToast('Excel esportato con successo', 'success');
+}
+
 // ===========================
 // Modal Management
 // ===========================
@@ -1598,6 +1796,7 @@ function initializeEventListeners() {
     document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
     document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
     document.getElementById('exportPdfBtn').addEventListener('click', openPdfModal);
+    document.getElementById('exportExcelBtn').addEventListener('click', openExcelModal);
     document.getElementById('pdfForm').addEventListener('submit', handlePdfExport);
 
     // Availability
@@ -1612,6 +1811,7 @@ function initializeEventListeners() {
 
     // Availability Overview
     document.getElementById('exportAvailabilityPdfBtn').addEventListener('click', exportAvailabilityPdf);
+    document.getElementById('exportAvailabilityExcelBtn').addEventListener('click', exportAvailabilityExcel);
 
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {
@@ -1768,6 +1968,92 @@ function exportAvailabilityPdf() {
 
     doc.save(`indisponibilita_${ITALIAN_MONTHS[month]}_${year}.pdf`);
     showToast('PDF esportato con successo', 'success');
+}
+
+function exportAvailabilityExcel() {
+    const select = document.getElementById('availabilityOverviewMonth');
+    const [year, month] = select.value.split('-').map(Number);
+    const daysInMonth = getDaysInMonth(year, month);
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+
+    // Create header row with days
+    const headers = ['Medico'];
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dayName = DAY_NAMES[date.getDay()].substring(0, 3);
+        headers.push(`${day}\n${dayName}`);
+    }
+
+    // Create data rows
+    const data = [headers];
+
+    AppState.users.forEach(user => {
+        const userAvailabilityKey = `${user.id}_${year}_${month}`;
+        const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+
+        const row = [user.name];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDate(year, month, day);
+            const daySlots = unavailableSlots[dateKey] || {};
+
+            const slots = [];
+            if (daySlots.MATT) slots.push('M');
+            if (daySlots.POM) slots.push('P');
+            if (daySlots.NTT) slots.push('N');
+
+            row.push(slots.join(','));
+        }
+
+        data.push(row);
+    });
+
+    // Create worksheet from data
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Set column widths
+    const colWidths = [{ wch: 20 }]; // First column (names)
+    for (let i = 1; i <= daysInMonth; i++) {
+        colWidths.push({ wch: 8 }); // Day columns
+    }
+    ws['!cols'] = colWidths;
+
+    // Add styling for header row
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellAddress]) continue;
+        ws[cellAddress].s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: 'C62828' } },
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: true }
+        };
+    }
+
+    // Add weekend highlighting
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        if (date.getDay() === 0 || date.getDay() === 6) {
+            const col = day; // Column index (0 = names, 1+ = days)
+            for (let row = 0; row <= range.e.r; row++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
+                ws[cellAddress].s = {
+                    ...ws[cellAddress].s,
+                    fill: { fgColor: { rgb: 'ADB9CA' } }
+                };
+            }
+        }
+    }
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, `Indisponibilità ${ITALIAN_MONTHS[month]}`);
+
+    // Generate and download file
+    XLSX.writeFile(wb, `indisponibilita_${ITALIAN_MONTHS[month]}_${year}.xlsx`);
+    showToast('Excel esportato con successo', 'success');
 }
 
 // ===========================

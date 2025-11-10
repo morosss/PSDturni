@@ -138,6 +138,10 @@
                             <span class="material-icons">picture_as_pdf</span>
                             Esporta PDF
                         </button>
+                        <button id="exportExcelBtn" class="btn btn-secondary admin-only" style="display: none;">
+                            <span class="material-icons">table_chart</span>
+                            Esporta Excel
+                        </button>
                     </div>
                 </div>
 
@@ -336,11 +340,11 @@
         </div>
     </div>
 
-    <!-- PDF Export Options Modal -->
+    <!-- Export Options Modal -->
     <div id="pdfModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Esporta PDF</h3>
+                <h3 id="exportModalTitle">Esporta</h3>
                 <button class="modal-close" data-modal="pdfModal">
                     <span class="material-icons">close</span>
                 </button>
@@ -365,9 +369,9 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal="pdfModal">Annulla</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="exportSubmitBtn">
                         <span class="material-icons">download</span>
-                        Scarica PDF
+                        <span id="exportSubmitText">Scarica</span>
                     </button>
                 </div>
             </form>
@@ -376,6 +380,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
