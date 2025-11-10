@@ -25,13 +25,7 @@ Sistema web moderno per la gestione dei turni del personale ospedaliero con inte
    - Password temporanea: lascia vuoto al primo accesso
    - Imposta la tua password personale (minimo 6 caratteri)
 
-### Credenziali di Default
-
-**Amministratore:**
-- ID: `spizzocri` (Dott. Samuele Pizzocri)
-- Password: `scassacazzi1`
-
-**Nota**: Altri utenti possono essere aggiunti dall'admin tramite l'interfaccia "Gestione Utenti"
+**Nota**: L'amministratore può aggiungere nuovi utenti tramite l'interfaccia "Gestione Utenti"
 
 ## 📋 Funzionalità per Utente
 
