@@ -382,13 +382,14 @@ function renderCalendar() {
     const daysInMonth = getDaysInMonth(AppState.currentYear, AppState.currentMonth);
 
     let html = '<table class="calendar-table"><thead><tr>';
-    html += '<th>Data</th>';
+    html += '<th class="date-header">Data</th>';
 
-    // Add shift type headers
+    // Add shift type headers with color coding
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
         slots.forEach(slot => {
-            html += `<th>${shiftType}<br><small>${slot}</small></th>`;
+            const colorClass = slot === 'POM' ? 'header-pom' : slot === 'MATT' ? 'header-matt' : 'header-default';
+            html += `<th class="${colorClass}">${shiftType}<br><small>${slot}</small></th>`;
         });
     });
     html += '</tr></thead><tbody>';
@@ -403,18 +404,21 @@ function renderCalendar() {
         html += `<tr>`;
         html += `<td class="date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
 
-        // Add shift cells
+        // Add shift cells with color coding
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             slots.forEach(slot => {
                 const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                const assignedUser = AppState.shifts[shiftKey] || '';
+                const userId = AppState.shifts[shiftKey] || '';
+                const user = userId ? AppState.users.find(u => u.id === userId) : null;
+                const displayName = user ? user.name : '';
                 const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
 
                 if (isClosed) {
                     html += `<td class="shift-cell closed"></td>`;
                 } else {
-                    html += `<td class="shift-cell"><input type="text" value="${assignedUser}" readonly></td>`;
+                    const colorClass = slot === 'POM' ? 'cell-pom' : slot === 'MATT' ? 'cell-matt' : 'cell-default';
+                    html += `<td class="shift-cell ${colorClass}"><div class="shift-name">${displayName}</div></td>`;
                 }
             });
         });
@@ -744,6 +748,9 @@ function renderShiftsGrid() {
     const container = document.getElementById('shiftsGrid');
     const daysInMonth = getDaysInMonth(year, month);
 
+    // Reload availability to ensure real-time updates
+    AppState.availability = loadFromStorage('availability', {});
+
     let html = '<div class="shift-editor">';
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -759,14 +766,37 @@ function renderShiftsGrid() {
                 <div class="shift-assignments">
         `;
 
+        // Group shift types: separate REPARTO MATT and POM
+        const shiftGroups = [];
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+            if (shiftType === 'REPARTO') {
+                // Split REPARTO into separate MATT and POM columns
+                slots.forEach(slot => {
+                    shiftGroups.push({
+                        type: shiftType,
+                        slot: slot,
+                        displayName: `${shiftType} ${slot}`
+                    });
+                });
+            } else {
+                shiftGroups.push({
+                    type: shiftType,
+                    slot: null,
+                    displayName: shiftType,
+                    slots: slots
+                });
+            }
+        });
+
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
             const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed';
 
             html += `
-                <div class="shift-assignment">
-                    <label>${shiftType}</label>
+                <div class="shift-assignment ${isClosed ? 'closed-shift' : ''}">
+                    <label>${shiftType} <small>(Chiuso)</small></label>
                     <div style="display: flex; gap: 4px; align-items: center;">
                         <input type="checkbox"
                                ${isClosed ? 'checked' : ''}
@@ -783,7 +813,7 @@ function renderShiftsGrid() {
 
                     html += `
                         <div class="shift-assignment" id="shift_${shiftKey}">
-                            <label>${slot}</label>
+                            <label>${shiftType} - ${slot}</label>
                             <select onchange="assignShift('${shiftKey}', this.value)">
                                 <option value="">-- Non assegnato --</option>
                                 ${AppState.users.map(user => {
@@ -791,9 +821,10 @@ function renderShiftsGrid() {
                                     const isUnavailable = (AppState.availability[`${user.id}_${year}_${month}`] || []).includes(dateKey);
                                     const selected = assignedUser === user.id ? 'selected' : '';
                                     const disabled = (!canWork || isUnavailable) ? 'disabled' : '';
-                                    return `<option value="${user.id}" ${selected} ${disabled}>
-                                        ${user.name} ${!canWork ? '(non abilitato)' : ''} ${isUnavailable ? '(non disponibile)' : ''}
-                                    </option>`;
+                                    let optionText = user.name;
+                                    if (!canWork) optionText += ' (non abilitato)';
+                                    else if (isUnavailable) optionText += ' (non disponibile)';
+                                    return `<option value="${user.id}" ${selected} ${disabled}>${optionText}</option>`;
                                 }).join('')}
                             </select>
                         </div>
@@ -908,6 +939,9 @@ function runAutoAssignment() {
         let errorCount = 0;
         const errors = [];
 
+        // Reload availability data to ensure it's up to date
+        AppState.availability = loadFromStorage('availability', {});
+
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = formatDate(year, month, day);
 
@@ -920,7 +954,10 @@ function runAutoAssignment() {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
 
                     // Skip if already assigned
-                    if (AppState.shifts[shiftKey]) return;
+                    if (AppState.shifts[shiftKey]) {
+                        assignedCount++;
+                        return;
+                    }
 
                     // Find available users
                     const availableUsers = AppState.users.filter(user => {
@@ -937,7 +974,7 @@ function runAutoAssignment() {
                         assignedCount++;
                     } else {
                         errorCount++;
-                        errors.push(`${dateKey} - ${shiftType} (${slot}): Nessun utente disponibile`);
+                        errors.push(`${day}/${month + 1} - ${shiftType} (${slot}): Nessun utente disponibile`);
                     }
                 });
             });
@@ -985,7 +1022,7 @@ function runAutoAssignment() {
 }
 
 // ===========================
-// PDF Export
+// Excel Export with Color Coding
 // ===========================
 function openPdfModal() {
     const select = document.getElementById('pdfMonth');
@@ -1010,105 +1047,187 @@ function handlePdfExport(e) {
     const [year, month] = select.value.split('-').map(Number);
     const pdfType = document.querySelector('input[name="pdfType"]:checked').value;
 
-    generatePDF(year, month, pdfType);
+    generateExcel(year, month, pdfType);
     closeModal('pdfModal');
 }
 
-function generatePDF(year, month, type) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape', 'mm', 'a4');
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Header
-    doc.setFillColor(198, 40, 40);
-    doc.rect(0, 0, pageWidth, 25, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.text('PSDturni - Sistema Gestione Turni', 15, 12);
-
-    doc.setFontSize(14);
-    doc.text(`${ITALIAN_MONTHS[month]} ${year}`, 15, 20);
-
-    doc.setFontSize(10);
-    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
-    doc.text(typeText, pageWidth - 30, 12);
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-
-    // Prepare table data
+function generateExcel(year, month, type) {
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
     const daysInMonth = getDaysInMonth(year, month);
-    const tableData = [];
 
+    // Prepare data array
+    const data = [];
+
+    // Header row 1: Shift type names
+    const headerRow1 = [''];
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        headerRow1.push(shiftType);
+        for (let i = 1; i < slots.length; i++) {
+            headerRow1.push('');
+        }
+    });
+    data.push(headerRow1);
+
+    // Header row 2: Time slots
+    const headerRow2 = ['Data'];
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(slot => {
+            headerRow2.push(slot);
+        });
+    });
+    data.push(headerRow2);
+
+    // Data rows
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dayName = DAY_NAMES[date.getDay()];
         const dateKey = formatDate(year, month, day);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
         const row = [`${day} ${dayName}`];
 
-        // Add assignments for each shift type (showing only first few to fit in 2 pages)
-        const mainShifts = ['SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
-        mainShifts.forEach(shiftType => {
+        SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
 
             if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed') {
-                row.push('CHIUSO');
+                slots.forEach(() => row.push('CLOSED'));
             } else {
-                const assignments = slots.map(slot => {
+                slots.forEach(slot => {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
                     const userId = AppState.shifts[shiftKey];
-                    if (!userId) return '-';
-                    const user = AppState.users.find(u => u.id === userId);
-                    return user ? user.name.split(' ')[0] : '-';
-                }).join('\n');
-                row.push(assignments || '-');
+                    if (!userId) {
+                        row.push('');
+                    } else {
+                        const user = AppState.users.find(u => u.id === userId);
+                        row.push(user ? user.name : '');
+                    }
+                });
             }
         });
 
-        tableData.push(row);
+        data.push(row);
     }
 
-    const headers = ['Data', 'SALA Sr', 'SALA Jr', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet(data);
 
-    doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 30,
-        theme: 'grid',
-        styles: {
-            fontSize: 7,
-            cellPadding: 2,
-        },
-        headStyles: {
-            fillColor: [97, 97, 97],
-            textColor: 255,
-            fontStyle: 'bold'
-        },
-        columnStyles: {
-            0: { cellWidth: 20, fontStyle: 'bold' }
-        },
-        margin: { left: 10, right: 10 },
-        didDrawPage: function(data) {
-            // Footer
-            doc.setFontSize(8);
-            doc.setTextColor(128);
-            doc.text(
-                `Generato il ${new Date().toLocaleDateString('it-IT')}`,
-                pageWidth / 2,
-                pageHeight - 10,
-                { align: 'center' }
-            );
-        }
+    // Apply column widths
+    const colWidths = [{ wch: 12 }]; // Date column
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(() => colWidths.push({ wch: 15 }));
     });
+    ws['!cols'] = colWidths;
 
-    // Save PDF
-    doc.save(`turni_${ITALIAN_MONTHS[month]}_${year}_${type}.pdf`);
+    // Apply cell styles and colors
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    // Color mapping based on sample file
+    const getSlotColor = (slot) => {
+        if (slot === 'POM' || slot === 'POM') return 'FFFFF2CC'; // Light yellow for afternoon
+        return 'FFFFFFFF'; // White for morning
+    };
+
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!ws[cellAddress]) continue;
+
+            const cell = ws[cellAddress];
+            if (!cell.s) cell.s = {};
+
+            // Header styling
+            if (R === 0 || R === 1) {
+                cell.s = {
+                    fill: { fgColor: { rgb: R === 0 ? 'FFD9D9D9' : 'FFE6E6E6' } },
+                    font: { bold: true, sz: 11 },
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    border: {
+                        top: { style: 'thin', color: { rgb: '00000000' } },
+                        bottom: { style: 'thin', color: { rgb: '00000000' } },
+                        left: { style: 'thin', color: { rgb: '00000000' } },
+                        right: { style: 'thin', color: { rgb: '00000000' } }
+                    }
+                };
+            } else {
+                // Data cells
+                const dayRow = data[R];
+                const isWeekend = dayRow && dayRow[0] && (dayRow[0].includes('Dom') || dayRow[0].includes('Sab'));
+                const headerSlot = data[1][C];
+                const cellValue = cell.v;
+
+                let fillColor = 'FFFFFFFF'; // Default white
+
+                // Check if cell is closed (bright red)
+                if (cellValue === 'CLOSED') {
+                    fillColor = 'FFFF0000'; // Bright red for closed shifts
+                    cell.v = ''; // Clear the text
+                } else if (C === 0 && isWeekend) {
+                    // Apply weekend color
+                    fillColor = 'FFADB9CA'; // Grayish blue for weekend dates
+                } else if (C > 0 && headerSlot) {
+                    // Apply color based on time slot
+                    if (headerSlot === 'POM') {
+                        fillColor = 'FFFFF2CC'; // Light yellow for afternoon
+                    } else {
+                        fillColor = 'FFFFFFFF'; // White for morning
+                    }
+                }
+
+                cell.s = {
+                    fill: { fgColor: { rgb: fillColor } },
+                    font: { sz: 10 },
+                    alignment: { horizontal: C === 0 ? 'left' : 'center', vertical: 'center' },
+                    border: {
+                        top: { style: 'thin', color: { rgb: '00000000' } },
+                        bottom: { style: 'thin', color: { rgb: '00000000' } },
+                        left: { style: 'thin', color: { rgb: '00000000' } },
+                        right: { style: 'thin', color: { rgb: '00000000' } }
+                    }
+                };
+            }
+        }
+    }
+
+    // Merge header cells for shift types
+    const merges = [];
+    let colIndex = 1;
+    SHIFT_TYPES.forEach(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        if (slots.length > 1) {
+            merges.push({
+                s: { r: 0, c: colIndex },
+                e: { r: 0, c: colIndex + slots.length - 1 }
+            });
+        }
+        colIndex += slots.length;
+    });
+    ws['!merges'] = merges;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, `${ITALIAN_MONTHS[month]} ${year}`);
+
+    // Generate Excel file
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary', cellStyles: true });
+
+    function s2ab(s) {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+    }
+
+    const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `turni_${ITALIAN_MONTHS[month]}_${year}_${type}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // ===========================
