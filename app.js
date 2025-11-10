@@ -762,7 +762,42 @@ function openAddUserModal() {
     });
     container.innerHTML = html;
 
+    // Populate shift limits grid
+    renderShiftLimitsGrid();
+
     openModal('userModal');
+}
+
+function renderShiftLimitsGrid(userLimits = {}) {
+    const container = document.getElementById('shiftLimits');
+    let html = '';
+
+    SHIFT_TYPES.forEach(shiftType => {
+        const limits = userLimits[shiftType] || { min: '', max: '' };
+        html += `
+            <div class="limit-row">
+                <div class="limit-label">${shiftType}</div>
+                <div class="limit-input-group">
+                    <label>Min</label>
+                    <input type="number" min="0"
+                           class="limit-min"
+                           data-shift="${shiftType}"
+                           value="${limits.min}"
+                           placeholder="0">
+                </div>
+                <div class="limit-input-group">
+                    <label>Max</label>
+                    <input type="number" min="0"
+                           class="limit-max"
+                           data-shift="${shiftType}"
+                           value="${limits.max}"
+                           placeholder="∞">
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
 }
 
 function editUser(userId) {
@@ -790,6 +825,9 @@ function editUser(userId) {
     });
     container.innerHTML = html;
 
+    // Populate shift limits grid with user's current limits
+    renderShiftLimitsGrid(user.shiftLimits || {});
+
     document.getElementById('userForm').dataset.mode = 'edit';
     document.getElementById('userForm').dataset.userId = userId;
     openModal('userModal');
@@ -806,6 +844,19 @@ async function handleUserFormSubmit(e) {
     const specialty = sanitizeInput(document.getElementById('userSpecialty').value.trim());
     const capabilities = Array.from(document.querySelectorAll('input[name="capability"]:checked'))
         .map(cb => cb.value);
+
+    // Collect shift limits
+    const shiftLimits = {};
+    document.querySelectorAll('.limit-min').forEach(input => {
+        const shiftType = input.dataset.shift;
+        const min = input.value ? parseInt(input.value) : null;
+        const maxInput = document.querySelector(`.limit-max[data-shift="${shiftType}"]`);
+        const max = maxInput.value ? parseInt(maxInput.value) : null;
+
+        if (min !== null || max !== null) {
+            shiftLimits[shiftType] = { min: min || 0, max: max || null };
+        }
+    });
 
     if (!name || !userId) {
         showError('userFormError', 'Nome e ID sono obbligatori');
@@ -830,7 +881,8 @@ async function handleUserFormSubmit(e) {
             role: role,
             specialty: specialty,
             password: null,
-            capabilities: capabilities
+            capabilities: capabilities,
+            shiftLimits: shiftLimits
         };
 
         AppState.users.push(newUser);
@@ -843,6 +895,7 @@ async function handleUserFormSubmit(e) {
         AppState.users[userIndex].role = role;
         AppState.users[userIndex].specialty = specialty;
         AppState.users[userIndex].capabilities = capabilities;
+        AppState.users[userIndex].shiftLimits = shiftLimits;
 
         // Update current user if editing self
         if (AppState.currentUser.id === e.target.dataset.userId) {
@@ -1207,6 +1260,44 @@ function updateAutoAssignMonthSelector() {
     select.innerHTML = html;
 }
 
+// Helper function to count user's shifts of a specific type in a month
+function countUserShifts(userId, shiftType, year, month) {
+    let count = 0;
+    const daysInMonth = getDaysInMonth(year, month);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDate(year, month, day);
+        const slots = TIME_SLOTS[shiftType];
+
+        slots.forEach(slot => {
+            const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+            if (AppState.shifts[shiftKey] === userId) {
+                count++;
+            }
+        });
+    }
+
+    return count;
+}
+
+// Helper function to check if user has reached their shift limits
+function hasReachedShiftLimit(userId, shiftType, year, month) {
+    const user = AppState.users.find(u => u.id === userId);
+    if (!user || !user.shiftLimits || !user.shiftLimits[shiftType]) {
+        return false; // No limits set
+    }
+
+    const limits = user.shiftLimits[shiftType];
+    const currentCount = countUserShifts(userId, shiftType, year, month);
+
+    // Check max limit
+    if (limits.max !== null && currentCount >= limits.max) {
+        return true;
+    }
+
+    return false;
+}
+
 // Helper function to check if user had night shift previous day
 function hadNightShiftPreviousDay(userId, dateKey) {
     const [year, month, day] = dateKey.split('-').map(Number);
@@ -1329,6 +1420,9 @@ function runAutoAssignment() {
 
                         // Must not be unavailable for this slot
                         if (isUserUnavailableForSlot(user.id, dateKey, slot)) return false;
+
+                        // Must not have reached shift limit for this type
+                        if (hasReachedShiftLimit(user.id, shiftType, year, month)) return false;
 
                         // RULE 1: No shifts the day after night shift
                         if (hadNightShiftPreviousDay(user.id, dateKey)) return false;

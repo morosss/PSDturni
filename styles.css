@@ -2181,3 +2181,61 @@ body {
 .slot-indicator.ntt {
     background: #4A90E2;
 }
+
+/* ===========================
+   Shift Limits Grid
+   =========================== */
+
+.limits-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--radius-md);
+}
+
+.limit-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 8px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--divider);
+}
+
+.limit-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.limit-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.limit-input-group label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.limit-input-group input {
+    padding: 6px 8px;
+    font-size: 13px;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    width: 100%;
+}
+
+.limit-input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
