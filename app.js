@@ -2372,6 +2372,12 @@ function initializeEventListeners() {
     document.getElementById('runAutoAssign').addEventListener('click', runAutoAssignment);
 
     // Availability Overview
+    document.getElementById('refreshAvailabilityBtn').addEventListener('click', () => {
+        // Reload availability data from storage
+        AppState.availability = loadFromStorage('availability') || {};
+        renderAvailabilityOverviewGrid();
+        showToast('Indisponibilità aggiornate', 'success');
+    });
     document.getElementById('exportAvailabilityPdfBtn').addEventListener('click', exportAvailabilityPdf);
     document.getElementById('exportAvailabilityExcelBtn').addEventListener('click', exportAvailabilityExcel);
 
