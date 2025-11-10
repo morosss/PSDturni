@@ -1822,7 +1822,8 @@ async function generatePDF(year, month, type) {
         showToast('PDF esportato con successo', 'success');
     } catch (error) {
         console.error('Error generating PDF:', error);
-        showToast('Errore durante la generazione del PDF. Assicurati che il server sia attivo.', 'error');
+        console.error('Error details:', error.message, error.stack);
+        showToast(`Errore PDF: ${error.message}`, 'error');
     }
 }
 
@@ -1863,7 +1864,8 @@ async function generateExcel(year, month, type) {
         showToast('Excel esportato con successo', 'success');
     } catch (error) {
         console.error('Error generating Excel:', error);
-        showToast('Errore durante la generazione dell\'Excel. Assicurati che il server sia attivo.', 'error');
+        console.error('Error details:', error.message, error.stack);
+        showToast(`Errore Excel: ${error.message}`, 'error');
     }
 }
 
