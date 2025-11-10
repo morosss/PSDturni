@@ -192,10 +192,8 @@ function isUserUnavailableForSlot(userId, dateKey, timeSlot) {
     const daySlots = unavailableSlots[dateKey] || {};
 
     const requiredSlots = getAvailabilitySlot(timeSlot);
-    // User is unavailable only if ALL required slots are marked as unavailable
-    // This allows assignment if they're available for at least part of the shift
-    if (requiredSlots.length === 0) return false;
-    return requiredSlots.every(slot => daySlots[slot] === true);
+    // User is unavailable if ANY of the required slots are marked as unavailable
+    return requiredSlots.some(slot => daySlots[slot] === true);
 }
 
 // ===========================
