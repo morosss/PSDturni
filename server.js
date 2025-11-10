@@ -330,8 +330,8 @@ app.post('/api/generate-pdf', async (req, res) => {
         const tempExcelPath = path.join(__dirname, `temp_${Date.now()}.xlsx`);
         await workbook.xlsx.writeFile(tempExcelPath);
 
-        // Convert to PDF using libre-office-convert
-        const libre = require('libre-office-convert');
+        // Convert to PDF using libreoffice-convert
+        const libre = require('libreoffice-convert');
         libre.convertAsync = require('util').promisify(libre.convert);
 
         const excelBuffer = fs.readFileSync(tempExcelPath);
