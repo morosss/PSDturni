@@ -2411,3 +2411,98 @@ body {
 .overview-day-cell.unavail-matt.unavail-pom.unavail-ntt::after {
     display: none;
 }
+
+/* ===========================
+   Compact Calendar Table Styles
+   =========================== */
+.compact-table {
+    font-size: 10px !important;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+}
+
+.compact-date-col {
+    min-width: 60px !important;
+    max-width: 70px !important;
+}
+
+.compact-shift-col {
+    min-width: 40px !important;
+    max-width: 50px !important;
+    font-size: 9px !important;
+}
+
+.compact-date-cell {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+}
+
+.compact-shift-cell {
+    min-width: 40px !important;
+    padding: 4px 6px !important;
+    text-align: center !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+}
+
+/* Color coding for slots - matching Excel */
+/* Weekday colors */
+.slot-matt {
+    background-color: #FFFFFF !important;
+}
+
+.slot-pom {
+    background-color: #FFF2CC !important;
+}
+
+.slot-ntt {
+    background-color: #D9D9D9 !important;
+}
+
+.slot-gg {
+    background-color: #E7E6E6 !important;
+}
+
+.slot-spec {
+    background-color: #CCCCFF !important;
+}
+
+.slot-other {
+    background-color: #E7E6E6 !important;
+}
+
+/* Weekend colors */
+.slot-weekend-matt {
+    background-color: #D0DAE6 !important;
+}
+
+.slot-weekend-pom {
+    background-color: #C9D6E3 !important;
+}
+
+.slot-weekend-ntt {
+    background-color: #BEC9D6 !important;
+}
+
+.slot-weekend-gg {
+    background-color: #C5D3E0 !important;
+}
+
+.slot-weekend-spec {
+    background-color: #C5D3E0 !important;
+}
+
+.slot-weekend-other {
+    background-color: #C5D3E0 !important;
+}
+
+/* Closed cells */
+.shift-cell.closed {
+    background-color: #F0F0F0 !important;
+    color: #999 !important;
+}
+

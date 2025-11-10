@@ -6,7 +6,7 @@
 // Constants & Configuration
 // ===========================
 const SHIFT_TYPES = [
-    'SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'RAP', 'ENI',
+    'SALA Senior', 'SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'RAP', 'ENI',
     'VIS 201', 'VISITE 208', 'TDS 207', 'ECOTT 205', 'ECO 206',
     'ECO spec 204', 'ECO INT', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE'
 ];
@@ -14,7 +14,8 @@ const SHIFT_TYPES = [
 const TIME_SLOTS = {
     'SALA Senior': ['MATT', 'POM'],
     'SALA Junior': ['MATT', 'POM'],
-    'REPARTO': ['MATT 1', 'MATT 2', 'MATT 3', 'POM 1', 'POM 2', 'POM 3'],
+    'REPARTO MAT': ['MATT 1', 'MATT 2', 'MATT 3'],
+    'REPARTO POM': ['POM 1', 'POM 2', 'POM 3'],
     'UTIC': ['MATT', 'POM'],
     'PS': ['GG', 'NTT'],
     'RAP': ['GG', 'NTT'],
@@ -207,32 +208,32 @@ function initializeDefaultData() {
         { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', code: 'PIZ', role: 'admin', specialty: 'Emodinamista', password: '62c5ec050cf9b0bf5523b30df8c40e3872b8b3f0a48f20e0dc1ec5cdf989686d', capabilities: SHIFT_TYPES, canDoREP: true },
 
         // Medical staff
-        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'], canDoREP: false },
-        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'], canDoREP: false },
-        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'], canDoREP: false },
-        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
-        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
-        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201', 'RAP'], canDoREP: true },
-        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'], canDoREP: true },
-        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
-        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'], canDoREP: false },
+        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'], canDoREP: false },
+        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'], canDoREP: false },
+        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'PS', 'VIS 201', 'RAP'], canDoREP: true },
+        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'PS'], canDoREP: true },
+        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MAT', 'REPARTO POM', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'PS', 'RAP', 'ECO 206', 'VISITE 208'], canDoREP: false },
         { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', code: 'LODI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'], canDoREP: false },
-        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'], canDoREP: false },
-        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'], canDoREP: false },
+        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'ECO 206', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'RAP', 'VISITE 208', 'PS'], canDoREP: false },
         { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', code: 'STE', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206'], canDoREP: false },
+        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'PS', 'UTIC', 'ECO 206'], canDoREP: false },
         { id: 'mtusa', name: 'Dott. Maurizio Tusa', code: 'TUSA', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'], canDoREP: false },
-        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'], canDoREP: false },
-        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'], canDoREP: false },
-        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'], canDoREP: false },
-        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
-        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'VISITE 208', 'ECO 206'], canDoREP: false },
-        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'ECO INT'], canDoREP: false }
+        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'TDS 207', 'ECO 206', 'PS'], canDoREP: false },
+        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'], canDoREP: false },
+        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'VIS 201', 'VISITE 208', 'ECO 206'], canDoREP: false },
+        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MAT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'ECO INT'], canDoREP: false }
     ];
 
     const existingUsers = loadFromStorage('users');
@@ -506,14 +507,15 @@ function renderCalendar() {
     // Check if user should see shifts for this month
     const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
 
-    let html = '<table class="calendar-table"><thead><tr>';
-    html += '<th>Data</th>';
+    let html = '<table class="calendar-table compact-table"><thead><tr>';
+    html += '<th class="compact-date-col">Data</th>';
 
-    // Add shift type headers
+    // Add shift type headers with abbr
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
+        const shortType = shiftType.replace('REPARTO MAT', 'REP-M').replace('REPARTO POM', 'REP-P');
         slots.forEach(slot => {
-            html += `<th>${shiftType}<br><small>${slot}</small></th>`;
+            html += `<th class="compact-shift-col">${shortType}<br><small>${slot}</small></th>`;
         });
     });
     html += '</tr></thead><tbody>';
@@ -526,15 +528,37 @@ function renderCalendar() {
         const dateKey = formatDate(AppState.currentYear, AppState.currentMonth, day);
 
         html += `<tr>`;
-        html += `<td class="date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
+        html += `<td class="date-cell compact-date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
 
-        // Add shift cells
+        // Add shift cells with color coding
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
+            const ambulatoriKey = `${dateKey}_${shiftType}`;
+            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
+            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
+
             slots.forEach(slot => {
                 const shiftKey = `${dateKey}_${shiftType}_${slot}`;
                 const assignedUserId = AppState.shifts[shiftKey] || '';
-                const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
+                const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend;
+
+                // Determine color class based on slot type
+                let colorClass = '';
+                if (!isClosed) {
+                    if (slot.includes('MATT') || slot === 'MATT 1' || slot === 'MATT 2' || slot === 'MATT 3') {
+                        colorClass = isWeekend ? 'slot-weekend-matt' : 'slot-matt';
+                    } else if (slot.includes('POM') || slot === 'POM 1' || slot === 'POM 2' || slot === 'POM 3') {
+                        colorClass = isWeekend ? 'slot-weekend-pom' : 'slot-pom';
+                    } else if (slot === 'NTT') {
+                        colorClass = isWeekend ? 'slot-weekend-ntt' : 'slot-ntt';
+                    } else if (slot === 'GG') {
+                        colorClass = isWeekend ? 'slot-weekend-gg' : 'slot-gg';
+                    } else if (slot === 'SPEC' || slot === 'SS') {
+                        colorClass = isWeekend ? 'slot-weekend-spec' : 'slot-spec';
+                    } else {
+                        colorClass = isWeekend ? 'slot-weekend-other' : 'slot-other';
+                    }
+                }
 
                 let displayValue = '';
                 // Only show assignments if user has permission
@@ -544,9 +568,9 @@ function renderCalendar() {
                 }
 
                 if (isClosed) {
-                    html += `<td class="shift-cell closed"></td>`;
+                    html += `<td class="shift-cell compact-shift-cell closed ${colorClass}">-</td>`;
                 } else {
-                    html += `<td class="shift-cell"><input type="text" value="${displayValue}" readonly></td>`;
+                    html += `<td class="shift-cell compact-shift-cell ${colorClass}">${displayValue || '-'}</td>`;
                 }
             });
         });
@@ -1074,7 +1098,6 @@ function renderShiftsGrid() {
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
                                 <div class="assigned-person">
-                                    <div class="person-avatar">${userCode}</div>
                                     <div class="person-name">${userCode}</div>
                                     ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
                                 </div>
@@ -1443,13 +1466,13 @@ function runAutoAssignment() {
         selectedTypes.push('SALA Senior', 'SALA Junior');
     }
     if (document.getElementById('assignREPARTO').checked) {
-        selectedTypes.push('RAP');
+        selectedTypes.push('REPARTO MAT', 'REPARTO POM', 'RAP');
     }
     if (document.getElementById('assignECO').checked) {
-        selectedTypes.push('ECO 206', 'ECO 214', 'ECO 230');
+        selectedTypes.push('ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT');
     }
     if (document.getElementById('assignOthers').checked) {
-        selectedTypes.push('UTIC', 'PS', 'PDD', 'SCC', 'VAD', 'AMB 201', 'AMB 203', 'AMB 207', 'AMB 210', 'AMB 213', 'AMB 228');
+        selectedTypes.push('UTIC', 'PS', 'RAP', 'ENI', 'VIS 201', 'VISITE 208', 'TDS 207', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE');
     }
 
     if (selectedTypes.length === 0) {
@@ -1724,112 +1747,11 @@ function handlePdfExport(e) {
 }
 
 function generatePDF(year, month, type) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape', 'mm', 'a4');
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Header background
-    doc.setFillColor(198, 40, 40);
-    doc.rect(0, 0, pageWidth, 25, 'F');
-
-    // Add icon on the left
-    const img = new Image();
-    img.src = 'icon.jpg';
-    try {
-        doc.addImage(img, 'JPEG', 8, 5, 15, 15);
-    } catch (e) {
-        console.log('Icon not loaded for PDF');
-    }
-
-    // Title on the right
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Turni ${ITALIAN_MONTHS[month]} ${year}`, pageWidth - 15, 12, { align: 'right' });
-
-    // Type indicator
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
-    doc.text(typeText, pageWidth - 15, 19, { align: 'right' });
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-
-    // Prepare table data
-    const daysInMonth = getDaysInMonth(year, month);
-    const tableData = [];
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const dayName = DAY_NAMES[date.getDay()];
-        const dateKey = formatDate(year, month, day);
-
-        const row = [`${day} ${dayName}`];
-
-        // Add assignments for each shift type (showing only first few to fit in 2 pages)
-        const mainShifts = ['SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
-        mainShifts.forEach(shiftType => {
-            const slots = TIME_SLOTS[shiftType];
-            const ambulatoriKey = `${dateKey}_${shiftType}`;
-
-            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed') {
-                row.push('CHIUSO');
-            } else {
-                const assignments = slots.map(slot => {
-                    const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                    const userId = AppState.shifts[shiftKey];
-                    if (!userId) return '-';
-                    const user = AppState.users.find(u => u.id === userId);
-                    return user ? (user.code || user.id.toUpperCase()) : '-';
-                }).join('\n');
-                row.push(assignments || '-');
-            }
-        });
-
-        tableData.push(row);
-    }
-
-    const headers = ['Data', 'SALA Sr', 'SALA Jr', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
-
-    doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 28,
-        theme: 'grid',
-        styles: {
-            fontSize: 6,
-            cellPadding: 1,
-            lineWidth: 0.1
-        },
-        headStyles: {
-            fillColor: [97, 97, 97],
-            textColor: 255,
-            fontStyle: 'bold',
-            fontSize: 7
-        },
-        columnStyles: {
-            0: { cellWidth: 18, fontStyle: 'bold' }
-        },
-        margin: { left: 8, right: 8, top: 28, bottom: 15 },
-        didDrawPage: function(data) {
-            // Footer
-            doc.setFontSize(7);
-            doc.setTextColor(128);
-            doc.text(
-                `Generato il ${new Date().toLocaleDateString('it-IT')}`,
-                pageWidth / 2,
-                pageHeight - 8,
-                { align: 'center' }
-            );
-        }
-    });
-
-    // Save PDF
-    doc.save(`turni_${ITALIAN_MONTHS[month]}_${year}_${type}.pdf`);
+    // For PDF export, we now just generate the Excel file
+    // Users can convert the Excel to PDF using their preferred tool
+    // This ensures the PDF maintains the exact formatting of the Excel
+    showToast('Generating Excel file. You can convert it to PDF using Excel or another tool.', 'info', 4000);
+    generateExcel(year, month, type);
 }
 
 function generateExcel(year, month, type) {
@@ -2000,18 +1922,21 @@ function generateExcel(year, month, type) {
                 let bgColor;
                 if (isWeekend) {
                     // Weekend colors
-                    if (slot === 'MATT') bgColor = 'D0DAE6';
-                    else if (slot === 'POM') bgColor = 'C9D6E3';
+                    if (slot === 'MATT' || slot.includes('MATT')) bgColor = 'D0DAE6';
+                    else if (slot === 'POM' || slot.includes('POM')) bgColor = 'C9D6E3';
                     else if (slot === 'NTT') bgColor = 'BEC9D6';
                     else if (slot === 'GG') bgColor = 'C5D3E0';
-                    else if (slot === 'SPEC') bgColor = 'C5D3E0';
+                    else if (slot === 'SPEC' || slot === 'SS') bgColor = 'C5D3E0';
+                    else bgColor = 'C5D3E0'; // Default weekend color
                 } else {
                     // Weekday colors
-                    if (slot === 'MATT') bgColor = 'FFFFFF';
-                    else if (slot === 'POM') bgColor = 'FFF2CC';
+                    if (slot === 'MATT' || slot.includes('MATT')) bgColor = 'FFFFFF';
+                    else if (slot === 'POM' || slot.includes('POM')) bgColor = 'FFF2CC';
                     else if (slot === 'NTT') bgColor = 'D9D9D9';
                     else if (slot === 'GG') bgColor = 'E7E6E6';
-                    else if (slot === 'SPEC') bgColor = 'CCCCFF';
+                    else if (slot === 'SPEC' || slot === 'SS') bgColor = 'CCCCFF';
+                    else if (slot.includes('h ')) bgColor = 'E7E6E6'; // For ENI hours
+                    else bgColor = 'E7E6E6'; // Default weekday color
                 }
 
                 ws[cellAddress].s = {
@@ -2381,6 +2306,39 @@ function initializeEventListeners() {
             }
         });
     });
+
+    // Real-time availability updates - listen for storage changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'availability' && AppState.currentUser && AppState.currentUser.role === 'admin') {
+            // Reload availability data
+            AppState.availability = loadFromStorage('availability') || {};
+
+            // Update availability overview if currently viewing it
+            const overviewView = document.getElementById('availability-overviewView');
+            if (overviewView && overviewView.classList.contains('active')) {
+                renderAvailabilityOverviewGrid();
+            }
+        }
+    });
+
+    // Poll for availability updates every 5 seconds (for same-window updates)
+    setInterval(() => {
+        if (AppState.currentUser && AppState.currentUser.role === 'admin') {
+            const currentAvailability = loadFromStorage('availability') || {};
+            const currentHash = JSON.stringify(currentAvailability);
+            const stateHash = JSON.stringify(AppState.availability);
+
+            if (currentHash !== stateHash) {
+                AppState.availability = currentAvailability;
+
+                // Update availability overview if currently viewing it
+                const overviewView = document.getElementById('availability-overviewView');
+                if (overviewView && overviewView.classList.contains('active')) {
+                    renderAvailabilityOverviewGrid();
+                }
+            }
+        }
+    }, 5000);
 }
 
 // ===========================
