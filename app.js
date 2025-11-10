@@ -703,25 +703,25 @@ function renderAvailabilityDays() {
                     <span class="day-name">${dayName}</span>
                 </div>
                 <div class="slot-toggles">
-                    <button class="slot-toggle ${daySlots.mattina ? 'unavailable' : 'available'}"
+                    <button class="slot-toggle ${daySlots.MATT ? 'unavailable' : 'available'}"
                             data-date="${dateKey}"
-                            data-slot="mattina"
+                            data-slot="MATT"
                             ${isPastDeadline ? 'disabled' : ''}>
-                        <span class="material-icons">${daySlots.mattina ? 'close' : 'check'}</span>
+                        <span class="material-icons">${daySlots.MATT ? 'close' : 'check'}</span>
                         <span class="slot-label">Mattina</span>
                     </button>
-                    <button class="slot-toggle ${daySlots.pomeriggio ? 'unavailable' : 'available'}"
+                    <button class="slot-toggle ${daySlots.POM ? 'unavailable' : 'available'}"
                             data-date="${dateKey}"
-                            data-slot="pomeriggio"
+                            data-slot="POM"
                             ${isPastDeadline ? 'disabled' : ''}>
-                        <span class="material-icons">${daySlots.pomeriggio ? 'close' : 'check'}</span>
+                        <span class="material-icons">${daySlots.POM ? 'close' : 'check'}</span>
                         <span class="slot-label">Pomeriggio</span>
                     </button>
-                    <button class="slot-toggle ${daySlots.notte ? 'unavailable' : 'available'}"
+                    <button class="slot-toggle ${daySlots.NTT ? 'unavailable' : 'available'}"
                             data-date="${dateKey}"
-                            data-slot="notte"
+                            data-slot="NTT"
                             ${isPastDeadline ? 'disabled' : ''}>
-                        <span class="material-icons">${daySlots.notte ? 'close' : 'check'}</span>
+                        <span class="material-icons">${daySlots.NTT ? 'close' : 'check'}</span>
                         <span class="slot-label">Notte</span>
                     </button>
                 </div>
