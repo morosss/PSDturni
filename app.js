@@ -1293,6 +1293,31 @@ function runAutoAssignment() {
                     // Skip if already assigned
                     if (AppState.shifts[shiftKey]) return;
 
+                    // RULE 3: REP weekend continuity (Friday 8pm to Monday 8am)
+                    // Same emodinamista for Friday NTT, Saturday GG+NTT, Sunday GG+NTT
+                    let weekendREPUser = null;
+                    if (shiftType === 'RAP' && (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0)) {
+                        // Check if Friday night RAP is already assigned
+                        if (dayOfWeek === 6 || dayOfWeek === 0) { // Saturday or Sunday
+                            const fridayDate = new Date(year, month, day - (dayOfWeek === 6 ? 1 : 2));
+                            const fridayKey = formatDate(fridayDate.getFullYear(), fridayDate.getMonth(), fridayDate.getDate());
+                            const fridayNightKey = `${fridayKey}_RAP_NTT`;
+                            if (AppState.shifts[fridayNightKey]) {
+                                weekendREPUser = AppState.shifts[fridayNightKey];
+                            }
+                        }
+                    }
+
+                    // RULE 4: UTIC weekend consistency (same person for MATT and POM on weekends)
+                    let weekendUTICUser = null;
+                    if (shiftType === 'UTIC' && isWeekend && slot === 'POM') {
+                        // Check if MATT is already assigned
+                        const mattKey = `${dateKey}_UTIC_MATT`;
+                        if (AppState.shifts[mattKey]) {
+                            weekendUTICUser = AppState.shifts[mattKey];
+                        }
+                    }
+
                     // Find available users with enhanced filtering
                     let availableUsers = AppState.users.filter(user => {
                         // Must have capability for this shift type
@@ -1320,6 +1345,21 @@ function runAutoAssignment() {
 
                         return true;
                     });
+
+                    // Apply weekend continuity rules
+                    if (weekendREPUser) {
+                        const preferredUser = AppState.users.find(u => u.id === weekendREPUser);
+                        if (preferredUser && availableUsers.includes(preferredUser)) {
+                            availableUsers = [preferredUser]; // Force same user
+                        }
+                    }
+
+                    if (weekendUTICUser) {
+                        const preferredUser = AppState.users.find(u => u.id === weekendUTICUser);
+                        if (preferredUser && availableUsers.includes(preferredUser)) {
+                            availableUsers = [preferredUser]; // Force same user
+                        }
+                    }
 
                     // LOAD BALANCING: Sort users by number of assigned shifts
                     // This ensures more even distribution of shifts across all doctors
