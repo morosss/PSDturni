@@ -162,35 +162,35 @@ function initializeDefaultData() {
     // Initialize users with actual hospital staff
     const defaultUsers = [
         // Admin users
-        { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', code: 'PIZ', role: 'admin', specialty: 'Emodinamista', password: '62c5ec050cf9b0bf5523b30df8c40e3872b8b3f0a48f20e0dc1ec5cdf989686d', capabilities: SHIFT_TYPES },
+        { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', code: 'PIZ', role: 'admin', specialty: 'Emodinamista', password: '62c5ec050cf9b0bf5523b30df8c40e3872b8b3f0a48f20e0dc1ec5cdf989686d', capabilities: SHIFT_TYPES, canDoREP: true },
 
         // Medical staff
-        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'] },
-        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'] },
-        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'] },
-        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'] },
-        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'] },
-        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206', 'VISITE 208'] },
-        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201', 'RAP'] },
-        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'] },
-        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'] },
-        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206', 'VISITE 208'] },
-        { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', code: 'LODI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'] },
-        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] },
-        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'] },
-        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'] },
-        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'] },
-        { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', code: 'STE', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'] },
-        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206'] },
-        { id: 'mtusa', name: 'Dott. Maurizio Tusa', code: 'TUSA', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'] },
-        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'] },
-        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'] },
-        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] },
-        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'] },
-        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'] },
-        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'VISITE 208'] },
-        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'VISITE 208', 'ECO 206'] },
-        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'ECO INT'] }
+        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'], canDoREP: false },
+        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'], canDoREP: false },
+        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'], canDoREP: false },
+        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201', 'RAP'], canDoREP: true },
+        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'], canDoREP: true },
+        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', code: 'LODI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'], canDoREP: false },
+        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'], canDoREP: false },
+        { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', code: 'STE', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206'], canDoREP: false },
+        { id: 'mtusa', name: 'Dott. Maurizio Tusa', code: 'TUSA', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'], canDoREP: false },
+        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'], canDoREP: false },
+        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'], canDoREP: false },
+        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'VISITE 208', 'ECO 206'], canDoREP: false },
+        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'ECO INT'], canDoREP: false }
     ];
 
     const existingUsers = loadFromStorage('users');
@@ -1081,6 +1081,48 @@ function updateAutoAssignMonthSelector() {
     select.innerHTML = html;
 }
 
+// Helper function to check if user had night shift previous day
+function hadNightShiftPreviousDay(userId, dateKey) {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    if (day === 1) return false; // First day of month, no previous day to check
+
+    const previousDay = day - 1;
+    const previousDateKey = formatDate(year, month, previousDay);
+
+    // Check all night shifts (NTT) from previous day
+    const nightShifts = ['NTT'];
+    return SHIFT_TYPES.some(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        return slots.some(slot => {
+            if (nightShifts.some(ns => slot.includes(ns))) {
+                const shiftKey = `${previousDateKey}_${shiftType}_${slot}`;
+                return AppState.shifts[shiftKey] === userId;
+            }
+            return false;
+        });
+    });
+}
+
+// Helper function to check if night shift on same day has REP-capable emodinamista
+function hasREPCapableNightShift(dateKey) {
+    // Check if PS or RAP night shift (NTT) is assigned to REP-capable emodinamista
+    const nightShiftTypes = ['PS', 'RAP'];
+    return nightShiftTypes.some(shiftType => {
+        const slots = TIME_SLOTS[shiftType];
+        return slots.some(slot => {
+            if (slot === 'NTT') {
+                const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                const assignedUserId = AppState.shifts[shiftKey];
+                if (assignedUserId) {
+                    const assignedUser = AppState.users.find(u => u.id === assignedUserId);
+                    return assignedUser && assignedUser.canDoREP === true;
+                }
+            }
+            return false;
+        });
+    });
+}
+
 function runAutoAssignment() {
     const select = document.getElementById('autoAssignMonth');
     const [year, month] = select.value.split('-').map(Number);
@@ -1088,37 +1130,92 @@ function runAutoAssignment() {
 
     resultsContainer.innerHTML = '<p>Generazione turni in corso...</p>';
 
-    // Simple auto-assignment algorithm
+    // Enhanced auto-assignment algorithm with shift rules
     setTimeout(() => {
         const daysInMonth = getDaysInMonth(year, month);
         let assignedCount = 0;
         let errorCount = 0;
         const errors = [];
 
+        // Process shifts in specific order: NTT first, then other shifts
+        // This allows us to check REP rules properly
+        const shiftOrder = ['PS', 'RAP', ...SHIFT_TYPES.filter(st => st !== 'PS' && st !== 'RAP')];
+
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = formatDate(year, month, day);
+            const date = new Date(year, month, day);
+            const dayOfWeek = date.getDay(); // 0=Sunday, 5=Friday
 
-            SHIFT_TYPES.forEach(shiftType => {
+            shiftOrder.forEach(shiftType => {
                 const ambulatoriKey = `${dateKey}_${shiftType}`;
                 if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed') return;
 
                 const slots = TIME_SLOTS[shiftType];
-                slots.forEach(slot => {
+
+                // Process NTT (night) slots first
+                const sortedSlots = [...slots].sort((a, b) => {
+                    if (a === 'NTT') return -1;
+                    if (b === 'NTT') return 1;
+                    return 0;
+                });
+
+                sortedSlots.forEach(slot => {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
 
                     // Skip if already assigned
                     if (AppState.shifts[shiftKey]) return;
 
-                    // Find available users
-                    const availableUsers = AppState.users.filter(user => {
+                    // Find available users with enhanced filtering
+                    let availableUsers = AppState.users.filter(user => {
+                        // Must have capability for this shift type
                         if (!user.capabilities.includes(shiftType)) return false;
-                        return !isUserUnavailableForSlot(user.id, dateKey, slot);
+
+                        // Must not be unavailable for this slot
+                        if (isUserUnavailableForSlot(user.id, dateKey, slot)) return false;
+
+                        // RULE 1: No shifts the day after night shift
+                        if (hadNightShiftPreviousDay(user.id, dateKey)) return false;
+
+                        // RULE 2: REP (RAP) assignment logic
+                        if (shiftType === 'RAP') {
+                            // If user can do REP, they're eligible
+                            if (user.canDoREP) return true;
+
+                            // If night shift has REP-capable emodinamista, clinici can also do RAP
+                            if (hasREPCapableNightShift(dateKey)) {
+                                return user.specialty === 'Cardiologo';
+                            }
+
+                            // Otherwise, only REP-capable users
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+                    // LOAD BALANCING: Sort users by number of assigned shifts
+                    // This ensures more even distribution of shifts across all doctors
+                    availableUsers.sort((a, b) => {
+                        const aCount = Object.values(AppState.shifts).filter(id => id === a.id).length;
+                        const bCount = Object.values(AppState.shifts).filter(id => id === b.id).length;
+
+                        // If it's a preferred shift (Friday night or Sunday day), prioritize even more
+                        if ((dayOfWeek === 5 && slot === 'NTT') || (dayOfWeek === 0 && slot === 'GG')) {
+                            return aCount - bCount;
+                        }
+
+                        // Add some randomness for same count to avoid always picking the first user
+                        if (aCount === bCount) {
+                            return Math.random() - 0.5;
+                        }
+
+                        return aCount - bCount;
                     });
 
                     if (availableUsers.length > 0) {
-                        // Assign randomly (in a real system, this would be more sophisticated)
-                        const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
-                        AppState.shifts[shiftKey] = randomUser.id;
+                        // Assign user with fewest shifts (balanced distribution)
+                        const selectedUser = availableUsers[0];
+                        AppState.shifts[shiftKey] = selectedUser.id;
                         assignedCount++;
                     } else {
                         errorCount++;
