@@ -1,117 +1,68 @@
-# PSDturni - Backend Server Setup
+# PSDturni - Backend Server
 
-## Overview
+## ✅ Everything Runs Remotely - No Local Setup Needed!
 
-The PSDturni backend server provides server-side Excel and PDF generation with full color support and proper formatting.
+The PSDturni backend server is **already running** in your remote environment. You don't need to install anything on your local PC.
 
-## Prerequisites
+## Current Status
 
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
-- LibreOffice (for PDF conversion)
+🟢 **Server is RUNNING on port 3000**
 
-## Installation
+The backend is already configured with:
+- Node.js ✅
+- All npm dependencies ✅
+- LibreOffice (for PDF conversion) ✅
+- ExcelJS (for Excel generation) ✅
 
-### 1. Install Node.js Dependencies
+## How to Access
 
-```bash
-npm install
-```
+Simply open the app in your browser:
+- If using a web IDE: Access through your IDE's preview/port forwarding
+- If using SSH tunnel: Access `http://localhost:3000`
+- The server will handle all Excel and PDF generation automatically
 
-### 2. Install LibreOffice (for PDF conversion)
+## What the Server Does
 
-#### Ubuntu/Debian:
-```bash
-sudo apt-get update
-sudo apt-get install -y libreoffice
-```
+### Excel Generation (`/api/generate-excel`)
+1. Uses the `Novembre 2025.xlsx` template
+2. Fills it with your shift data
+3. Applies full color coding:
+   - **Empty shifts**: Light red (#FFE6E6)
+   - **Closed shifts**: Bright red (#FF0000) with white text
+   - **Time slots**: MATT (white), POM (yellow), NTT (gray), GG (light gray)
+   - **Weekend variations**: Different shades for Saturday/Sunday
+4. Returns a downloadable .xlsx file
 
-#### macOS:
-```bash
-brew install libreoffice
-```
+### PDF Generation (`/api/generate-pdf`)
+1. Generates the Excel file (with all colors)
+2. Converts it to PDF using LibreOffice
+3. Returns a downloadable PDF (horizontal layout, ~2 pages)
+4. **All colors and formatting preserved**
 
-#### Windows:
-Download and install from https://www.libreoffice.org/download/download/
+## No Installation Required
 
-## Running the Server
+Everything is handled server-side:
+- ✅ No Excel/LibreOffice needed on your PC
+- ✅ No Node.js needed on your PC
+- ✅ No npm install on your PC
+- ✅ Works from any browser
 
-### Start the server:
+## Testing the Server
 
-```bash
-npm start
-```
-
-Or for development with auto-reload:
-
-```bash
-npm run dev
-```
-
-The server will start on **http://localhost:3000**
+The server is already running! Just:
+1. Open the app in your browser
+2. Log in to PSDturni
+3. Navigate to any month
+4. Click **"Esporta Excel"** or **"Esporta PDF"**
+5. The file downloads with full colors! 🎨
 
 ## How It Works
 
-### Excel Generation
-1. Uses the `Novembre 2025.xlsx` template file
-2. Fills it with shift data while preserving formatting
-3. Applies color coding based on:
-   - Time slots (MATT, POM, NTT, GG)
-   - Weekend vs weekday
-   - Empty shifts (light red)
-   - Closed shifts (bright red)
-
-### PDF Generation
-1. Generates Excel file with proper formatting
-2. Converts to PDF using LibreOffice
-3. Maintains colors and layout in horizontal 2-page format
-
-## API Endpoints
-
-### POST /api/generate-excel
-Generates an Excel file with color coding.
-
-**Request Body:**
-```json
-{
-  "year": 2024,
-  "month": 10,
-  "type": "draft",
-  "shifts": {...},
-  "ambulatoriStatus": {...},
-  "users": [...]
-}
 ```
-
-**Response:** Excel file download
-
-### POST /api/generate-pdf
-Generates a PDF file from the Excel template.
-
-**Request Body:** Same as `/api/generate-excel`
-
-**Response:** PDF file download
-
-## Troubleshooting
-
-### Server won't start
-- Check if port 3000 is already in use
-- Ensure all dependencies are installed (`npm install`)
-
-### PDF generation fails
-- Verify LibreOffice is installed: `libreoffice --version`
-- Check server logs for specific errors
-
-### Colors not showing in Excel
-- Server-side generation should always show colors
-- If not, check the template file exists: `Novembre 2025.xlsx`
-
-## File Structure
-
-- `server.js` - Main server file
-- `package.json` - Dependencies
-- `Novembre 2025.xlsx` - Excel template
-- `app.js` - Frontend code (calls backend APIs)
+Your Browser → Server (port 3000) → ExcelJS + LibreOffice → Download
+     ↑                                                            ↓
+     └────────────────── Colored file ──────────────────────────┘
+```
 
 ## Color Coding Reference
 
@@ -123,3 +74,21 @@ Generates a PDF file from the Excel template.
 | GG        | #E7E6E6 | #C5D3E0 |
 | Empty     | #FFE6E6 | #FFE6E6 |
 | Closed    | #FF0000 | #FF0000 |
+
+## If You Need to Restart the Server
+
+```bash
+# Stop the server
+pkill -f "node server.js"
+
+# Start it again
+node server.js &
+```
+
+## Files
+
+- `server.js` - Backend server (already running)
+- `package.json` - Dependencies (already installed)
+- `Novembre 2025.xlsx` - Excel template
+- `app.js` - Frontend (calls backend APIs)
+- `index.html` - Web interface
