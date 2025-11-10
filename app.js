@@ -922,7 +922,13 @@ function renderShiftsGrid() {
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
-            const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed';
+
+            // Weekend logic: only UTIC, PS, RAP are open by default
+            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
+            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
+
+            // Check if manually closed or auto-closed for weekend
+            const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend;
             const isAdmin = AppState.currentUser.role === 'admin';
 
             html += `<div class="shift-cell-container ${isClosed ? 'closed-cell' : ''}" data-ambulatori="${ambulatoriKey}">`;
@@ -1244,11 +1250,17 @@ function runAutoAssignment() {
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = formatDate(year, month, day);
             const date = new Date(year, month, day);
-            const dayOfWeek = date.getDay(); // 0=Sunday, 5=Friday
+            const dayOfWeek = date.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             shiftOrder.forEach(shiftType => {
                 const ambulatoriKey = `${dateKey}_${shiftType}`;
-                if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed') return;
+
+                // Weekend logic: only UTIC, PS, RAP are open by default
+                const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
+                const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
+
+                if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend) return;
 
                 const slots = TIME_SLOTS[shiftType];
 
