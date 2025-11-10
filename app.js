@@ -14,7 +14,7 @@ const SHIFT_TYPES = [
 const TIME_SLOTS = {
     'SALA Senior': ['MATT', 'POM'],
     'SALA Junior': ['MATT', 'POM'],
-    'REPARTO': ['MATT', 'POM'],
+    'REPARTO': ['MATT 1', 'MATT 2', 'MATT 3', 'POM 1', 'POM 2', 'POM 3'],
     'UTIC': ['MATT', 'POM'],
     'PS': ['GG', 'NTT'],
     'RAP': ['GG', 'NTT'],
@@ -124,6 +124,35 @@ function loadFromStorage(key, defaultValue = null) {
         console.error('Storage error:', error);
         return defaultValue;
     }
+}
+
+// ===========================
+// Availability Helper Functions
+// ===========================
+function getAvailabilitySlot(timeSlot) {
+    // Map time slots to availability periods (mattina/pomeriggio/notte)
+    const mattina = ['MATT', 'MATT 1', 'MATT 2', 'MATT 3', 'h 8-13'];
+    const pomeriggio = ['POM', 'POM 1', 'POM 2', 'POM 3', 'h 14-18', 'SPEC', 'SS'];
+    const notte = ['NTT'];
+    const allDay = ['GG']; // Covers both mattina and pomeriggio
+
+    if (mattina.includes(timeSlot)) return ['mattina'];
+    if (pomeriggio.includes(timeSlot)) return ['pomeriggio'];
+    if (notte.includes(timeSlot)) return ['notte'];
+    if (allDay.includes(timeSlot)) return ['mattina', 'pomeriggio'];
+
+    return []; // Unknown slot type
+}
+
+function isUserUnavailableForSlot(userId, dateKey, timeSlot) {
+    const [year, month] = dateKey.split('-').map(Number);
+    const userAvailabilityKey = `${userId}_${year}_${month - 1}`;
+    const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+    const daySlots = unavailableSlots[dateKey] || {};
+
+    const requiredSlots = getAvailabilitySlot(timeSlot);
+    // User is unavailable if ANY of the required slots are marked as unavailable
+    return requiredSlots.some(slot => daySlots[slot] === true);
 }
 
 // ===========================
@@ -486,22 +515,47 @@ function renderAvailabilityDays() {
     const daysInMonth = getDaysInMonth(year, month);
     const isPastDeadline = isDeadlinePassed(month, year);
     const userAvailabilityKey = `${AppState.currentUser.id}_${year}_${month}`;
-    const unavailableDays = AppState.availability[userAvailabilityKey] || [];
+    const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
 
-    let html = '<div class="availability-grid">';
+    let html = '<div class="availability-slots-grid">';
 
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dayName = DAY_NAMES[date.getDay()];
         const dateKey = formatDate(year, month, day);
-        const isSelected = unavailableDays.includes(dateKey);
+        const daySlots = unavailableSlots[dateKey] || {};
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const disabledClass = isPastDeadline ? 'disabled' : '';
 
         html += `
-            <div class="availability-day ${isSelected ? 'selected' : ''} ${disabledClass}"
-                 data-date="${dateKey}">
-                <span class="day-number">${day}</span>
-                <span class="day-name">${dayName}</span>
+            <div class="availability-day-card ${isWeekend ? 'weekend' : ''} ${disabledClass}">
+                <div class="day-header">
+                    <span class="day-number">${day}</span>
+                    <span class="day-name">${dayName}</span>
+                </div>
+                <div class="slot-toggles">
+                    <button class="slot-toggle ${daySlots.mattina ? 'unavailable' : 'available'}"
+                            data-date="${dateKey}"
+                            data-slot="mattina"
+                            ${isPastDeadline ? 'disabled' : ''}>
+                        <span class="material-icons">${daySlots.mattina ? 'close' : 'check'}</span>
+                        <span class="slot-label">Mattina</span>
+                    </button>
+                    <button class="slot-toggle ${daySlots.pomeriggio ? 'unavailable' : 'available'}"
+                            data-date="${dateKey}"
+                            data-slot="pomeriggio"
+                            ${isPastDeadline ? 'disabled' : ''}>
+                        <span class="material-icons">${daySlots.pomeriggio ? 'close' : 'check'}</span>
+                        <span class="slot-label">Pomeriggio</span>
+                    </button>
+                    <button class="slot-toggle ${daySlots.notte ? 'unavailable' : 'available'}"
+                            data-date="${dateKey}"
+                            data-slot="notte"
+                            ${isPastDeadline ? 'disabled' : ''}>
+                        <span class="material-icons">${daySlots.notte ? 'close' : 'check'}</span>
+                        <span class="slot-label">Notte</span>
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -509,11 +563,14 @@ function renderAvailabilityDays() {
     html += '</div>';
     container.innerHTML = html;
 
-    // Add click handlers
+    // Add click handlers for slot toggles
     if (!isPastDeadline) {
-        document.querySelectorAll('.availability-day:not(.disabled)').forEach(dayEl => {
-            dayEl.addEventListener('click', () => {
-                dayEl.classList.toggle('selected');
+        document.querySelectorAll('.slot-toggle:not([disabled])').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('unavailable');
+                toggle.classList.toggle('available');
+                const icon = toggle.querySelector('.material-icons');
+                icon.textContent = toggle.classList.contains('unavailable') ? 'close' : 'check';
             });
         });
     }
@@ -530,11 +587,19 @@ function saveAvailability() {
         return;
     }
 
-    const selectedDays = Array.from(document.querySelectorAll('.availability-day.selected'))
-        .map(el => el.dataset.date);
+    // Build slot-based unavailability object
+    const unavailableSlots = {};
+    document.querySelectorAll('.slot-toggle.unavailable').forEach(toggle => {
+        const date = toggle.dataset.date;
+        const slot = toggle.dataset.slot;
+        if (!unavailableSlots[date]) {
+            unavailableSlots[date] = {};
+        }
+        unavailableSlots[date][slot] = true;
+    });
 
     const userAvailabilityKey = `${AppState.currentUser.id}_${year}_${month}`;
-    AppState.availability[userAvailabilityKey] = selectedDays;
+    AppState.availability[userAvailabilityKey] = unavailableSlots;
     saveToStorage('availability', AppState.availability);
 
     alert('Indisponibilità salvate con successo!');
@@ -744,72 +809,198 @@ function renderShiftsGrid() {
     const container = document.getElementById('shiftsGrid');
     const daysInMonth = getDaysInMonth(year, month);
 
-    let html = '<div class="shift-editor">';
+    // Create visual grid calendar
+    let html = '<div class="visual-shift-calendar">';
 
+    // Header with shift types
+    html += '<div class="shift-calendar-header">';
+    html += '<div class="shift-date-column">Data</div>';
+    SHIFT_TYPES.forEach(shiftType => {
+        html += `<div class="shift-column-header">${shiftType}</div>`;
+    });
+    html += '</div>';
+
+    // Days grid
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dayName = DAY_NAMES[date.getDay()];
         const dateKey = formatDate(year, month, day);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
-        html += `
-            <div class="shift-day-card">
-                <div class="shift-day-header">
-                    <h4>${day} ${dayName} - ${ITALIAN_MONTHS[month]} ${year}</h4>
-                </div>
-                <div class="shift-assignments">
-        `;
+        html += `<div class="shift-calendar-row ${isWeekend ? 'weekend-row' : ''}">`;
+        html += `<div class="shift-date-cell">
+            <div class="date-number">${day}</div>
+            <div class="date-name">${dayName}</div>
+        </div>`;
 
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
             const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed';
 
-            html += `
-                <div class="shift-assignment">
-                    <label>${shiftType}</label>
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        <input type="checkbox"
-                               ${isClosed ? 'checked' : ''}
-                               onchange="toggleAmbulatorio('${ambulatoriKey}', this.checked)"
-                               title="Chiuso">
-                    </div>
-                </div>
-            `;
+            html += `<div class="shift-cell-container ${isClosed ? 'closed-cell' : ''}" data-ambulatori="${ambulatoriKey}">`;
 
-            if (!isClosed) {
+            if (isClosed) {
+                html += `
+                    <div class="closed-indicator">
+                        <span class="material-icons">block</span>
+                        <span>CHIUSO</span>
+                    </div>
+                    <button class="toggle-ambulatori-btn" onclick="toggleAmbulatorio('${ambulatoriKey}', false)">
+                        <span class="material-icons">lock_open</span>
+                    </button>
+                `;
+            } else {
+                html += `<div class="shift-slots">`;
+
                 slots.forEach(slot => {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                    const assignedUser = AppState.shifts[shiftKey] || '';
+                    const assignedUserId = AppState.shifts[shiftKey] || '';
+                    const assignedUser = assignedUserId ? AppState.users.find(u => u.id === assignedUserId) : null;
+
+                    const isUnavailable = assignedUser ? isUserUnavailableForSlot(assignedUserId, dateKey, slot) : false;
+                    const canWork = assignedUser ? assignedUser.capabilities.includes(shiftType) : true;
+
+                    const hasError = assignedUser && (!canWork || isUnavailable);
+                    const colorClass = assignedUser ? getColorForUser(assignedUserId) : '';
 
                     html += `
-                        <div class="shift-assignment" id="shift_${shiftKey}">
-                            <label>${slot}</label>
-                            <select onchange="assignShift('${shiftKey}', this.value)">
-                                <option value="">-- Non assegnato --</option>
-                                ${AppState.users.map(user => {
-                                    const canWork = user.capabilities.includes(shiftType);
-                                    const isUnavailable = (AppState.availability[`${user.id}_${year}_${month}`] || []).includes(dateKey);
-                                    const selected = assignedUser === user.id ? 'selected' : '';
-                                    const disabled = (!canWork || isUnavailable) ? 'disabled' : '';
-                                    return `<option value="${user.id}" ${selected} ${disabled}>
-                                        ${user.name} ${!canWork ? '(non abilitato)' : ''} ${isUnavailable ? '(non disponibile)' : ''}
-                                    </option>`;
-                                }).join('')}
-                            </select>
+                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass}"
+                             onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')">
+                            <div class="slot-time">${slot}</div>
+                            ${assignedUser ? `
+                                <div class="assigned-person">
+                                    <div class="person-avatar">${getInitials(assignedUser.name)}</div>
+                                    <div class="person-name">${getShortName(assignedUser.name)}</div>
+                                    ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
+                                </div>
+                            ` : `
+                                <div class="empty-slot-indicator">
+                                    <span class="material-icons">person_add</span>
+                                    <span>Assegna</span>
+                                </div>
+                            `}
                         </div>
                     `;
                 });
+
+                html += `</div>`;
+                html += `<button class="toggle-ambulatori-btn close" onclick="toggleAmbulatorio('${ambulatoriKey}', true)">
+                    <span class="material-icons">lock</span>
+                </button>`;
             }
+
+            html += `</div>`;
         });
 
-        html += `
-                </div>
-            </div>
-        `;
+        html += '</div>';
     }
 
     html += '</div>';
     container.innerHTML = html;
+}
+
+// Helper functions for visual calendar
+function getColorForUser(userId) {
+    const colors = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6', 'color-7', 'color-8'];
+    const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+}
+
+function getInitials(name) {
+    return name.split(' ')
+        .map(word => word[0])
+        .filter((_, i, arr) => i === 0 || i === arr.length - 1)
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+}
+
+function getShortName(name) {
+    const parts = name.split(' ');
+    if (parts.length === 1) return name;
+    const lastName = parts[parts.length - 1];
+    return lastName.length > 10 ? lastName.slice(0, 10) + '.' : lastName;
+}
+
+function openShiftModal(shiftKey, shiftType, dateKey, slot) {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    const modal = document.getElementById('shiftAssignModal') || createShiftAssignModal();
+
+    const assignedUserId = AppState.shifts[shiftKey] || '';
+
+    let html = `
+        <div class="assign-modal-header">
+            <h3>Assegna Turno</h3>
+            <div class="assign-modal-info">
+                <span><strong>${shiftType}</strong> - ${slot}</span>
+                <span>${day}/${month + 1}/${year}</span>
+            </div>
+        </div>
+        <div class="user-selection-grid">
+    `;
+
+    AppState.users.forEach(user => {
+        const canWork = user.capabilities.includes(shiftType);
+        const isUnavailable = isUserUnavailableForSlot(user.id, dateKey, slot);
+        const isSelected = assignedUserId === user.id;
+        const colorClass = getColorForUser(user.id);
+
+        html += `
+            <div class="user-select-card ${!canWork || isUnavailable ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${colorClass}"
+                 onclick="${canWork && !isUnavailable ? `selectUserForShift('${shiftKey}', '${user.id}')` : ''}">
+                <div class="user-avatar-large">${getInitials(user.name)}</div>
+                <div class="user-select-info">
+                    <div class="user-select-name">${user.name}</div>
+                    <div class="user-select-specialty">${user.specialty}</div>
+                </div>
+                ${!canWork ? '<span class="badge badge-error">Non abilitato</span>' : ''}
+                ${isUnavailable ? '<span class="badge badge-warning">Non disponibile</span>' : ''}
+                ${isSelected ? '<span class="material-icons check-icon">check_circle</span>' : ''}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    html += `
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal('shiftAssignModal')">Annulla</button>
+            <button class="btn btn-primary" onclick="clearShift('${shiftKey}')">
+                <span class="material-icons">clear</span>
+                Rimuovi Assegnazione
+            </button>
+        </div>
+    `;
+
+    modal.querySelector('.modal-content').innerHTML = html;
+    modal.classList.add('active');
+}
+
+function createShiftAssignModal() {
+    const modal = document.createElement('div');
+    modal.id = 'shiftAssignModal';
+    modal.className = 'modal';
+    modal.innerHTML = '<div class="modal-content modal-large"></div>';
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal('shiftAssignModal');
+    });
+
+    return modal;
+}
+
+function selectUserForShift(shiftKey, userId) {
+    assignShift(shiftKey, userId);
+    closeModal('shiftAssignModal');
+    renderShiftsGrid();
+}
+
+function clearShift(shiftKey) {
+    delete AppState.shifts[shiftKey];
+    saveToStorage('shifts', AppState.shifts);
+    closeModal('shiftAssignModal');
+    renderShiftsGrid();
 }
 
 function toggleAmbulatorio(ambulatoriKey, isClosed) {
@@ -854,11 +1045,7 @@ function validateShiftAssignment(shiftKey, userId) {
     }
 
     // Check availability
-    const [year, month] = dateKey.split('-').map(Number);
-    const userAvailabilityKey = `${userId}_${year}_${month - 1}`;
-    const unavailableDays = AppState.availability[userAvailabilityKey] || [];
-
-    if (unavailableDays.includes(dateKey)) {
+    if (isUserUnavailableForSlot(userId, dateKey, slot)) {
         element.classList.add('error');
         const tooltip = document.createElement('div');
         tooltip.className = 'error-tooltip';
@@ -925,9 +1112,7 @@ function runAutoAssignment() {
                     // Find available users
                     const availableUsers = AppState.users.filter(user => {
                         if (!user.capabilities.includes(shiftType)) return false;
-                        const userAvailabilityKey = `${user.id}_${year}_${month}`;
-                        const unavailableDays = AppState.availability[userAvailabilityKey] || [];
-                        return !unavailableDays.includes(dateKey);
+                        return !isUserUnavailableForSlot(user.id, dateKey, slot);
                     });
 
                     if (availableUsers.length > 0) {
