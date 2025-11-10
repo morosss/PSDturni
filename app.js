@@ -6,7 +6,7 @@
 // Constants & Configuration
 // ===========================
 const SHIFT_TYPES = [
-    'SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'RAP', 'ENI',
+    'SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'RAP', 'ENI',
     'VIS 201', 'VISITE 208', 'TDS 207', 'ECOTT 205', 'ECO 206',
     'ECO spec 204', 'ECO INT', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE'
 ];
@@ -14,7 +14,8 @@ const SHIFT_TYPES = [
 const TIME_SLOTS = {
     'SALA Senior': ['MATT', 'POM'],
     'SALA Junior': ['MATT', 'POM'],
-    'REPARTO': ['MATT 1', 'MATT 2', 'MATT 3', 'POM 1', 'POM 2', 'POM 3'],
+    'REPARTO MATT': ['1', '2', '3'],
+    'REPARTO POM': ['1', '2', '3'],
     'UTIC': ['MATT', 'POM'],
     'PS': ['GG', 'NTT'],
     'RAP': ['GG', 'NTT'],
@@ -207,32 +208,32 @@ function initializeDefaultData() {
         { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', code: 'PIZ', role: 'admin', specialty: 'Emodinamista', password: '62c5ec050cf9b0bf5523b30df8c40e3872b8b3f0a48f20e0dc1ec5cdf989686d', capabilities: SHIFT_TYPES, canDoREP: true },
 
         // Medical staff
-        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'], canDoREP: false },
-        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'], canDoREP: false },
-        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'], canDoREP: false },
-        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
-        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
-        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201', 'RAP'], canDoREP: true },
-        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'], canDoREP: true },
-        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'], canDoREP: true },
-        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', code: 'GRELLI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'], canDoREP: false },
+        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', code: 'BRA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'], canDoREP: false },
+        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', code: 'MARTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'], canDoREP: false },
+        { id: 'aborin', name: 'Dott. Andrea Borin', code: 'BORIN', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', code: 'GAS', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', code: 'CHI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'ecriscione', name: 'Dott. Enrico Criscione', code: 'CRISCIONE', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'PS', 'VIS 201', 'RAP'], canDoREP: true },
+        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', code: 'DEL', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'PS'], canDoREP: true },
+        { id: 'rgorla', name: 'Dott. Riccardo Gorla', code: 'GOR', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'PS', 'UTIC'], canDoREP: true },
+        { id: 'mguerrini', name: 'Dott. Marco Guerrini', code: 'GUE', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'PS', 'RAP', 'ECO 206', 'VISITE 208'], canDoREP: false },
         { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', code: 'LODI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'], canDoREP: false },
-        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'], canDoREP: false },
-        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'], canDoREP: false },
+        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', code: 'MANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', code: 'MAZZUCCA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'ECO 206', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', code: 'ANTO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'msquillace', name: 'Dott. Mattia Squillace', code: 'SQUILLO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'RAP', 'VISITE 208', 'PS'], canDoREP: false },
         { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', code: 'STE', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206'], canDoREP: false },
+        { id: 'ltesta', name: 'Dott. Luca Testa', code: 'TESTA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'PS', 'UTIC', 'ECO 206'], canDoREP: false },
         { id: 'mtusa', name: 'Dott. Maurizio Tusa', code: 'TUSA', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'], canDoREP: false },
-        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'], canDoREP: false },
-        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'], canDoREP: false },
-        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
-        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'], canDoREP: false },
-        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
-        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
-        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'VISITE 208', 'ECO 206'], canDoREP: false },
-        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'ECO INT'], canDoREP: false }
+        { id: 'avella', name: 'Dott. Alessandro Vella', code: 'VELLA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'ECO INT', 'PS'], canDoREP: false },
+        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', code: 'VICARIO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'TDS 207', 'ECO 206', 'PS'], canDoREP: false },
+        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', code: 'ZANNONI', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'VISITE 208'], canDoREP: false },
+        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', code: 'COZZA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'], canDoREP: false },
+        { id: 'mmorosato', name: 'Dott. Michele Morosato', code: 'MORO', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'RAP'], canDoREP: false },
+        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', code: 'GRETA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'PS', 'ECO 206', 'VISITE 208'], canDoREP: false },
+        { id: 'tsimone', name: 'Dott. Tommaso Simone', code: 'TOM', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'VIS 201', 'VISITE 208', 'ECO 206'], canDoREP: false },
+        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', code: 'RAFFA', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206', 'ECO INT'], canDoREP: false }
     ];
 
     const existingUsers = loadFromStorage('users');
@@ -240,7 +241,7 @@ function initializeDefaultData() {
         saveToStorage('users', defaultUsers);
         AppState.users = defaultUsers;
     } else {
-        // Migrate existing users: add code field if missing
+        // Migrate existing users: add code field if missing and update REPARTO capabilities
         AppState.users = existingUsers.map(user => {
             if (!user.code) {
                 // Find matching default user by ID
@@ -253,6 +254,18 @@ function initializeDefaultData() {
                     user.code = nameParts[nameParts.length - 1].toUpperCase().substring(0, 6);
                 }
             }
+
+            // Migrate REPARTO to REPARTO MATT and REPARTO POM
+            if (user.capabilities && user.capabilities.includes('REPARTO')) {
+                user.capabilities = user.capabilities.filter(cap => cap !== 'REPARTO');
+                if (!user.capabilities.includes('REPARTO MATT')) {
+                    user.capabilities.push('REPARTO MATT');
+                }
+                if (!user.capabilities.includes('REPARTO POM')) {
+                    user.capabilities.push('REPARTO POM');
+                }
+            }
+
             return user;
         });
         saveToStorage('users', AppState.users);
@@ -1074,7 +1087,6 @@ function renderShiftsGrid() {
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
                                 <div class="assigned-person">
-                                    <div class="person-avatar">${userCode}</div>
                                     <div class="person-name">${userCode}</div>
                                     ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
                                 </div>
@@ -1443,13 +1455,13 @@ function runAutoAssignment() {
         selectedTypes.push('SALA Senior', 'SALA Junior');
     }
     if (document.getElementById('assignREPARTO').checked) {
-        selectedTypes.push('RAP');
+        selectedTypes.push('REPARTO MATT', 'REPARTO POM', 'RAP');
     }
     if (document.getElementById('assignECO').checked) {
-        selectedTypes.push('ECO 206', 'ECO 214', 'ECO 230');
+        selectedTypes.push('ECO 206', 'ECO spec 204', 'ECO INT');
     }
     if (document.getElementById('assignOthers').checked) {
-        selectedTypes.push('UTIC', 'PS', 'PDD', 'SCC', 'VAD', 'AMB 201', 'AMB 203', 'AMB 207', 'AMB 210', 'AMB 213', 'AMB 228');
+        selectedTypes.push('UTIC', 'PS', 'ENI', 'VIS 201', 'VISITE 208', 'TDS 207', 'ECOTT 205', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE');
     }
 
     if (selectedTypes.length === 0) {
