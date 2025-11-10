@@ -1789,7 +1789,7 @@ async function generatePDF(year, month, type) {
     showToast('Generazione PDF in corso...', 'info');
 
     try {
-        const response = await fetch('http://localhost:3000/api/generate-pdf', {
+        const response = await fetch('/api/generate-pdf', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1830,7 +1830,7 @@ async function generateExcel(year, month, type) {
     showToast('Generazione Excel in corso...', 'info');
 
     try {
-        const response = await fetch('http://localhost:3000/api/generate-excel', {
+        const response = await fetch('/api/generate-excel', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
