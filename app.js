@@ -40,6 +40,47 @@ const ITALIAN_MONTHS = [
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 
 // ===========================
+// Toast Notifications
+// ===========================
+function showToast(message, type = 'info', duration = 3000) {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Icon mapping
+    const icons = {
+        success: 'check_circle',
+        error: 'error',
+        warning: 'warning',
+        info: 'info'
+    };
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <span class="material-icons toast-icon">${icons[type] || icons.info}</span>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+            <span class="material-icons">close</span>
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after duration
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ===========================
 // State Management
 // ===========================
 const AppState = {
@@ -262,6 +303,15 @@ async function handleLogin(e) {
 
     // Login successful
     AppState.currentUser = user;
+
+    // Handle remember me
+    const rememberMe = document.getElementById('rememberMe').checked;
+    if (rememberMe) {
+        localStorage.setItem('rememberedUserId', userId);
+    } else {
+        localStorage.removeItem('rememberedUserId');
+    }
+
     initializeDashboard();
     showScreen('dashboardScreen');
 }
@@ -330,12 +380,23 @@ async function handleChangePassword(e) {
     saveToStorage('users', AppState.users);
 
     closeModal('changePasswordModal');
-    alert('Password modificata con successo');
+    showToast('Password modificata con successo', 'success');
 }
 
 function logout() {
     AppState.currentUser = null;
+
+    // Preserve remembered userId if it exists
+    const rememberedUserId = localStorage.getItem('rememberedUserId');
+
     document.getElementById('loginForm').reset();
+
+    // Restore remembered userId and check remember me checkbox
+    if (rememberedUserId) {
+        document.getElementById('userId').value = rememberedUserId;
+        document.getElementById('rememberMe').checked = true;
+    }
+
     showScreen('loginScreen');
 }
 
@@ -583,7 +644,7 @@ function saveAvailability() {
     const [year, month] = select.value.split('-').map(Number);
 
     if (isDeadlinePassed(month, year)) {
-        alert('Non è possibile modificare le indisponibilità dopo la scadenza.');
+        showToast('Non è possibile modificare le indisponibilità dopo la scadenza.', 'warning');
         return;
     }
 
@@ -602,7 +663,7 @@ function saveAvailability() {
     AppState.availability[userAvailabilityKey] = unavailableSlots;
     saveToStorage('availability', AppState.availability);
 
-    alert('Indisponibilità salvate con successo!');
+    showToast('Indisponibilità salvate con successo!', 'success');
 }
 
 // ===========================
@@ -837,6 +898,7 @@ function renderShiftsGrid() {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
             const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed';
+            const isAdmin = AppState.currentUser.role === 'admin';
 
             html += `<div class="shift-cell-container ${isClosed ? 'closed-cell' : ''}" data-ambulatori="${ambulatoriKey}">`;
 
@@ -846,9 +908,9 @@ function renderShiftsGrid() {
                         <span class="material-icons">block</span>
                         <span>CHIUSO</span>
                     </div>
-                    <button class="toggle-ambulatori-btn" onclick="toggleAmbulatorio('${ambulatoriKey}', false)">
+                    ${isAdmin ? `<button class="toggle-ambulatori-btn" onclick="toggleAmbulatorio('${ambulatoriKey}', false)">
                         <span class="material-icons">lock_open</span>
-                    </button>
+                    </button>` : ''}
                 `;
             } else {
                 html += `<div class="shift-slots">`;
@@ -864,14 +926,15 @@ function renderShiftsGrid() {
                     const hasError = assignedUser && (!canWork || isUnavailable);
                     const colorClass = assignedUser ? getColorForUser(assignedUserId) : '';
 
+                    const isAdmin = AppState.currentUser.role === 'admin';
                     html += `
-                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass}"
-                             onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')">
+                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${!isAdmin ? 'read-only' : ''}"
+                             ${isAdmin ? `onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')"` : ''}>
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
                                 <div class="assigned-person">
-                                    <div class="person-avatar">${getInitials(assignedUser.name)}</div>
-                                    <div class="person-name">${getShortName(assignedUser.name)}</div>
+                                    <div class="person-avatar">${assignedUser.code}</div>
+                                    <div class="person-name">${assignedUser.code}</div>
                                     ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
                                 </div>
                             ` : `
@@ -885,9 +948,11 @@ function renderShiftsGrid() {
                 });
 
                 html += `</div>`;
-                html += `<button class="toggle-ambulatori-btn close" onclick="toggleAmbulatorio('${ambulatoriKey}', true)">
-                    <span class="material-icons">lock</span>
-                </button>`;
+                if (isAdmin) {
+                    html += `<button class="toggle-ambulatori-btn close" onclick="toggleAmbulatorio('${ambulatoriKey}', true)">
+                        <span class="material-icons">lock</span>
+                    </button>`;
+                }
             }
 
             html += `</div>`;
@@ -924,6 +989,11 @@ function getShortName(name) {
 }
 
 function openShiftModal(shiftKey, shiftType, dateKey, slot) {
+    // Only allow admins to edit shifts
+    if (AppState.currentUser.role !== 'admin') {
+        return;
+    }
+
     const [year, month, day] = dateKey.split('-').map(Number);
     const modal = document.getElementById('shiftAssignModal') || createShiftAssignModal();
 
@@ -1004,6 +1074,11 @@ function clearShift(shiftKey) {
 }
 
 function toggleAmbulatorio(ambulatoriKey, isClosed) {
+    // Only allow admins to toggle ambulatori
+    if (AppState.currentUser.role !== 'admin') {
+        return;
+    }
+
     if (isClosed) {
         AppState.ambulatoriStatus[ambulatoriKey] = 'closed';
     } else {
@@ -1463,6 +1538,13 @@ function initializeEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeDefaultData();
     initializeEventListeners();
+
+    // Auto-fill userId if remember me was checked
+    const rememberedUserId = localStorage.getItem('rememberedUserId');
+    if (rememberedUserId) {
+        document.getElementById('userId').value = rememberedUserId;
+        document.getElementById('rememberMe').checked = true;
+    }
 
     // Check if user is already logged in (for development)
     // In production, you'd want proper session management

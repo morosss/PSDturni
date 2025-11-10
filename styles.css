@@ -189,6 +189,26 @@ body {
     transform: translateY(-1px);
 }
 
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.checkbox-label span {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
 .helper-text {
     display: block;
     font-size: 12px;
@@ -856,9 +876,9 @@ body {
 
 .shift-date-column,
 .shift-column-header {
-    padding: 16px 12px;
+    padding: 8px 6px;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
@@ -895,12 +915,12 @@ body {
     position: sticky;
     left: 0;
     background: var(--background);
-    padding: 16px 12px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 2px;
     border-right: 2px solid var(--divider);
     z-index: 10;
 }
@@ -910,14 +930,14 @@ body {
 }
 
 .date-number {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
 }
 
 .date-name {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -926,11 +946,12 @@ body {
 
 .shift-cell-container {
     position: relative;
-    padding: 8px;
+    padding: 4px;
     border-right: 1px solid var(--divider);
-    min-height: 100px;
+    min-height: 50px;
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .shift-cell-container.closed-cell {
@@ -992,22 +1013,22 @@ body {
 .shift-slots {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 2px;
     flex: 1;
 }
 
 .shift-slot {
     background: var(--background);
-    border: 2px solid var(--divider);
+    border: 1px solid var(--divider);
     border-radius: var(--radius-sm);
-    padding: 8px;
+    padding: 4px 6px;
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
-    min-height: 60px;
+    min-height: 36px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 3px;
 }
 
 .shift-slot:hover {
@@ -1036,8 +1057,19 @@ body {
     border-style: solid;
 }
 
+.shift-slot.read-only {
+    cursor: default;
+    opacity: 0.9;
+}
+
+.shift-slot.read-only:hover {
+    border-color: var(--divider);
+    box-shadow: none;
+    transform: none;
+}
+
 .slot-time {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 700;
     color: var(--text-tertiary);
     text-transform: uppercase;
@@ -1047,18 +1079,18 @@ body {
 .assigned-person {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     flex: 1;
 }
 
 .person-avatar {
-    width: 32px;
-    height: 32px;
+    width: 22px;
+    height: 22px;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     color: white;
     flex-shrink: 0;
@@ -1067,16 +1099,16 @@ body {
 }
 
 .person-name {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.1;
     flex: 1;
 }
 
 .error-icon {
     color: var(--error);
-    font-size: 18px;
+    font-size: 14px;
     flex-shrink: 0;
     animation: pulse 2s ease-in-out infinite;
 }
@@ -1086,15 +1118,15 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 8px 4px;
+    gap: 2px;
+    padding: 4px 2px;
     color: var(--text-tertiary);
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
 }
 
 .empty-slot-indicator .material-icons {
-    font-size: 24px;
+    font-size: 16px;
     opacity: 0.5;
 }
 
@@ -1601,6 +1633,124 @@ body {
 @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 0.5; }
     50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ===========================
+   Toast Notifications
+   =========================== */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 400px;
+    pointer-events: all;
+    animation: slideInRight 0.3s ease-out;
+    border-left: 4px solid var(--primary-color);
+}
+
+.toast.success {
+    border-left-color: var(--success);
+}
+
+.toast.error {
+    border-left-color: var(--error);
+}
+
+.toast.warning {
+    border-left-color: #ff9800;
+}
+
+.toast.info {
+    border-left-color: var(--primary-color);
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+.toast.success .toast-icon {
+    color: var(--success);
+}
+
+.toast.error .toast-icon {
+    color: var(--error);
+}
+
+.toast.warning .toast-icon {
+    color: #ff9800;
+}
+
+.toast.info .toast-icon {
+    color: var(--primary-color);
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.toast-close {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.toast-close:hover {
+    color: var(--text-primary);
+}
+
+.toast-close .material-icons {
+    font-size: 20px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.toast.hiding {
+    animation: slideOutRight 0.3s ease-out forwards;
 }
 
 /* ===========================
