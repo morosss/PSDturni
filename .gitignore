@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+temp_*.xlsx
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1785,350 +1785,89 @@ function handlePdfExport(e) {
     closeModal('pdfModal');
 }
 
-function generatePDF(year, month, type) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape', 'mm', 'a4');
+async function generatePDF(year, month, type) {
+    showToast('Generazione PDF in corso...', 'info');
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Header background
-    doc.setFillColor(198, 40, 40);
-    doc.rect(0, 0, pageWidth, 25, 'F');
-
-    // Add icon on the left
-    const img = new Image();
-    img.src = 'icon.jpg';
     try {
-        doc.addImage(img, 'JPEG', 8, 5, 15, 15);
-    } catch (e) {
-        console.log('Icon not loaded for PDF');
-    }
-
-    // Title on the right
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Turni ${ITALIAN_MONTHS[month]} ${year}`, pageWidth - 15, 12, { align: 'right' });
-
-    // Type indicator
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
-    doc.text(typeText, pageWidth - 15, 19, { align: 'right' });
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-
-    // Prepare table data
-    const daysInMonth = getDaysInMonth(year, month);
-    const tableData = [];
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const dayName = DAY_NAMES[date.getDay()];
-        const dateKey = formatDate(year, month, day);
-
-        const row = [`${day} ${dayName}`];
-
-        // Add assignments for each shift type (showing only first few to fit in 2 pages)
-        const mainShifts = ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206'];
-        mainShifts.forEach(shiftType => {
-            const slots = TIME_SLOTS[shiftType];
-            const ambulatoriKey = `${dateKey}_${shiftType}`;
-
-            // Weekend logic
-            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
-            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
-
-            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend) {
-                row.push('CHIUSO');
-            } else {
-                const assignments = slots.map(slot => {
-                    const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                    const userId = AppState.shifts[shiftKey];
-                    if (!userId) return '-';
-                    const user = AppState.users.find(u => u.id === userId);
-                    return user ? (user.code || user.id.toUpperCase()) : '-';
-                }).join('\n');
-                row.push(assignments || '-');
-            }
+        const response = await fetch('http://localhost:3000/api/generate-pdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                year,
+                month,
+                type,
+                shifts: AppState.shifts,
+                ambulatoriStatus: AppState.ambulatoriStatus,
+                users: AppState.users
+            })
         });
 
-        tableData.push(row);
-    }
-
-    const headers = ['Data', 'SALA Sr', 'SALA Jr', 'REP M', 'REP P', 'UTIC', 'PS', 'ECO 206'];
-
-    doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 28,
-        theme: 'grid',
-        styles: {
-            fontSize: 6,
-            cellPadding: 1,
-            lineWidth: 0.1
-        },
-        headStyles: {
-            fillColor: [97, 97, 97],
-            textColor: 255,
-            fontStyle: 'bold',
-            fontSize: 7
-        },
-        columnStyles: {
-            0: { cellWidth: 18, fontStyle: 'bold' }
-        },
-        margin: { left: 8, right: 8, top: 28, bottom: 15 },
-        didDrawPage: function(data) {
-            // Footer
-            doc.setFontSize(7);
-            doc.setTextColor(128);
-            doc.text(
-                `Generato il ${new Date().toLocaleDateString('it-IT')}`,
-                pageWidth / 2,
-                pageHeight - 8,
-                { align: 'center' }
-            );
+        if (!response.ok) {
+            throw new Error('Failed to generate PDF');
         }
-    });
 
-    // Save PDF
-    doc.save(`turni_${ITALIAN_MONTHS[month]}_${year}_${type}.pdf`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
+        a.download = `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showToast('PDF esportato con successo', 'success');
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        showToast('Errore durante la generazione del PDF. Assicurati che il server sia attivo.', 'error');
+    }
 }
 
-function generateExcel(year, month, type) {
-    const wb = XLSX.utils.book_new();
-    const daysInMonth = getDaysInMonth(year, month);
-    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
+async function generateExcel(year, month, type) {
+    showToast('Generazione Excel in corso...', 'info');
 
-    // Create data array for all shifts
-    const data = [];
-
-    // Title row
-    const titleRow = [`Turni ${ITALIAN_MONTHS[month]} ${year} - ${typeText}`];
-    // Fill rest of title row with empty strings
-    let totalCols = 1;
-    SHIFT_TYPES.forEach(shiftType => {
-        totalCols += TIME_SLOTS[shiftType].length;
-    });
-    for (let i = 1; i < totalCols; i++) {
-        titleRow.push('');
-    }
-    data.push(titleRow);
-
-    // Header row 1: Shift types (offset by 1 due to title)
-    const header1 = ['Data'];
-    SHIFT_TYPES.forEach(shiftType => {
-        const slots = TIME_SLOTS[shiftType];
-        slots.forEach(() => {
-            header1.push(shiftType);
-        });
-    });
-    data.push(header1);
-
-    // Header row 2: Time slots (offset by 1 due to title)
-    const header2 = [''];
-    SHIFT_TYPES.forEach(shiftType => {
-        const slots = TIME_SLOTS[shiftType];
-        slots.forEach(slot => {
-            header2.push(slot);
-        });
-    });
-    data.push(header2);
-
-    // Data rows - one for each day
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const dayName = DAY_NAMES[date.getDay()];
-        const dateKey = formatDate(year, month, day);
-        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-
-        const row = [`${day} ${dayName}`];
-
-        SHIFT_TYPES.forEach(shiftType => {
-            const slots = TIME_SLOTS[shiftType];
-            const ambulatoriKey = `${dateKey}_${shiftType}`;
-
-            // Weekend logic
-            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
-            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
-
-            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend) {
-                slots.forEach(() => row.push('CHIUSO'));
-            } else {
-                slots.forEach(slot => {
-                    const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                    const userId = AppState.shifts[shiftKey];
-                    if (!userId) {
-                        row.push('');
-                    } else {
-                        const user = AppState.users.find(u => u.id === userId);
-                        row.push(user ? (user.code || user.id.toUpperCase()) : '');
-                    }
-                });
-            }
+    try {
+        const response = await fetch('http://localhost:3000/api/generate-excel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                year,
+                month,
+                type,
+                shifts: AppState.shifts,
+                ambulatoriStatus: AppState.ambulatoriStatus,
+                users: AppState.users
+            })
         });
 
-        data.push(row);
-    }
-
-    // Create worksheet
-    const ws = XLSX.utils.aoa_to_sheet(data);
-
-    // Set column widths
-    const colWidths = [{ wch: 15 }]; // Date column
-    SHIFT_TYPES.forEach(shiftType => {
-        const slots = TIME_SLOTS[shiftType];
-        slots.forEach(() => {
-            colWidths.push({ wch: 10 });
-        });
-    });
-    ws['!cols'] = colWidths;
-
-    // Merge cells for title row and shift type headers
-    const merges = [];
-
-    // Merge title row across all columns
-    merges.push({
-        s: { r: 0, c: 0 },
-        e: { r: 0, c: totalCols - 1 }
-    });
-
-    // Merge cells for shift type headers (row 1, offset by title row)
-    let colIndex = 1;
-    SHIFT_TYPES.forEach(shiftType => {
-        const slots = TIME_SLOTS[shiftType];
-        if (slots.length > 1) {
-            merges.push({
-                s: { r: 1, c: colIndex },
-                e: { r: 1, c: colIndex + slots.length - 1 }
-            });
+        if (!response.ok) {
+            throw new Error('Failed to generate Excel');
         }
-        colIndex += slots.length;
-    });
-    ws['!merges'] = merges;
 
-    // Add styling
-    const range = XLSX.utils.decode_range(ws['!ref']);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
+        a.download = `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
-    // Style title row (row 0)
-    for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
-        ws[cellAddress].s = {
-            font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } },
-            fill: { fgColor: { rgb: 'C62828' } },
-            alignment: { horizontal: 'center', vertical: 'center' }
-        };
+        showToast('Excel esportato con successo', 'success');
+    } catch (error) {
+        console.error('Error generating Excel:', error);
+        showToast('Errore durante la generazione dell\'Excel. Assicurati che il server sia attivo.', 'error');
     }
-
-    // Style header rows (rows 1 and 2, shift types and time slots)
-    for (let col = range.s.c; col <= range.e.c; col++) {
-        for (let row = 1; row <= 2; row++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-            if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
-            ws[cellAddress].s = {
-                font: { bold: true, color: { rgb: 'FFFFFF' } },
-                fill: { fgColor: { rgb: 'C62828' } },
-                alignment: { horizontal: 'center', vertical: 'center' }
-            };
-        }
-    }
-
-    // Style data cells based on time slot and weekend (starting from row 3, offset by title row)
-    for (let row = 3; row <= range.e.r; row++) {
-        const dateCell = ws[XLSX.utils.encode_cell({ r: row, c: 0 })];
-        const dayText = dateCell ? dateCell.v : '';
-        const isWeekend = dayText.includes('Sab') || dayText.includes('Dom');
-
-        // Date column styling
-        ws[XLSX.utils.encode_cell({ r: row, c: 0 })].s = {
-            font: { bold: true },
-            fill: { fgColor: { rgb: isWeekend ? 'ADB9CA' : 'FFFFFF' } },
-            alignment: { horizontal: 'left' },
-            border: {
-                top: { style: 'thin', color: { rgb: '000000' } },
-                bottom: { style: 'thin', color: { rgb: '000000' } },
-                left: { style: 'thin', color: { rgb: '000000' } },
-                right: { style: 'thin', color: { rgb: '000000' } }
-            }
-        };
-
-        let colIndex = 1;
-        SHIFT_TYPES.forEach(shiftType => {
-            const slots = TIME_SLOTS[shiftType];
-            slots.forEach(slot => {
-                const cellAddress = XLSX.utils.encode_cell({ r: row, c: colIndex });
-                if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
-
-                const cellValue = ws[cellAddress].v || '';
-                const isClosed = cellValue === 'CHIUSO';
-                const isEmpty = cellValue === '';
-
-                let bgColor;
-                let fontColor = '000000'; // Default black text
-
-                if (isClosed) {
-                    // Bright red for closed shifts
-                    bgColor = 'FF0000';
-                    fontColor = 'FFFFFF'; // White text on red
-                } else if (isEmpty) {
-                    // Light red for empty shifts
-                    bgColor = 'FFE6E6';
-                } else {
-                    // Normal color coding based on time slot
-                    if (isWeekend) {
-                        // Weekend colors
-                        if (slot === 'MATT' || slot === '1' || slot === '2' || slot === '3') bgColor = 'D0DAE6';
-                        else if (slot === 'POM') bgColor = 'C9D6E3';
-                        else if (slot === 'NTT') bgColor = 'BEC9D6';
-                        else if (slot === 'GG') bgColor = 'C5D3E0';
-                        else if (slot === 'SPEC' || slot === 'SS') bgColor = 'C5D3E0';
-                        else bgColor = 'D0DAE6'; // Default to morning color
-                    } else {
-                        // Weekday colors
-                        if (slot === 'MATT' || slot === '1' || slot === '2' || slot === '3') bgColor = 'FFFFFF';
-                        else if (slot === 'POM') bgColor = 'FFF2CC';
-                        else if (slot === 'NTT') bgColor = 'D9D9D9';
-                        else if (slot === 'GG') bgColor = 'E7E6E6';
-                        else if (slot === 'SPEC' || slot === 'SS') bgColor = 'CCCCFF';
-                        else bgColor = 'FFFFFF'; // Default to white
-                    }
-                }
-
-                ws[cellAddress].s = {
-                    fill: { fgColor: { rgb: bgColor } },
-                    font: { color: { rgb: fontColor }, bold: isClosed },
-                    alignment: { horizontal: 'center', vertical: 'center' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: '000000' } },
-                        bottom: { style: 'thin', color: { rgb: '000000' } },
-                        left: { style: 'thin', color: { rgb: '000000' } },
-                        right: { style: 'thin', color: { rgb: '000000' } }
-                    }
-                };
-
-                colIndex++;
-            });
-        });
-    }
-
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, `${ITALIAN_MONTHS[month]} ${year}`);
-
-    // Generate and download file with styling support
-    XLSX.writeFile(wb, `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`, {
-        bookType: 'xlsx',
-        cellStyles: true,
-        type: 'binary'
-    });
-
-    // Note: Cell styling (colors) requires SheetJS Pro. The free version may not show colors.
-    showToast('Excel esportato con successo', 'success');
 }
+
+
 
 // ===========================
 // Version Management
