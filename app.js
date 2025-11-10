@@ -519,14 +519,49 @@ function renderCalendar() {
     // Check if user should see shifts for this month
     const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
 
-    let html = '<table class="calendar-table"><thead><tr>';
-    html += '<th>Data</th>';
+    // Abbreviate shift type names for compact view
+    const shiftAbbrev = {
+        'SALA Senior': 'SAL Sr',
+        'SALA Junior': 'SAL Jr',
+        'REPARTO MATT': 'REP M',
+        'REPARTO POM': 'REP P',
+        'UTIC': 'UTIC',
+        'PS': 'PS',
+        'RAP': 'RAP',
+        'ENI': 'ENI',
+        'VIS 201': 'V201',
+        'VISITE 208': 'V208',
+        'TDS 207': 'TDS',
+        'ECOTT 205': 'E205',
+        'ECO 206': 'E206',
+        'ECO spec 204': 'E204',
+        'ECO INT': 'EINT',
+        'CARDIOCHIR': 'CARD',
+        'Vicenza': 'VIC',
+        'Ricerca': 'RIC',
+        'RISERVE': 'RIS'
+    };
 
-    // Add shift type headers
+    // Abbreviate slot names
+    const slotAbbrev = (slot) => {
+        if (slot === 'MATT') return 'M';
+        if (slot === 'POM') return 'P';
+        if (slot === 'NTT') return 'N';
+        if (slot === 'GG') return 'G';
+        if (slot === 'SS') return 'S';
+        if (slot === 'SPEC') return 'SP';
+        return slot; // Return as-is for numbers like 1, 2, 3
+    };
+
+    let html = '<table class="calendar-table compact-calendar"><thead><tr>';
+    html += '<th class="date-header">GG</th>';
+
+    // Add shift type headers - compact format
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
+        const abbrev = shiftAbbrev[shiftType] || shiftType;
         slots.forEach(slot => {
-            html += `<th>${shiftType}<br><small>${slot}</small></th>`;
+            html += `<th class="compact-header">${abbrev}<br>${slotAbbrev(slot)}</th>`;
         });
     });
     html += '</tr></thead><tbody>';
@@ -535,11 +570,12 @@ function renderCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(AppState.currentYear, AppState.currentMonth, day);
         const dayName = DAY_NAMES[date.getDay()];
+        const dayAbbrev = dayName.substring(0, 2); // Lu, Ma, Me, Gi, Ve, Sa, Do
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const dateKey = formatDate(AppState.currentYear, AppState.currentMonth, day);
 
         html += `<tr>`;
-        html += `<td class="date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
+        html += `<td class="date-cell compact-date ${isWeekend ? 'weekend' : ''}">${day}<br><small>${dayAbbrev}</small></td>`;
 
         // Add shift cells
         SHIFT_TYPES.forEach(shiftType => {
@@ -563,10 +599,14 @@ function renderCalendar() {
                                   slot === 'GG' ? 'slot-gg' :
                                   slot === 'SS' || slot === 'SPEC' ? 'slot-spec' : '';
 
+                const isEmpty = !displayValue && !isClosed;
+
                 if (isClosed) {
-                    html += `<td class="shift-cell closed"></td>`;
+                    html += `<td class="shift-cell closed compact-cell"></td>`;
+                } else if (isEmpty) {
+                    html += `<td class="shift-cell empty-cell compact-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><div class="compact-shift-content"></div></td>`;
                 } else {
-                    html += `<td class="shift-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><input type="text" value="${displayValue}" readonly></td>`;
+                    html += `<td class="shift-cell compact-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><div class="compact-shift-content">${displayValue}</div></td>`;
                 }
             });
         });
@@ -2016,25 +2056,44 @@ function generateExcel(year, month, type) {
                 const cellAddress = XLSX.utils.encode_cell({ r: row, c: colIndex });
                 if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
 
+                const cellValue = ws[cellAddress].v || '';
+                const isClosed = cellValue === 'CHIUSO';
+                const isEmpty = cellValue === '';
+
                 let bgColor;
-                if (isWeekend) {
-                    // Weekend colors
-                    if (slot === 'MATT') bgColor = 'D0DAE6';
-                    else if (slot === 'POM') bgColor = 'C9D6E3';
-                    else if (slot === 'NTT') bgColor = 'BEC9D6';
-                    else if (slot === 'GG') bgColor = 'C5D3E0';
-                    else if (slot === 'SPEC') bgColor = 'C5D3E0';
+                let fontColor = '000000'; // Default black text
+
+                if (isClosed) {
+                    // Bright red for closed shifts
+                    bgColor = 'FF0000';
+                    fontColor = 'FFFFFF'; // White text on red
+                } else if (isEmpty) {
+                    // Light red for empty shifts
+                    bgColor = 'FFE6E6';
                 } else {
-                    // Weekday colors
-                    if (slot === 'MATT') bgColor = 'FFFFFF';
-                    else if (slot === 'POM') bgColor = 'FFF2CC';
-                    else if (slot === 'NTT') bgColor = 'D9D9D9';
-                    else if (slot === 'GG') bgColor = 'E7E6E6';
-                    else if (slot === 'SPEC') bgColor = 'CCCCFF';
+                    // Normal color coding based on time slot
+                    if (isWeekend) {
+                        // Weekend colors
+                        if (slot === 'MATT' || slot === '1' || slot === '2' || slot === '3') bgColor = 'D0DAE6';
+                        else if (slot === 'POM') bgColor = 'C9D6E3';
+                        else if (slot === 'NTT') bgColor = 'BEC9D6';
+                        else if (slot === 'GG') bgColor = 'C5D3E0';
+                        else if (slot === 'SPEC' || slot === 'SS') bgColor = 'C5D3E0';
+                        else bgColor = 'D0DAE6'; // Default to morning color
+                    } else {
+                        // Weekday colors
+                        if (slot === 'MATT' || slot === '1' || slot === '2' || slot === '3') bgColor = 'FFFFFF';
+                        else if (slot === 'POM') bgColor = 'FFF2CC';
+                        else if (slot === 'NTT') bgColor = 'D9D9D9';
+                        else if (slot === 'GG') bgColor = 'E7E6E6';
+                        else if (slot === 'SPEC' || slot === 'SS') bgColor = 'CCCCFF';
+                        else bgColor = 'FFFFFF'; // Default to white
+                    }
                 }
 
                 ws[cellAddress].s = {
                     fill: { fgColor: { rgb: bgColor } },
+                    font: { color: { rgb: fontColor }, bold: isClosed },
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: {
                         top: { style: 'thin', color: { rgb: '000000' } },

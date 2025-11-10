@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .compact-calendar {
+            display: grid;
+            gap: 2px;
+            font-size: 8px;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .day-row {
+            display: grid;
+            grid-template-columns: 40px repeat(auto-fit, minmax(35px, 1fr));
+            gap: 1px;
+            border-bottom: 1px solid #ddd;
+        }
+        .day-cell {
+            padding: 2px;
+            font-weight: bold;
+            background: #f5f5f5;
+            font-size: 9px;
+        }
+        .shift-mini {
+            padding: 2px 1px;
+            text-align: center;
+            font-size: 8px;
+            font-weight: 600;
+            min-height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Slot colors matching Excel */
+        .matt { background-color: #FFFFFF; }
+        .pom { background-color: #FFF2CC; }
+        .ntt { background-color: #D9D9D9; }
+        .gg { background-color: #E7E6E6; }
+        .weekend.matt { background-color: #D0DAE6; }
+        .weekend.pom { background-color: #C9D6E3; }
+        .weekend.ntt { background-color: #BEC9D6; }
+        .weekend.gg { background-color: #C5D3E0; }
+        .day-cell.weekend { background-color: #ADB9CA; }
+    </style>
+</head>
+<body>
+    <div id="compact-view"></div>
+    <script>
+        // This is the new compact calendar renderer
+        function renderCompactCalendar(shifts, year, month) {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const shiftTypes = ['SALA Sr', 'SALA Jr', 'REP M', 'REP P', 'UTIC', 'PS', 'RAP'];
+            const slots = {
+                'SALA Sr': ['M', 'P'],
+                'SALA Jr': ['M', 'P'],
+                'REP M': ['1', '2', '3'],
+                'REP P': ['1', '2', '3'],
+                'UTIC': ['M', 'P'],
+                'PS': ['G', 'N'],
+                'RAP': ['G', 'N']
+            };
+
+            let html = '<div class="compact-calendar">';
+
+            // Header
+            html += '<div class="day-row"><div class="day-cell">DAY</div>';
+            shiftTypes.forEach(type => {
+                slots[type].forEach(slot => {
+                    html += `<div class="shift-mini" style="background:#C62828;color:white;font-weight:bold">${type}<br>${slot}</div>`;
+                });
+            });
+            html += '</div>';
+
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayName = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'][date.getDay()];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+                html += `<div class="day-row">`;
+                html += `<div class="day-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</div>`;
+
+                shiftTypes.forEach(type => {
+                    slots[type].forEach(slot => {
+                        const slotClass = slot.includes('M') || slot === '1' || slot === '2' || slot === '3' ? 'matt' :
+                                          slot.includes('P') ? 'pom' :
+                                          slot === 'N' ? 'ntt' : 'gg';
+                        const code = ''; // Get from shifts data
+                        html += `<div class="shift-mini ${slotClass} ${isWeekend ? 'weekend' : ''}">${code}</div>`;
+                    });
+                });
+
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+    </script>
+</body>
+</html>
