@@ -1211,6 +1211,36 @@ function createShiftAssignModal() {
 }
 
 function selectUserForShift(shiftKey, userId) {
+    // Parse shift key to get details
+    const parts = shiftKey.split('_');
+    const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
+    const shiftType = parts.slice(3, -1).join('_');
+    const slot = parts[parts.length - 1];
+
+    const user = AppState.users.find(u => u.id === userId);
+    if (!user) {
+        assignShift(shiftKey, userId);
+        closeModal('shiftAssignModal');
+        renderShiftsGrid();
+        return;
+    }
+
+    // Check if this is an override case
+    const canWork = user.capabilities.includes(shiftType);
+    const isUnavailable = isUserUnavailableForSlot(userId, dateKey, slot);
+
+    if (!canWork || isUnavailable) {
+        const userCode = user.code || user.id.toUpperCase();
+        let warning = `Stai assegnando ${userCode} a un turno con delle restrizioni:\n\n`;
+        if (!canWork) warning += `- ${userCode} non è abilitato per ${shiftType}\n`;
+        if (isUnavailable) warning += `- ${userCode} ha segnato indisponibilità per questo slot\n`;
+        warning += '\nSei sicuro di voler procedere?';
+
+        if (!confirm(warning)) {
+            return;
+        }
+    }
+
     assignShift(shiftKey, userId);
     closeModal('shiftAssignModal');
     renderShiftsGrid();
@@ -1226,6 +1256,12 @@ function clearShift(shiftKey) {
 function toggleAmbulatorio(ambulatoriKey, isClosed) {
     // Only allow admins to toggle ambulatori
     if (AppState.currentUser.role !== 'admin') {
+        return;
+    }
+
+    // Prevent closing Reparto (RAP) - it can never be closed
+    if (ambulatoriKey.includes('_RAP') && isClosed) {
+        showToast('REPARTO non può mai essere chiuso', 'error');
         return;
     }
 
@@ -1756,29 +1792,31 @@ function generatePDF(year, month, type) {
     doc.autoTable({
         head: [headers],
         body: tableData,
-        startY: 30,
+        startY: 28,
         theme: 'grid',
         styles: {
-            fontSize: 7,
-            cellPadding: 2,
+            fontSize: 6,
+            cellPadding: 1,
+            lineWidth: 0.1
         },
         headStyles: {
             fillColor: [97, 97, 97],
             textColor: 255,
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontSize: 7
         },
         columnStyles: {
-            0: { cellWidth: 20, fontStyle: 'bold' }
+            0: { cellWidth: 18, fontStyle: 'bold' }
         },
-        margin: { left: 10, right: 10 },
+        margin: { left: 8, right: 8, top: 28, bottom: 15 },
         didDrawPage: function(data) {
             // Footer
-            doc.setFontSize(8);
+            doc.setFontSize(7);
             doc.setTextColor(128);
             doc.text(
                 `Generato il ${new Date().toLocaleDateString('it-IT')}`,
                 pageWidth / 2,
-                pageHeight - 10,
+                pageHeight - 8,
                 { align: 'center' }
             );
         }

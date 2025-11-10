@@ -472,9 +472,9 @@ body {
    Main Content
    =========================== */
 .main-content {
-    max-width: 1400px;
+    max-width: 1800px;
     margin: 0 auto;
-    padding: 16px 20px;
+    padding: 16px 24px;
 }
 
 .view {
@@ -759,8 +759,9 @@ body {
     background: var(--surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: 32px;
+    padding: 20px;
     border: 1px solid rgba(0, 0, 0, 0.04);
+    overflow-x: auto;
 }
 
 .shift-day-card {
