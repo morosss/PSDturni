@@ -5,7 +5,7 @@
 1. **Apri il browser** e vai su: https://morosss.github.io/PSDturni/
 
 2. **Primo Login come Admin**:
-   - ID Utente: `mrossi`
+   - ID Utente: `agrelli` (Dott.ssa Arianna Grelli)
    - Password: lascia vuoto
    - Ti verrà chiesto di impostare una nuova password
 
@@ -16,10 +16,18 @@
 
 ## Configurazione Iniziale (Admin)
 
-### 1. Verifica Utenti
+### 1. Verifica e Gestisci Utenti
 - Vai su "Utenti" nella barra di navigazione
 - Controlla che tutti i medici siano presenti
-- Modifica le competenze se necessario
+- **Per aggiungere un nuovo medico**: Clicca "Aggiungi Utente"
+  - Inserisci nome completo (es. "Dott. Mario Rossi")
+  - ID utente (es. "mrossi" per Mario Rossi)
+  - Ruolo (Utente o Amministratore)
+  - Specialità
+  - Seleziona i turni che può coprire
+  - Clicca "Salva"
+- **Per modificare un utente**: Clicca "Modifica" sulla card dell'utente
+- **Per eliminare un utente**: Clicca "Elimina" (non puoi eliminare te stesso)
 
 ### 2. Gestisci Ambulatori
 - Vai su "Gestione Turni"
@@ -30,18 +38,19 @@
 - Vai su "Assegnazione Automatica"
 - Seleziona il mese
 - Clicca "Genera Turni Automatici"
-- Verifica i risultati
+- Verifica i risultati e il report di turni assegnati/non assegnati
 
 ### 4. Modifica Manualmente (se necessario)
 - Torna su "Gestione Turni"
 - Modifica manualmente le assegnazioni
 - Il sistema ti avviserà se assegni qualcuno non abilitato
+- Puoi forzare l'assegnazione se necessario (override)
 
 ### 5. Esporta PDF
 - Vai su "Calendario"
 - Clicca "Esporta PDF"
 - Scegli il mese e il tipo (Bozza/Definitivo)
-- Scarica il PDF
+- Scarica il PDF pronto per la stampa
 
 ## Per Utenti Standard
 

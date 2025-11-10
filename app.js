@@ -130,33 +130,33 @@ function loadFromStorage(key, defaultValue = null) {
 // Initialize Default Data
 // ===========================
 function initializeDefaultData() {
-    // Initialize users based on Excel data
+    // Initialize users with actual hospital staff
     const defaultUsers = [
-        { id: 'mrossi', name: 'Mario Rossi', role: 'admin', specialty: 'Emodinamista', password: null, capabilities: SHIFT_TYPES },
-        { id: 'agrelli', name: 'A. Grelli', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'VIS 201', 'ECO 206'] },
-        { id: 'ccriscione', name: 'C. Criscione', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201'] },
-        { id: 'mmainardi', name: 'M. Mainardi', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT'] },
-        { id: 'ssisinni', name: 'S. Sisinni', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'VISITE 208'] },
-        { id: 'ddeluca', name: 'D. Deluca', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO'] },
-        { id: 'gguerriero', name: 'G. Guerriero', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206'] },
-        { id: 'abianchi', name: 'A. Bianchi', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['VISITE 208', 'ECO 206', 'ECO spec 204', 'ECOTT 205'] },
-        { id: 'cchiesa', name: 'C. Chiesa', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206'] },
-        { id: 'ssquillo', name: 'S. Squillo', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208'] },
-        { id: 'bborin', name: 'B. Borin', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206'] },
-        { id: 'lodi', name: 'Lodi', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206'] },
-        { id: 'ggor', name: 'G. Gor', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'] },
-        { id: 'ccozza', name: 'C. Cozza', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207'] },
-        { id: 'mmazzucca', name: 'M. Mazzucca', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT'] },
-        { id: 'ttuscano', name: 'T. Tuscano', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204'] },
-        { id: 'mmandolesi', name: 'M. Mandolesi', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT'] },
-        { id: 'ppizzuto', name: 'P. Pizzuto', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO'] },
-        { id: 'mmarta', name: 'M. Marta', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204'] },
-        { id: 'ggasparini', name: 'G. Gasparini', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO'] },
-        { id: 'vvella', name: 'V. Vella', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT'] },
-        { id: 'rrojas', name: 'R. Rojas', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'ECO 206'] },
-        { id: 'ppontremoli', name: 'P. Pontremoli', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207'] },
-        { id: 'vzannoni', name: 'V. Zannoni', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT'] },
-        { id: 'ccentola', name: 'C. Centola', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS'] }
+        // Admin users
+        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', role: 'admin', specialty: 'Cardiologo', password: null, capabilities: SHIFT_TYPES },
+
+        // Medical staff
+        { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'] },
+        { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'] },
+        { id: 'aborin', name: 'Dott. Andrea Borin', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'] },
+        { id: 'gcannone', name: 'Dott. Gaspare Sergio Cannone', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'] },
+        { id: 'echiorino', name: 'Dott.ssa Elisa Chiorino', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['SALA Junior', 'REPARTO', 'PS', 'ECO 206', 'VISITE 208'] },
+        { id: 'ecriscione', name: 'Dott. Enrico Criscione', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'VIS 201', 'RAP'] },
+        { id: 'fdellarosa', name: 'Dott. Francesco Della Rosa', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'] },
+        { id: 'rgorla', name: 'Dott. Riccardo Gorla', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS', 'UTIC'] },
+        { id: 'mguerrini', name: 'Dott. Marco Guerrini', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'RAP', 'ECO 206', 'VISITE 208'] },
+        { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'] },
+        { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] },
+        { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'] },
+        { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'] },
+        { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'] },
+        { id: 'msquillace', name: 'Dott. Mattia Squillace', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'] },
+        { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'] },
+        { id: 'ltesta', name: 'Dott. Luca Testa', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206'] },
+        { id: 'mtusa', name: 'Dott. Maurizio Tusa', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'] },
+        { id: 'avella', name: 'Dott. Alessandro Vella', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'] },
+        { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'] },
+        { id: 'jzannone', name: 'Dott.ssa Jessica Zannone', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] }
     ];
 
     const existingUsers = loadFromStorage('users');

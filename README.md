@@ -21,15 +21,17 @@ Sistema web moderno per la gestione dei turni del personale ospedaliero con inte
 
 1. **URL**: https://morosss.github.io/PSDturni/
 2. **Primo Accesso**:
-   - Inserisci il tuo ID utente (es. `mrossi`)
+   - Inserisci il tuo ID utente (es. `agrelli`, `aborin`, `jzannone`)
    - Password temporanea: lascia vuoto al primo accesso
    - Imposta la tua password personale (minimo 6 caratteri)
 
 ### Credenziali di Default
 
 **Amministratore:**
-- ID: `mrossi`
+- ID: `agrelli` (Dott.ssa Arianna Grelli)
 - Password: (da impostare al primo accesso)
+
+**Nota**: Altri utenti possono essere aggiunti dall'admin tramite l'interfaccia "Gestione Utenti"
 
 ## 📋 Funzionalità per Utente
 
