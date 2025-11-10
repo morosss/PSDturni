@@ -541,14 +541,14 @@ body {
 
 .calendar-table {
     width: 100%;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     font-size: 10px;
 }
 
 /* Compact calendar specific styles */
 .calendar-table.compact-calendar {
-    font-size: 8px;
+    font-size: 9px;
     max-width: 100%;
     overflow-x: auto;
     display: block;
@@ -563,14 +563,14 @@ body {
 
 .calendar-table th,
 .calendar-table td {
-    padding: 4px 6px;
+    padding: 1px 2px;
     text-align: center;
 }
 
 /* Compact headers */
 .calendar-table th.compact-header {
     padding: 2px 1px;
-    font-size: 7px;
+    font-size: 8px;
     line-height: 1.1;
     min-width: 30px;
     max-width: 35px;
@@ -578,7 +578,7 @@ body {
 
 .calendar-table th.date-header {
     padding: 2px;
-    font-size: 8px;
+    font-size: 9px;
     min-width: 35px;
     max-width: 40px;
 }
@@ -631,8 +631,8 @@ body {
 .shift-cell.compact-cell {
     min-width: 30px;
     max-width: 35px;
-    padding: 1px;
-    font-size: 7px;
+    padding: 0px;
+    font-size: 8px;
     line-height: 1.2;
 }
 
@@ -645,16 +645,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 8px;
 }
 
 .compact-date {
-    font-size: 8px;
-    padding: 2px 3px;
+    font-size: 9px;
+    padding: 1px 2px;
     line-height: 1.1;
 }
 
 .compact-date small {
-    font-size: 6px;
+    font-size: 7px;
     font-weight: 400;
 }
 
@@ -940,7 +941,7 @@ body {
 
 .shift-calendar-header {
     display: grid;
-    grid-template-columns: 80px repeat(18, 80px);
+    grid-template-columns: 80px repeat(19, 80px);
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
     color: white;
     position: sticky;
@@ -970,7 +971,7 @@ body {
 
 .shift-calendar-row {
     display: grid;
-    grid-template-columns: 80px repeat(18, 80px);
+    grid-template-columns: 80px repeat(19, 80px);
     border-bottom: 1px solid var(--divider);
     transition: background-color var(--transition-fast);
     min-width: fit-content;

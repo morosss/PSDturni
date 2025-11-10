@@ -188,8 +188,11 @@ function getAvailabilitySlot(timeSlot) {
 }
 
 function isUserUnavailableForSlot(userId, dateKey, timeSlot) {
-    const [year, month] = dateKey.split('-').map(Number);
-    const userAvailabilityKey = `${userId}_${year}_${month - 1}`;
+    // Extract month and year from dateKey (format: YYYY-MM-DD)
+    // dateKey month is 1-indexed (01-12), but we need 0-indexed for consistency
+    const [year, monthStr, day] = dateKey.split('-');
+    const month = parseInt(monthStr) - 1; // Convert to 0-indexed month
+    const userAvailabilityKey = `${userId}_${year}_${month}`;
     const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
     const daySlots = unavailableSlots[dateKey] || {};
 
@@ -1830,12 +1833,17 @@ function generatePDF(year, month, type) {
         const row = [`${day} ${dayName}`];
 
         // Add assignments for each shift type (showing only first few to fit in 2 pages)
-        const mainShifts = ['SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
+        const mainShifts = ['SALA Senior', 'SALA Junior', 'REPARTO MATT', 'REPARTO POM', 'UTIC', 'PS', 'ECO 206'];
         mainShifts.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
             const ambulatoriKey = `${dateKey}_${shiftType}`;
 
-            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed') {
+            // Weekend logic
+            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
+
+            if (AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend) {
                 row.push('CHIUSO');
             } else {
                 const assignments = slots.map(slot => {
@@ -1852,7 +1860,7 @@ function generatePDF(year, month, type) {
         tableData.push(row);
     }
 
-    const headers = ['Data', 'SALA Sr', 'SALA Jr', 'REPARTO', 'UTIC', 'PS', 'ECO 206'];
+    const headers = ['Data', 'SALA Sr', 'SALA Jr', 'REP M', 'REP P', 'UTIC', 'PS', 'ECO 206'];
 
     doc.autoTable({
         head: [headers],
@@ -2111,8 +2119,14 @@ function generateExcel(year, month, type) {
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, `${ITALIAN_MONTHS[month]} ${year}`);
 
-    // Generate and download file
-    XLSX.writeFile(wb, `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`);
+    // Generate and download file with styling support
+    XLSX.writeFile(wb, `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`, {
+        bookType: 'xlsx',
+        cellStyles: true,
+        type: 'binary'
+    });
+
+    // Note: Cell styling (colors) requires SheetJS Pro. The free version may not show colors.
     showToast('Excel esportato con successo', 'success');
 }
 
@@ -2471,6 +2485,8 @@ function initializeEventListeners() {
 // Availability Overview (Admin)
 // ===========================
 function renderAvailabilityOverview() {
+    // Reload availability data from storage to ensure latest data
+    AppState.availability = loadFromStorage('availability') || {};
     updateAvailabilityOverviewMonthSelector();
     renderAvailabilityOverviewGrid();
 }
