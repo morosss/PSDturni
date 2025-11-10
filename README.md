@@ -28,8 +28,8 @@ Sistema web moderno per la gestione dei turni del personale ospedaliero con inte
 ### Credenziali di Default
 
 **Amministratore:**
-- ID: `agrelli` (Dott.ssa Arianna Grelli)
-- Password: (da impostare al primo accesso)
+- ID: `spizzocri` (Dott. Samuele Pizzocri)
+- Password: `scassacazzi1`
 
 **Nota**: Altri utenti possono essere aggiunti dall'admin tramite l'interfaccia "Gestione Utenti"
 

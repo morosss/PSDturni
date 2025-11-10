@@ -5,14 +5,12 @@
 1. **Apri il browser** e vai su: https://morosss.github.io/PSDturni/
 
 2. **Primo Login come Admin**:
-   - ID Utente: `agrelli` (Dott.ssa Arianna Grelli)
-   - Password: lascia vuoto
-   - Ti verrà chiesto di impostare una nuova password
+   - ID Utente: `spizzocri` (Dott. Samuele Pizzocri)
+   - Password: `scassacazzi1`
 
-3. **Imposta Password**:
-   - Inserisci una password di almeno 6 caratteri
-   - Conferma la password
-   - Clicca "Imposta Password"
+3. **Accedi al Sistema**:
+   - Verrai portato alla dashboard principale
+   - Puoi cambiare la password in seguito dal pulsante in alto a destra
 
 ## Configurazione Iniziale (Admin)
 

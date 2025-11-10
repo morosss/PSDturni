@@ -133,9 +133,10 @@ function initializeDefaultData() {
     // Initialize users with actual hospital staff
     const defaultUsers = [
         // Admin users
-        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', role: 'admin', specialty: 'Cardiologo', password: null, capabilities: SHIFT_TYPES },
+        { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', role: 'admin', specialty: 'Emodinamista', password: '62c5ec050cf9b0bf5523b30df8c40e3872b8b3f0a48f20e0dc1ec5cdf989686d', capabilities: SHIFT_TYPES },
 
         // Medical staff
+        { id: 'agrelli', name: 'Dott.ssa Arianna Grelli', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201', 'ECO INT'] },
         { id: 'nbrambilla', name: 'Dott.ssa Nedy Brambilla', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'VISITE 208', 'VIS 201'] },
         { id: 'mbarletta', name: 'Dott.ssa Marta Barletta', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'ECO spec 204', 'VISITE 208'] },
         { id: 'aborin', name: 'Dott. Andrea Borin', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'] },
@@ -148,7 +149,6 @@ function initializeDefaultData() {
         { id: 'alodirizzini', name: 'Dott. Angelo Lodi Rizzini', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['VIS 201', 'VISITE 208', 'ECO 206', 'TDS 207', 'ECOTT 205'] },
         { id: 'vmantovani', name: 'Dott.ssa Valentina Mantovani', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] },
         { id: 'mmazzucca', name: 'Dott. Mattia Mazzucca', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO 206', 'ECO INT', 'PS'] },
-        { id: 'spizzocri', name: 'Dott. Samuele Pizzocri', role: 'user', specialty: 'Emodinamista', password: null, capabilities: ['SALA Senior', 'SALA Junior', 'REPARTO', 'PS'] },
         { id: 'apopolorubbio', name: 'Dott. Antonio Popolo Rubbio', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'UTIC', 'ECO 206', 'VISITE 208'] },
         { id: 'msquillace', name: 'Dott. Mattia Squillace', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'RAP', 'VISITE 208', 'PS'] },
         { id: 'estefanini', name: 'Dott.ssa Elisa Stefanini', role: 'user', specialty: 'Ecocardiografista', password: null, capabilities: ['ECO 206', 'ECO spec 204', 'ECOTT 205', 'ECO INT', 'VISITE 208'] },
