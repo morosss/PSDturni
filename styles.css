@@ -861,17 +861,19 @@ body {
     background: var(--surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
+    width: 100%;
 }
 
 .shift-calendar-header {
     display: grid;
-    grid-template-columns: 80px repeat(18, minmax(70px, 1fr));
+    grid-template-columns: 80px repeat(18, 80px);
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
     color: white;
     position: sticky;
     top: 0;
     z-index: 20;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    min-width: fit-content;
 }
 
 .shift-date-column,
@@ -894,9 +896,10 @@ body {
 
 .shift-calendar-row {
     display: grid;
-    grid-template-columns: 80px repeat(18, minmax(70px, 1fr));
+    grid-template-columns: 80px repeat(18, 80px);
     border-bottom: 1px solid var(--divider);
     transition: background-color var(--transition-fast);
+    min-width: fit-content;
 }
 
 .shift-calendar-row:hover {

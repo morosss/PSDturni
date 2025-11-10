@@ -239,7 +239,22 @@ function initializeDefaultData() {
         saveToStorage('users', defaultUsers);
         AppState.users = defaultUsers;
     } else {
-        AppState.users = existingUsers;
+        // Migrate existing users: add code field if missing
+        AppState.users = existingUsers.map(user => {
+            if (!user.code) {
+                // Find matching default user by ID
+                const defaultUser = defaultUsers.find(du => du.id === user.id);
+                if (defaultUser && defaultUser.code) {
+                    user.code = defaultUser.code;
+                } else {
+                    // Generate code from name if not found
+                    const nameParts = user.name.replace(/Dott\.(ssa)?/g, '').trim().split(' ');
+                    user.code = nameParts[nameParts.length - 1].toUpperCase().substring(0, 6);
+                }
+            }
+            return user;
+        });
+        saveToStorage('users', AppState.users);
     }
 
     // Initialize shifts structure
@@ -501,13 +516,19 @@ function renderCalendar() {
             const slots = TIME_SLOTS[shiftType];
             slots.forEach(slot => {
                 const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                const assignedUser = AppState.shifts[shiftKey] || '';
+                const assignedUserId = AppState.shifts[shiftKey] || '';
                 const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
+
+                let displayValue = '';
+                if (assignedUserId) {
+                    const user = AppState.users.find(u => u.id === assignedUserId);
+                    displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
+                }
 
                 if (isClosed) {
                     html += `<td class="shift-cell closed"></td>`;
                 } else {
-                    html += `<td class="shift-cell"><input type="text" value="${assignedUser}" readonly></td>`;
+                    html += `<td class="shift-cell"><input type="text" value="${displayValue}" readonly></td>`;
                 }
             });
         });
