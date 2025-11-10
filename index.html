@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSDturni - Sistema Gestione Turni Ospedalieri</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="hospital-logo">
+                    <span class="material-icons" style="font-size: 64px; color: #c62828;">local_hospital</span>
+                </div>
+                <h1>PSDturni</h1>
+                <p class="subtitle">Sistema Gestione Turni</p>
+
+                <form id="loginForm" class="form">
+                    <div class="input-group">
+                        <label for="userId">ID Utente</label>
+                        <input type="text" id="userId" placeholder="es. mrossi" required autocomplete="username">
+                        <span class="helper-text">Formato: inizialenome+cognome</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-icons">login</span>
+                        Accedi
+                    </button>
+
+                    <div id="loginError" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Login - Change Password -->
+    <div id="firstLoginScreen" class="screen">
+        <div class="login-container">
+            <div class="login-card">
+                <h2>Primo Accesso</h2>
+                <p>Imposta la tua password personale</p>
+
+                <form id="firstLoginForm" class="form">
+                    <div class="input-group">
+                        <label for="newPassword">Nuova Password</label>
+                        <input type="password" id="newPassword" required minlength="6">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirmPassword">Conferma Password</label>
+                        <input type="password" id="confirmPassword" required minlength="6">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Imposta Password
+                    </button>
+
+                    <div id="firstLoginError" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardScreen" class="screen">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <span class="material-icons logo-icon">local_hospital</span>
+                    <h1>PSDturni</h1>
+                </div>
+                <div class="header-right">
+                    <span id="currentUserName" class="user-name"></span>
+                    <button id="changePasswordBtn" class="btn btn-icon" title="Cambia Password">
+                        <span class="material-icons">lock</span>
+                    </button>
+                    <button id="logoutBtn" class="btn btn-icon" title="Logout">
+                        <span class="material-icons">logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="navigation" id="mainNav">
+            <button class="nav-btn active" data-view="calendar">
+                <span class="material-icons">calendar_today</span>
+                <span>Calendario</span>
+            </button>
+            <button class="nav-btn" data-view="availability" id="availabilityNavBtn">
+                <span class="material-icons">event_busy</span>
+                <span>Indisponibilità</span>
+            </button>
+            <button class="nav-btn admin-only" data-view="users" style="display: none;">
+                <span class="material-icons">people</span>
+                <span>Utenti</span>
+            </button>
+            <button class="nav-btn admin-only" data-view="shifts" style="display: none;">
+                <span class="material-icons">schedule</span>
+                <span>Gestione Turni</span>
+            </button>
+            <button class="nav-btn admin-only" data-view="autoassign" style="display: none;">
+                <span class="material-icons">auto_fix_high</span>
+                <span>Assegnazione Automatica</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Calendar View -->
+            <div id="calendarView" class="view active">
+                <div class="view-header">
+                    <h2>Calendario Turni</h2>
+                    <div class="view-actions">
+                        <button id="exportPdfBtn" class="btn btn-secondary admin-only" style="display: none;">
+                            <span class="material-icons">picture_as_pdf</span>
+                            Esporta PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calendar-controls">
+                    <button id="prevMonth" class="btn btn-icon">
+                        <span class="material-icons">chevron_left</span>
+                    </button>
+                    <h3 id="currentMonth"></h3>
+                    <button id="nextMonth" class="btn btn-icon">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                </div>
+
+                <div id="calendarGrid" class="calendar-grid"></div>
+            </div>
+
+            <!-- Availability View -->
+            <div id="availabilityView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Indisponibilità</h2>
+                    <div id="deadlineWarning" class="warning-box"></div>
+                </div>
+
+                <div class="availability-controls">
+                    <div class="month-selector">
+                        <label>Seleziona Mese:</label>
+                        <select id="availabilityMonth"></select>
+                    </div>
+                </div>
+
+                <div id="availabilityCalendar" class="availability-calendar"></div>
+
+                <div class="form-actions">
+                    <button id="saveAvailability" class="btn btn-primary">
+                        <span class="material-icons">save</span>
+                        Salva Indisponibilità
+                    </button>
+                </div>
+            </div>
+
+            <!-- Users Management View (Admin Only) -->
+            <div id="usersView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Utenti</h2>
+                    <button id="addUserBtn" class="btn btn-primary">
+                        <span class="material-icons">person_add</span>
+                        Aggiungi Utente
+                    </button>
+                </div>
+
+                <div class="users-grid" id="usersGrid"></div>
+            </div>
+
+            <!-- Shifts Management View (Admin Only) -->
+            <div id="shiftsView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Turni</h2>
+                    <div class="view-actions">
+                        <select id="shiftMonth" class="select-input"></select>
+                    </div>
+                </div>
+
+                <div id="shiftsGrid" class="shifts-grid"></div>
+            </div>
+
+            <!-- Auto Assignment View (Admin Only) -->
+            <div id="autoassignView" class="view">
+                <div class="view-header">
+                    <h2>Assegnazione Automatica Turni</h2>
+                </div>
+
+                <div class="auto-assign-controls">
+                    <div class="input-group">
+                        <label>Mese:</label>
+                        <select id="autoAssignMonth"></select>
+                    </div>
+
+                    <button id="runAutoAssign" class="btn btn-primary">
+                        <span class="material-icons">auto_fix_high</span>
+                        Genera Turni Automatici
+                    </button>
+                </div>
+
+                <div id="autoAssignResults" class="auto-assign-results"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cambia Password</h3>
+                <button class="modal-close" data-modal="changePasswordModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <form id="changePasswordForm" class="form">
+                <div class="input-group">
+                    <label for="currentPassword">Password Attuale</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="input-group">
+                    <label for="newPasswordChange">Nuova Password</label>
+                    <input type="password" id="newPasswordChange" required minlength="6">
+                </div>
+                <div class="input-group">
+                    <label for="confirmPasswordChange">Conferma Nuova Password</label>
+                    <input type="password" id="confirmPasswordChange" required minlength="6">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="changePasswordModal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Cambia Password</button>
+                </div>
+                <div id="changePasswordError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Aggiungi Utente</h3>
+                <button class="modal-close" data-modal="userModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <form id="userForm" class="form">
+                <div class="input-group">
+                    <label for="userName">Nome Completo</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="input-group">
+                    <label for="userIdInput">ID Utente</label>
+                    <input type="text" id="userIdInput" required pattern="[a-z]+">
+                    <span class="helper-text">Formato: inizialenome+cognome (es. mrossi)</span>
+                </div>
+                <div class="input-group">
+                    <label for="userRole">Ruolo</label>
+                    <select id="userRole" required>
+                        <option value="user">Utente</option>
+                        <option value="admin">Amministratore</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="userSpecialty">Specialità</label>
+                    <input type="text" id="userSpecialty" placeholder="es. Emodinamista, Ecocardiografista">
+                </div>
+                <div class="input-group">
+                    <label>Turni Abilitati</label>
+                    <div id="shiftCapabilities" class="checkbox-grid"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="userModal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+                <div id="userFormError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PDF Export Options Modal -->
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Esporta PDF</h3>
+                <button class="modal-close" data-modal="pdfModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <form id="pdfForm" class="form">
+                <div class="input-group">
+                    <label for="pdfMonth">Mese</label>
+                    <select id="pdfMonth"></select>
+                </div>
+                <div class="input-group">
+                    <label>Tipo</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pdfType" value="draft" checked>
+                            <span>Bozza</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pdfType" value="final">
+                            <span>Definitivo</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="pdfModal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-icons">download</span>
+                        Scarica PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
