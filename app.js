@@ -956,6 +956,7 @@ function renderShiftsGrid() {
 
                     const hasError = assignedUser && (!canWork || isUnavailable);
                     const colorClass = assignedUser ? getColorForUser(assignedUserId) : '';
+                    const userCode = assignedUser ? (assignedUser.code || assignedUser.id.toUpperCase()) : '';
 
                     const isAdmin = AppState.currentUser.role === 'admin';
                     html += `
@@ -964,8 +965,8 @@ function renderShiftsGrid() {
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
                                 <div class="assigned-person">
-                                    <div class="person-avatar">${assignedUser.code}</div>
-                                    <div class="person-name">${assignedUser.code}</div>
+                                    <div class="person-avatar">${userCode}</div>
+                                    <div class="person-name">${userCode}</div>
                                     ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
                                 </div>
                             ` : `
@@ -1060,12 +1061,13 @@ function openShiftModal(shiftKey, shiftType, dateKey, slot) {
         const isSelected = assignedUserId === user.id;
         const colorClass = getColorForUser(user.id);
 
+        const userCode = user.code || user.id.toUpperCase();
         html += `
             <div class="user-select-card ${!canWork || isUnavailable ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${colorClass}"
                  onclick="selectUserForShift('${shiftKey}', '${user.id}')">
-                <div class="user-avatar-large">${user.code}</div>
+                <div class="user-avatar-large">${userCode}</div>
                 <div class="user-select-info">
-                    <div class="user-select-name">${user.code}</div>
+                    <div class="user-select-name">${userCode}</div>
                     <div class="user-select-specialty">${user.specialty}</div>
                 </div>
                 ${!canWork ? '<span class="badge badge-error">Non abilitato</span>' : ''}
@@ -1473,7 +1475,7 @@ function generatePDF(year, month, type) {
                     const userId = AppState.shifts[shiftKey];
                     if (!userId) return '-';
                     const user = AppState.users.find(u => u.id === userId);
-                    return user ? user.name.split(' ')[0] : '-';
+                    return user ? (user.code || user.id.toUpperCase()) : '-';
                 }).join('\n');
                 row.push(assignments || '-');
             }
