@@ -91,7 +91,8 @@ const AppState = {
     users: [],
     shifts: {},
     availability: {},
-    ambulatoriStatus: {}
+    ambulatoriStatus: {},
+    approvalStatus: {} // Format: "YYYY-MM": { status: "draft"|"approved", approvedBy: "user", approvedAt: "ISO date" }
 };
 
 // ===========================
@@ -282,6 +283,15 @@ function initializeDefaultData() {
         saveToStorage('ambulatoriStatus', AppState.ambulatoriStatus);
     } else {
         AppState.ambulatoriStatus = existingAmbulatori;
+    }
+
+    // Initialize approval status
+    const existingApprovalStatus = loadFromStorage('approvalStatus');
+    if (!existingApprovalStatus) {
+        AppState.approvalStatus = {};
+        saveToStorage('approvalStatus', AppState.approvalStatus);
+    } else {
+        AppState.approvalStatus = existingApprovalStatus;
     }
 }
 
@@ -493,6 +503,9 @@ function renderCalendar() {
     const container = document.getElementById('calendarGrid');
     const daysInMonth = getDaysInMonth(AppState.currentYear, AppState.currentMonth);
 
+    // Check if user should see shifts for this month
+    const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
+
     let html = '<table class="calendar-table"><thead><tr>';
     html += '<th>Data</th>';
 
@@ -524,7 +537,8 @@ function renderCalendar() {
                 const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
 
                 let displayValue = '';
-                if (assignedUserId) {
+                // Only show assignments if user has permission
+                if (canSeeShifts && assignedUserId) {
                     const user = AppState.users.find(u => u.id === assignedUserId);
                     displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
                 }
@@ -542,6 +556,9 @@ function renderCalendar() {
 
     html += '</tbody></table>';
     container.innerHTML = html;
+
+    // Update approval UI
+    updateApprovalUI();
 }
 
 function changeMonth(direction) {
@@ -835,6 +852,7 @@ function editUser(userId) {
     document.getElementById('userIdInput').disabled = true;
     document.getElementById('userRole').value = user.role;
     document.getElementById('userSpecialty').value = user.specialty || '';
+    document.getElementById('userEmail').value = user.email || '';
 
     // Populate and check capabilities
     const container = document.getElementById('shiftCapabilities');
@@ -867,6 +885,7 @@ async function handleUserFormSubmit(e) {
     const userId = sanitizeInput(document.getElementById('userIdInput').value.toLowerCase().trim());
     const role = document.getElementById('userRole').value;
     const specialty = sanitizeInput(document.getElementById('userSpecialty').value.trim());
+    const email = sanitizeInput(document.getElementById('userEmail').value.trim());
     const capabilities = Array.from(document.querySelectorAll('input[name="capability"]:checked'))
         .map(cb => cb.value);
 
@@ -905,6 +924,7 @@ async function handleUserFormSubmit(e) {
             name: name,
             role: role,
             specialty: specialty,
+            email: email || null,
             password: null,
             capabilities: capabilities,
             shiftLimits: shiftLimits
@@ -919,6 +939,7 @@ async function handleUserFormSubmit(e) {
         AppState.users[userIndex].name = name;
         AppState.users[userIndex].role = role;
         AppState.users[userIndex].specialty = specialty;
+        AppState.users[userIndex].email = email || null;
         AppState.users[userIndex].capabilities = capabilities;
         AppState.users[userIndex].shiftLimits = shiftLimits;
 
@@ -2187,6 +2208,61 @@ function updateVersionMonthSelectors() {
 }
 
 // ===========================
+// Approval System
+// ===========================
+function getMonthApprovalStatus(year, month) {
+    const key = `${year}-${month}`;
+    return AppState.approvalStatus[key] || { status: 'draft' };
+}
+
+function toggleMonthApproval() {
+    const key = `${AppState.currentYear}-${AppState.currentMonth}`;
+    const current = AppState.approvalStatus[key] || { status: 'draft' };
+
+    const newStatus = current.status === 'draft' ? 'approved' : 'draft';
+
+    AppState.approvalStatus[key] = {
+        status: newStatus,
+        approvedBy: AppState.currentUser.name,
+        approvedAt: new Date().toISOString()
+    };
+
+    saveToStorage('approvalStatus', AppState.approvalStatus);
+
+    showToast(
+        newStatus === 'approved' ? 'Turni approvati come definitivi' : 'Turni rimessi in bozza',
+        'success'
+    );
+
+    updateApprovalUI();
+}
+
+function updateApprovalUI() {
+    const approval = getMonthApprovalStatus(AppState.currentYear, AppState.currentMonth);
+    const badge = document.getElementById('approvalBadge');
+    const btn = document.getElementById('toggleApprovalBtn');
+    const btnText = document.getElementById('approvalBtnText');
+
+    // Update badge
+    badge.textContent = approval.status === 'approved' ? 'DEFINITIVO' : 'BOZZA';
+    badge.className = `approval-badge ${approval.status}`;
+
+    // Update button text
+    if (btn && btnText) {
+        btnText.textContent = approval.status === 'approved' ? 'Rimetti in Bozza' : 'Segna come Definitivo';
+    }
+}
+
+function shouldShowShiftsForUser(year, month) {
+    // Admins always see everything
+    if (AppState.currentUser.role === 'admin') return true;
+
+    // Regular users only see approved months
+    const approval = getMonthApprovalStatus(year, month);
+    return approval.status === 'approved';
+}
+
+// ===========================
 // Modal Management
 // ===========================
 function openModal(modalId) {
@@ -2240,6 +2316,9 @@ function initializeEventListeners() {
     document.getElementById('saveVersionBtn').addEventListener('click', () => openModal('saveVersionModal'));
     document.getElementById('saveVersionForm').addEventListener('submit', handleSaveVersion);
     document.getElementById('versionMonth').addEventListener('change', renderVersionsGrid);
+
+    // Approval System
+    document.getElementById('toggleApprovalBtn').addEventListener('click', toggleMonthApproval);
 
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {

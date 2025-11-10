@@ -153,9 +153,16 @@
                     <button id="prevMonth" class="btn btn-icon">
                         <span class="material-icons">chevron_left</span>
                     </button>
-                    <h3 id="currentMonth"></h3>
+                    <div class="month-header-container">
+                        <h3 id="currentMonth"></h3>
+                        <div id="approvalBadge" class="approval-badge"></div>
+                    </div>
                     <button id="nextMonth" class="btn btn-icon">
                         <span class="material-icons">chevron_right</span>
+                    </button>
+                    <button id="toggleApprovalBtn" class="btn btn-secondary admin-only" style="display: none;">
+                        <span class="material-icons">check_circle</span>
+                        <span id="approvalBtnText">Segna come Definitivo</span>
                     </button>
                 </div>
 
@@ -386,6 +393,10 @@
                 <div class="input-group">
                     <label for="userSpecialty">Specialità</label>
                     <input type="text" id="userSpecialty" placeholder="es. Emodinamista, Ecocardiografista">
+                </div>
+                <div class="input-group">
+                    <label for="userEmail">Email (opzionale)</label>
+                    <input type="email" id="userEmail" placeholder="es. nome.cognome@ospedale.it">
                 </div>
                 <div class="input-group">
                     <label>Turni Abilitati</label>

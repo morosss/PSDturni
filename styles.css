@@ -2300,3 +2300,54 @@ body {
     font-size: 13px;
     padding: 6px 12px;
 }
+
+/* Approval System */
+.month-header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.approval-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.approval-badge.draft {
+    background: #FFF3CD;
+    color: #856404;
+}
+
+.approval-badge.approved {
+    background: #D4EDDA;
+    color: #155724;
+}
+
+
+/* Approval System */
+.month-header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.approval-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.approval-badge.draft {
+    background: #FFF3CD;
+    color: #856404;
+}
+
+.approval-badge.approved {
+    background: #D4EDDA;
+    color: #155724;
+}
