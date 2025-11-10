@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSDturni - Sistema Gestione Turni Ospedalieri</title>
+    <link rel="icon" type="image/jpeg" href="icon.jpg">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -14,7 +15,7 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="hospital-logo">
-                    <span class="material-icons" style="font-size: 64px; color: #c62828;">local_hospital</span>
+                    <img src="logo.jpg" alt="Hospital Logo" style="max-width: 200px; height: auto; border-radius: 8px;">
                 </div>
                 <h1>PSDturni</h1>
                 <p class="subtitle">Sistema Gestione Turni</p>
@@ -29,6 +30,13 @@
                     <div class="input-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Ricorda le mie credenziali</span>
+                        </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -76,7 +84,7 @@
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
-                    <span class="material-icons logo-icon">local_hospital</span>
+                    <img src="icon.jpg" class="logo-icon" alt="Hospital Logo" style="width: 32px; height: 32px; border-radius: 4px;">
                     <h1>PSDturni</h1>
                 </div>
                 <div class="header-right">
@@ -113,6 +121,14 @@
                 <span class="material-icons">auto_fix_high</span>
                 <span>Assegnazione Automatica</span>
             </button>
+            <button class="nav-btn admin-only" data-view="availability-overview" style="display: none;">
+                <span class="material-icons">grid_on</span>
+                <span>Panoramica Indisponibilità</span>
+            </button>
+            <button class="nav-btn admin-only" data-view="versions" style="display: none;">
+                <span class="material-icons">history</span>
+                <span>Versioni</span>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -126,6 +142,10 @@
                             <span class="material-icons">picture_as_pdf</span>
                             Esporta PDF
                         </button>
+                        <button id="exportExcelBtn" class="btn btn-secondary admin-only" style="display: none;">
+                            <span class="material-icons">table_chart</span>
+                            Esporta Excel
+                        </button>
                     </div>
                 </div>
 
@@ -133,9 +153,16 @@
                     <button id="prevMonth" class="btn btn-icon">
                         <span class="material-icons">chevron_left</span>
                     </button>
-                    <h3 id="currentMonth"></h3>
+                    <div class="month-header-container">
+                        <h3 id="currentMonth"></h3>
+                        <div id="approvalBadge" class="approval-badge"></div>
+                    </div>
                     <button id="nextMonth" class="btn btn-icon">
                         <span class="material-icons">chevron_right</span>
+                    </button>
+                    <button id="toggleApprovalBtn" class="btn btn-secondary admin-only" style="display: none;">
+                        <span class="material-icons">check_circle</span>
+                        <span id="approvalBtnText">Segna come Definitivo</span>
                     </button>
                 </div>
 
@@ -203,6 +230,42 @@
                         <select id="autoAssignMonth"></select>
                     </div>
 
+                    <div class="input-group">
+                        <label>Modalità Generazione:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="assignMode" value="all" checked>
+                                <span>Tutti i turni</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="assignMode" value="remaining">
+                                <span>Solo slot vuoti</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Tipologia Turni:</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignSALA" checked>
+                                <span>SALA (Senior + Junior)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignREPARTO" checked>
+                                <span>REPARTO</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignECO" checked>
+                                <span>ECO (tutte)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignOthers" checked>
+                                <span>Altri (UTIC, PS, ecc.)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <button id="runAutoAssign" class="btn btn-primary">
                         <span class="material-icons">auto_fix_high</span>
                         Genera Turni Automatici
@@ -210,6 +273,61 @@
                 </div>
 
                 <div id="autoAssignResults" class="auto-assign-results"></div>
+            </div>
+
+            <!-- Availability Overview View (Admin Only) -->
+            <div id="availability-overviewView" class="view">
+                <div class="view-header">
+                    <h2>Panoramica Indisponibilità</h2>
+                    <div class="view-actions">
+                        <select id="availabilityOverviewMonth" class="select-input"></select>
+                        <button id="exportAvailabilityPdfBtn" class="btn btn-secondary">
+                            <span class="material-icons">picture_as_pdf</span>
+                            Esporta PDF
+                        </button>
+                        <button id="exportAvailabilityExcelBtn" class="btn btn-secondary">
+                            <span class="material-icons">table_chart</span>
+                            Esporta Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="availability-legend">
+                    <div class="legend-item">
+                        <div class="legend-color matt-color"></div>
+                        <span>Mattina</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color pom-color"></div>
+                        <span>Pomeriggio</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color ntt-color"></div>
+                        <span>Notte</span>
+                    </div>
+                </div>
+
+                <div id="availabilityOverviewGrid" class="availability-overview-grid"></div>
+            </div>
+
+            <!-- Versions Management View (Admin Only) -->
+            <div id="versionsView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Versioni Turni</h2>
+                    <button id="saveVersionBtn" class="btn btn-primary">
+                        <span class="material-icons">save</span>
+                        Salva Versione Corrente
+                    </button>
+                </div>
+
+                <div class="version-controls">
+                    <div class="input-group">
+                        <label>Mese:</label>
+                        <select id="versionMonth"></select>
+                    </div>
+                </div>
+
+                <div id="versionsGrid" class="versions-grid"></div>
             </div>
         </main>
     </div>
@@ -277,8 +395,17 @@
                     <input type="text" id="userSpecialty" placeholder="es. Emodinamista, Ecocardiografista">
                 </div>
                 <div class="input-group">
+                    <label for="userEmail">Email (opzionale)</label>
+                    <input type="email" id="userEmail" placeholder="es. nome.cognome@ospedale.it">
+                </div>
+                <div class="input-group">
                     <label>Turni Abilitati</label>
                     <div id="shiftCapabilities" class="checkbox-grid"></div>
+                </div>
+                <div class="input-group">
+                    <label>Limiti Mensili Turni (opzionale)</label>
+                    <span class="helper-text">Imposta il numero minimo e massimo di turni al mese per ogni tipo</span>
+                    <div id="shiftLimits" class="limits-grid"></div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal="userModal">Annulla</button>
@@ -289,11 +416,11 @@
         </div>
     </div>
 
-    <!-- PDF Export Options Modal -->
+    <!-- Export Options Modal -->
     <div id="pdfModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Esporta PDF</h3>
+                <h3 id="exportModalTitle">Esporta</h3>
                 <button class="modal-close" data-modal="pdfModal">
                     <span class="material-icons">close</span>
                 </button>
@@ -318,17 +445,45 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal="pdfModal">Annulla</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="exportSubmitBtn">
                         <span class="material-icons">download</span>
-                        Scarica PDF
+                        <span id="exportSubmitText">Scarica</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Save Version Modal -->
+    <div id="saveVersionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Salva Versione Turni</h3>
+                <button class="modal-close" data-modal="saveVersionModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <form id="saveVersionForm" class="form">
+                <div class="input-group">
+                    <label for="versionName">Nome Versione</label>
+                    <input type="text" id="versionName" required placeholder="es. Versione 1, Bozza Novembre, ecc.">
+                </div>
+                <div class="input-group">
+                    <label for="versionMonthSelect">Mese</label>
+                    <select id="versionMonthSelect" required></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="saveVersionModal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva Versione</button>
+                </div>
+                <div id="saveVersionError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
