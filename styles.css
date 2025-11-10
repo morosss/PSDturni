@@ -1068,6 +1068,69 @@ body {
     transform: none;
 }
 
+/* Excel-style color coding for time slots */
+.shift-slot.slot-type-matt {
+    background: #FFFFFF; /* White for morning shifts */
+}
+
+.shift-slot.slot-type-pom {
+    background: #FFF2CC; /* Light orange for afternoon shifts */
+}
+
+.shift-slot.slot-type-ntt {
+    background: #D9D9D9; /* Light gray for night shifts */
+}
+
+.shift-slot.slot-type-gg {
+    background: #E7E6E6; /* Light gray for all-day shifts */
+}
+
+.shift-slot.slot-type-spec {
+    background: #CCCCFF; /* Light purple for special shifts */
+}
+
+/* Weekend row override - light blue background for all slots */
+.weekend-row .shift-slot {
+    background: #D0DAE6; /* Light blue for weekend shifts */
+}
+
+.weekend-row .shift-slot.slot-type-matt {
+    background: #D0DAE6;
+}
+
+.weekend-row .shift-slot.slot-type-pom {
+    background: #C9D6E3;
+}
+
+.weekend-row .shift-slot.slot-type-ntt {
+    background: #BEC9D6;
+}
+
+.weekend-row .shift-slot.slot-type-gg {
+    background: #C5D3E0;
+}
+
+/* Empty slots maintain slightly lighter color */
+.shift-slot.empty.slot-type-pom {
+    background: #FFF8E1;
+}
+
+.shift-slot.empty.slot-type-ntt {
+    background: #E8E8E8;
+}
+
+.shift-slot.empty.slot-type-gg {
+    background: #F0F0F0;
+}
+
+.shift-slot.empty.slot-type-spec {
+    background: #E6E6FF;
+}
+
+.weekend-row .shift-slot.empty {
+    background: #E3EBF3;
+}
+
 .slot-time {
     font-size: 8px;
     font-weight: 700;
@@ -1947,4 +2010,174 @@ body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ===========================
+   Availability Overview
+   =========================== */
+
+.availability-legend {
+    display: flex;
+    gap: 24px;
+    padding: 16px;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--divider);
+}
+
+.legend-color.matt-color {
+    background: #FF6B6B;
+}
+
+.legend-color.pom-color {
+    background: #FFA500;
+}
+
+.legend-color.ntt-color {
+    background: #4A90E2;
+}
+
+.overview-matrix {
+    overflow-x: auto;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.overview-header-row {
+    display: grid;
+    grid-template-columns: 200px repeat(auto-fit, minmax(35px, 1fr));
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 2px solid var(--divider);
+}
+
+.overview-user-header {
+    padding: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    border-right: 2px solid var(--divider);
+    position: sticky;
+    left: 0;
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+    z-index: 11;
+}
+
+.overview-day-header {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.overview-day-header.weekend {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.day-num {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.day-name {
+    font-size: 9px;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+
+.overview-user-row {
+    display: grid;
+    grid-template-columns: 200px repeat(auto-fit, minmax(35px, 1fr));
+    border-bottom: 1px solid var(--divider);
+    transition: background-color var(--transition-fast);
+}
+
+.overview-user-row:hover {
+    background-color: rgba(198, 40, 40, 0.02);
+}
+
+.overview-user-name {
+    padding: 12px;
+    border-right: 2px solid var(--divider);
+    position: sticky;
+    left: 0;
+    background: var(--background);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.overview-user-row:hover .overview-user-name {
+    background-color: rgba(198, 40, 40, 0.02);
+}
+
+.user-code {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--primary-color);
+}
+
+.user-fullname {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.overview-day-cell {
+    padding: 4px;
+    border-right: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+}
+
+.overview-day-cell.all-day-unavailable {
+    background: rgba(211, 47, 47, 0.1);
+}
+
+.slot-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+}
+
+.slot-indicator {
+    height: 8px;
+    border-radius: 2px;
+    width: 100%;
+}
+
+.slot-indicator.matt {
+    background: #FF6B6B;
+}
+
+.slot-indicator.pom {
+    background: #FFA500;
+}
+
+.slot-indicator.ntt {
+    background: #4A90E2;
 }

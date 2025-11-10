@@ -444,6 +444,9 @@ function switchView(viewName) {
         case 'autoassign':
             renderAutoAssign();
             break;
+        case 'availability-overview':
+            renderAvailabilityOverview();
+            break;
     }
 }
 
@@ -959,8 +962,9 @@ function renderShiftsGrid() {
                     const userCode = assignedUser ? (assignedUser.code || assignedUser.id.toUpperCase()) : '';
 
                     const isAdmin = AppState.currentUser.role === 'admin';
+                    const slotTypeClass = `slot-type-${slot.toLowerCase()}`;
                     html += `
-                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${!isAdmin ? 'read-only' : ''}"
+                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${slotTypeClass} ${!isAdmin ? 'read-only' : ''}"
                              ${isAdmin ? `onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')"` : ''}>
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
@@ -1606,6 +1610,9 @@ function initializeEventListeners() {
     // Auto Assignment
     document.getElementById('runAutoAssign').addEventListener('click', runAutoAssignment);
 
+    // Availability Overview
+    document.getElementById('exportAvailabilityPdfBtn').addEventListener('click', exportAvailabilityPdf);
+
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1623,6 +1630,144 @@ function initializeEventListeners() {
             }
         });
     });
+}
+
+// ===========================
+// Availability Overview (Admin)
+// ===========================
+function renderAvailabilityOverview() {
+    updateAvailabilityOverviewMonthSelector();
+    renderAvailabilityOverviewGrid();
+}
+
+function updateAvailabilityOverviewMonthSelector() {
+    const select = document.getElementById('availabilityOverviewMonth');
+    const now = new Date();
+    let html = '';
+
+    for (let i = 0; i <= 3; i++) {
+        const month = (now.getMonth() + i) % 12;
+        const year = now.getFullYear() + Math.floor((now.getMonth() + i) / 12);
+        const selected = month === AppState.currentMonth && year === AppState.currentYear ? 'selected' : '';
+        html += `<option value="${year}-${month}" ${selected}>${ITALIAN_MONTHS[month]} ${year}</option>`;
+    }
+
+    select.innerHTML = html;
+    select.addEventListener('change', renderAvailabilityOverviewGrid);
+}
+
+function renderAvailabilityOverviewGrid() {
+    const select = document.getElementById('availabilityOverviewMonth');
+    const [year, month] = select.value.split('-').map(Number);
+    const container = document.getElementById('availabilityOverviewGrid');
+    const daysInMonth = getDaysInMonth(year, month);
+
+    // Create matrix: rows = users, columns = days
+    let html = '<div class="overview-matrix">';
+
+    // Header row with days
+    html += '<div class="overview-header-row">';
+    html += '<div class="overview-user-header">Medico</div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dayName = DAY_NAMES[date.getDay()].substring(0, 3);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        html += `<div class="overview-day-header ${isWeekend ? 'weekend' : ''}">
+            <div class="day-num">${day}</div>
+            <div class="day-name">${dayName}</div>
+        </div>`;
+    }
+    html += '</div>';
+
+    // User rows
+    AppState.users.forEach(user => {
+        const userAvailabilityKey = `${user.id}_${year}_${month}`;
+        const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+
+        html += '<div class="overview-user-row">';
+        html += `<div class="overview-user-name">
+            <div class="user-code">${user.code || user.id.toUpperCase()}</div>
+            <div class="user-fullname">${user.name}</div>
+        </div>`;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDate(year, month, day);
+            const daySlots = unavailableSlots[dateKey] || {};
+
+            const hasMatt = daySlots.MATT === true;
+            const hasPom = daySlots.POM === true;
+            const hasNtt = daySlots.NTT === true;
+
+            const unavailableCount = (hasMatt ? 1 : 0) + (hasPom ? 1 : 0) + (hasNtt ? 1 : 0);
+            const cellClass = unavailableCount === 3 ? 'all-day-unavailable' : '';
+
+            html += `<div class="overview-day-cell ${cellClass}">`;
+            if (unavailableCount > 0) {
+                html += '<div class="slot-indicators">';
+                if (hasMatt) html += '<div class="slot-indicator matt" title="Mattina"></div>';
+                if (hasPom) html += '<div class="slot-indicator pom" title="Pomeriggio"></div>';
+                if (hasNtt) html += '<div class="slot-indicator ntt" title="Notte"></div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function exportAvailabilityPdf() {
+    const select = document.getElementById('availabilityOverviewMonth');
+    const [year, month] = select.value.split('-').map(Number);
+    const daysInMonth = getDaysInMonth(year, month);
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('landscape');
+
+    doc.setFontSize(16);
+    doc.text(`Panoramica Indisponibilità - ${ITALIAN_MONTHS[month]} ${year}`, 14, 15);
+
+    // Create table data
+    const headers = ['Medico'];
+    for (let day = 1; day <= daysInMonth; day++) {
+        headers.push(day.toString());
+    }
+
+    const rows = AppState.users.map(user => {
+        const userAvailabilityKey = `${user.id}_${year}_${month}`;
+        const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+
+        const row = [user.code || user.id.toUpperCase()];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDate(year, month, day);
+            const daySlots = unavailableSlots[dateKey] || {};
+
+            const slots = [];
+            if (daySlots.MATT) slots.push('M');
+            if (daySlots.POM) slots.push('P');
+            if (daySlots.NTT) slots.push('N');
+
+            row.push(slots.join(','));
+        }
+
+        return row;
+    });
+
+    doc.autoTable({
+        head: [headers],
+        body: rows,
+        startY: 20,
+        styles: { fontSize: 7, cellPadding: 1 },
+        headStyles: { fillColor: [198, 40, 40] },
+        margin: { left: 14, right: 14 }
+    });
+
+    doc.save(`indisponibilita_${ITALIAN_MONTHS[month]}_${year}.pdf`);
+    showToast('PDF esportato con successo', 'success');
 }
 
 // ===========================

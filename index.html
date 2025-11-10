@@ -121,6 +121,10 @@
                 <span class="material-icons">auto_fix_high</span>
                 <span>Assegnazione Automatica</span>
             </button>
+            <button class="nav-btn admin-only" data-view="availability-overview" style="display: none;">
+                <span class="material-icons">grid_on</span>
+                <span>Panoramica Indisponibilità</span>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -218,6 +222,41 @@
                 </div>
 
                 <div id="autoAssignResults" class="auto-assign-results"></div>
+            </div>
+
+            <!-- Availability Overview View (Admin Only) -->
+            <div id="availability-overviewView" class="view">
+                <div class="view-header">
+                    <h2>Panoramica Indisponibilità</h2>
+                    <div class="view-actions">
+                        <select id="availabilityOverviewMonth" class="select-input"></select>
+                        <button id="exportAvailabilityPdfBtn" class="btn btn-secondary">
+                            <span class="material-icons">picture_as_pdf</span>
+                            Esporta PDF
+                        </button>
+                        <button id="exportAvailabilityExcelBtn" class="btn btn-secondary">
+                            <span class="material-icons">table_chart</span>
+                            Esporta Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="availability-legend">
+                    <div class="legend-item">
+                        <div class="legend-color matt-color"></div>
+                        <span>Mattina</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color pom-color"></div>
+                        <span>Pomeriggio</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color ntt-color"></div>
+                        <span>Notte</span>
+                    </div>
+                </div>
+
+                <div id="availabilityOverviewGrid" class="availability-overview-grid"></div>
             </div>
         </main>
     </div>
