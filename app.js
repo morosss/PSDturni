@@ -156,7 +156,12 @@ function initializeDefaultData() {
         { id: 'mtusa', name: 'Dott. Maurizio Tusa', role: 'user', specialty: 'Ricercatore', password: null, capabilities: ['Ricerca', 'ECO spec 204', 'ECO INT'] },
         { id: 'avella', name: 'Dott. Alessandro Vella', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'ECO INT', 'PS'] },
         { id: 'mvicario', name: 'Dott.ssa Maria Lucia Vicario', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'TDS 207', 'ECO 206', 'PS'] },
-        { id: 'jzannone', name: 'Dott.ssa Jessica Zannone', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] }
+        { id: 'jzannoni', name: 'Dott.ssa Jessica Zannoni', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'VISITE 208'] },
+        { id: 'ecozza', name: 'Dott.ssa Elena Cozza', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'ECO 206', 'ECO INT', 'TDS 207', 'VISITE 208'] },
+        { id: 'mmorosato', name: 'Dott. Michele Morosato', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'RAP'] },
+        { id: 'gcattaneo', name: 'Dott.ssa Greta Cattaneo', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'PS', 'ECO 206', 'VISITE 208'] },
+        { id: 'tsimone', name: 'Dott. Tommaso Simone', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'VIS 201', 'VISITE 208', 'ECO 206'] },
+        { id: 'rdelmaso', name: 'Dott. Raffaele Del Maso', role: 'user', specialty: 'Cardiologo', password: null, capabilities: ['REPARTO', 'UTIC', 'PS', 'ECO 206', 'ECO INT'] }
     ];
 
     const existingUsers = loadFromStorage('users');
