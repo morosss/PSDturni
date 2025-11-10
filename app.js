@@ -289,7 +289,38 @@ function initializeDefaultData() {
         AppState.availability = {};
         saveToStorage('availability', AppState.availability);
     } else {
-        AppState.availability = existingAvailability;
+        // Migrate old slot names (mattina/pomeriggio/notte) to new format (MATT/POM/NTT)
+        const migratedAvailability = {};
+        Object.keys(existingAvailability).forEach(userKey => {
+            const userData = existingAvailability[userKey];
+            const migratedUserData = {};
+
+            Object.keys(userData).forEach(dateKey => {
+                const daySlots = userData[dateKey];
+                const migratedDaySlots = {};
+
+                // Convert old format to new format
+                if (daySlots.mattina) migratedDaySlots.MATT = true;
+                if (daySlots.pomeriggio) migratedDaySlots.POM = true;
+                if (daySlots.notte) migratedDaySlots.NTT = true;
+
+                // Keep new format as-is
+                if (daySlots.MATT) migratedDaySlots.MATT = true;
+                if (daySlots.POM) migratedDaySlots.POM = true;
+                if (daySlots.NTT) migratedDaySlots.NTT = true;
+
+                if (Object.keys(migratedDaySlots).length > 0) {
+                    migratedUserData[dateKey] = migratedDaySlots;
+                }
+            });
+
+            if (Object.keys(migratedUserData).length > 0) {
+                migratedAvailability[userKey] = migratedUserData;
+            }
+        });
+
+        AppState.availability = migratedAvailability;
+        saveToStorage('availability', AppState.availability);
     }
 
     // Initialize ambulatori status
