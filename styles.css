@@ -2352,3 +2352,57 @@ body {
     background: #D4EDDA;
     color: #155724;
 }
+
+/* Panoramica Indisponibilità - Triangular Patterns */
+.overview-day-cell {
+    position: relative;
+    background: #ffffff;
+}
+
+/* Mattina - bottom-left triangle */
+.overview-day-cell.unavail-matt::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 100% 100%;
+    border-color: transparent transparent #FFE0B2 transparent;
+    top: 0;
+    left: 0;
+}
+
+/* Pomeriggio - top-right triangle */
+.overview-day-cell.unavail-pom::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 100% 100% 0 0;
+    border-color: #FFF9C4 transparent transparent transparent;
+    top: 0;
+    right: 0;
+}
+
+/* Notte - center stripe */
+.overview-day-cell.unavail-ntt {
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        transparent 35%, 
+        #E0E0E0 35%, 
+        #E0E0E0 65%, 
+        transparent 65%, 
+        transparent 100%
+    );
+}
+
+/* All three - solid background */
+.overview-day-cell.unavail-matt.unavail-pom.unavail-ntt {
+    background: #FFCDD2 !important;
+}
+
+.overview-day-cell.unavail-matt.unavail-pom.unavail-ntt::before,
+.overview-day-cell.unavail-matt.unavail-pom.unavail-ntt::after {
+    display: none;
+}

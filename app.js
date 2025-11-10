@@ -734,6 +734,12 @@ function saveAvailability() {
     saveToStorage('availability', AppState.availability);
 
     showToast('Indisponibilità salvate con successo!', 'success');
+
+    // Refresh availability overview if it's currently active
+    const overviewView = document.getElementById('availability-overviewView');
+    if (overviewView && overviewView.classList.contains('active')) {
+        renderAvailabilityOverviewGrid();
+    }
 }
 
 // ===========================
@@ -2443,18 +2449,15 @@ function renderAvailabilityOverviewGrid() {
             const hasPom = daySlots.POM === true;
             const hasNtt = daySlots.NTT === true;
 
-            const unavailableCount = (hasMatt ? 1 : 0) + (hasPom ? 1 : 0) + (hasNtt ? 1 : 0);
-            const cellClass = unavailableCount === 3 ? 'all-day-unavailable' : '';
+            // Build cell class based on combination of unavailable slots
+            let cellClasses = ['overview-day-cell'];
+            if (hasMatt) cellClasses.push('unavail-matt');
+            if (hasPom) cellClasses.push('unavail-pom');
+            if (hasNtt) cellClasses.push('unavail-ntt');
 
-            html += `<div class="overview-day-cell ${cellClass}">`;
-            if (unavailableCount > 0) {
-                html += '<div class="slot-indicators">';
-                if (hasMatt) html += '<div class="slot-indicator matt" title="Mattina"></div>';
-                if (hasPom) html += '<div class="slot-indicator pom" title="Pomeriggio"></div>';
-                if (hasNtt) html += '<div class="slot-indicator ntt" title="Notte"></div>';
-                html += '</div>';
-            }
-            html += '</div>';
+            html += `<div class="${cellClasses.join(' ')}" title="${
+                [hasMatt && 'Mattina', hasPom && 'Pomeriggio', hasNtt && 'Notte'].filter(Boolean).join(', ') || 'Disponibile'
+            }"></div>`;
         }
 
         html += '</div>';
