@@ -2242,3 +2242,61 @@ body {
     outline: none;
     border-color: var(--primary-color);
 }
+
+/* Version Management */
+.version-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: flex-end;
+}
+
+.versions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.version-card {
+    background: var(--card-background);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+}
+
+.version-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.version-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.version-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.version-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 4px 0;
+}
+
+.version-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.version-actions .btn {
+    flex: 1;
+    font-size: 13px;
+    padding: 6px 12px;
+}

@@ -125,6 +125,10 @@
                 <span class="material-icons">grid_on</span>
                 <span>Panoramica Indisponibilità</span>
             </button>
+            <button class="nav-btn admin-only" data-view="versions" style="display: none;">
+                <span class="material-icons">history</span>
+                <span>Versioni</span>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -219,6 +223,42 @@
                         <select id="autoAssignMonth"></select>
                     </div>
 
+                    <div class="input-group">
+                        <label>Modalità Generazione:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="assignMode" value="all" checked>
+                                <span>Tutti i turni</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="assignMode" value="remaining">
+                                <span>Solo slot vuoti</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Tipologia Turni:</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignSALA" checked>
+                                <span>SALA (Senior + Junior)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignREPARTO" checked>
+                                <span>REPARTO</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignECO" checked>
+                                <span>ECO (tutte)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="assignOthers" checked>
+                                <span>Altri (UTIC, PS, ecc.)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <button id="runAutoAssign" class="btn btn-primary">
                         <span class="material-icons">auto_fix_high</span>
                         Genera Turni Automatici
@@ -261,6 +301,26 @@
                 </div>
 
                 <div id="availabilityOverviewGrid" class="availability-overview-grid"></div>
+            </div>
+
+            <!-- Versions Management View (Admin Only) -->
+            <div id="versionsView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Versioni Turni</h2>
+                    <button id="saveVersionBtn" class="btn btn-primary">
+                        <span class="material-icons">save</span>
+                        Salva Versione Corrente
+                    </button>
+                </div>
+
+                <div class="version-controls">
+                    <div class="input-group">
+                        <label>Mese:</label>
+                        <select id="versionMonth"></select>
+                    </div>
+                </div>
+
+                <div id="versionsGrid" class="versions-grid"></div>
             </div>
         </main>
     </div>
@@ -379,6 +439,33 @@
                         <span id="exportSubmitText">Scarica</span>
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Save Version Modal -->
+    <div id="saveVersionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Salva Versione Turni</h3>
+                <button class="modal-close" data-modal="saveVersionModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <form id="saveVersionForm" class="form">
+                <div class="input-group">
+                    <label for="versionName">Nome Versione</label>
+                    <input type="text" id="versionName" required placeholder="es. Versione 1, Bozza Novembre, ecc.">
+                </div>
+                <div class="input-group">
+                    <label for="versionMonthSelect">Mese</label>
+                    <select id="versionMonthSelect" required></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="saveVersionModal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva Versione</button>
+                </div>
+                <div id="saveVersionError" class="error-message"></div>
             </form>
         </div>
     </div>

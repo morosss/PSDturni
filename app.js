@@ -462,6 +462,10 @@ function switchView(viewName) {
         case 'availability-overview':
             renderAvailabilityOverview();
             break;
+        case 'versions':
+            updateVersionMonthSelectors();
+            renderVersionsGrid();
+            break;
     }
 }
 
@@ -1366,6 +1370,30 @@ function runAutoAssignment() {
     const [year, month] = select.value.split('-').map(Number);
     const resultsContainer = document.getElementById('autoAssignResults');
 
+    // Get generation options
+    const assignMode = document.querySelector('input[name="assignMode"]:checked').value;
+    const fillRemainingOnly = assignMode === 'remaining';
+
+    // Get selected shift types
+    const selectedTypes = [];
+    if (document.getElementById('assignSALA').checked) {
+        selectedTypes.push('SALA Senior', 'SALA Junior');
+    }
+    if (document.getElementById('assignREPARTO').checked) {
+        selectedTypes.push('RAP');
+    }
+    if (document.getElementById('assignECO').checked) {
+        selectedTypes.push('ECO 206', 'ECO 214', 'ECO 230');
+    }
+    if (document.getElementById('assignOthers').checked) {
+        selectedTypes.push('UTIC', 'PS', 'PDD', 'SCC', 'VAD', 'AMB 201', 'AMB 203', 'AMB 207', 'AMB 210', 'AMB 213', 'AMB 228');
+    }
+
+    if (selectedTypes.length === 0) {
+        resultsContainer.innerHTML = '<p class="error-message">Seleziona almeno una tipologia di turni da generare.</p>';
+        return;
+    }
+
     resultsContainer.innerHTML = '<p>Generazione turni in corso...</p>';
 
     // Enhanced auto-assignment algorithm with shift rules
@@ -1375,9 +1403,29 @@ function runAutoAssignment() {
         let errorCount = 0;
         const errors = [];
 
+        // If in "all" mode, clear existing assignments for selected shift types
+        if (!fillRemainingOnly) {
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = formatDate(year, month, day);
+                selectedTypes.forEach(shiftType => {
+                    const slots = TIME_SLOTS[shiftType];
+                    if (slots) {
+                        slots.forEach(slot => {
+                            const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                            delete AppState.shifts[shiftKey];
+                        });
+                    }
+                });
+            }
+            saveToStorage('shifts', AppState.shifts);
+        }
+
         // Process shifts in specific order: NTT first, then other shifts
         // This allows us to check REP rules properly
         const shiftOrder = ['PS', 'RAP', ...SHIFT_TYPES.filter(st => st !== 'PS' && st !== 'RAP')];
+
+        // Filter shift order based on selected types
+        const filteredShiftOrder = shiftOrder.filter(st => selectedTypes.includes(st));
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = formatDate(year, month, day);
@@ -1385,7 +1433,7 @@ function runAutoAssignment() {
             const dayOfWeek = date.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-            shiftOrder.forEach(shiftType => {
+            filteredShiftOrder.forEach(shiftType => {
                 const ambulatoriKey = `${dateKey}_${shiftType}`;
 
                 // Weekend logic: only UTIC, PS, RAP are open by default
@@ -1406,7 +1454,7 @@ function runAutoAssignment() {
                 sortedSlots.forEach(slot => {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
 
-                    // Skip if already assigned
+                    // Skip if already assigned (in "remaining" mode, slots were already cleared in "all" mode)
                     if (AppState.shifts[shiftKey]) return;
 
                     // RULE 3: REP weekend continuity (Friday 8pm to Monday 8am)
@@ -1619,20 +1667,30 @@ function generatePDF(year, month, type) {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Header
+    // Header background
     doc.setFillColor(198, 40, 40);
     doc.rect(0, 0, pageWidth, 25, 'F');
 
+    // Add icon on the left
+    const img = new Image();
+    img.src = 'icon.jpg';
+    try {
+        doc.addImage(img, 'JPEG', 8, 5, 15, 15);
+    } catch (e) {
+        console.log('Icon not loaded for PDF');
+    }
+
+    // Title on the right
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.text('PSDturni - Sistema Gestione Turni', 15, 12);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Turni ${ITALIAN_MONTHS[month]} ${year}`, pageWidth - 15, 12, { align: 'right' });
 
-    doc.setFontSize(14);
-    doc.text(`${ITALIAN_MONTHS[month]} ${year}`, 15, 20);
-
+    // Type indicator
     doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
     const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
-    doc.text(typeText, pageWidth - 30, 12);
+    doc.text(typeText, pageWidth - 15, 19, { align: 'right' });
 
     // Reset text color
     doc.setTextColor(0, 0, 0);
@@ -1712,11 +1770,24 @@ function generatePDF(year, month, type) {
 function generateExcel(year, month, type) {
     const wb = XLSX.utils.book_new();
     const daysInMonth = getDaysInMonth(year, month);
+    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
 
     // Create data array for all shifts
     const data = [];
 
-    // Header row 1: Shift types
+    // Title row
+    const titleRow = [`Turni ${ITALIAN_MONTHS[month]} ${year} - ${typeText}`];
+    // Fill rest of title row with empty strings
+    let totalCols = 1;
+    SHIFT_TYPES.forEach(shiftType => {
+        totalCols += TIME_SLOTS[shiftType].length;
+    });
+    for (let i = 1; i < totalCols; i++) {
+        titleRow.push('');
+    }
+    data.push(titleRow);
+
+    // Header row 1: Shift types (offset by 1 due to title)
     const header1 = ['Data'];
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
@@ -1726,7 +1797,7 @@ function generateExcel(year, month, type) {
     });
     data.push(header1);
 
-    // Header row 2: Time slots
+    // Header row 2: Time slots (offset by 1 due to title)
     const header2 = [''];
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
@@ -1785,15 +1856,23 @@ function generateExcel(year, month, type) {
     });
     ws['!cols'] = colWidths;
 
-    // Merge cells for shift type headers
+    // Merge cells for title row and shift type headers
     const merges = [];
+
+    // Merge title row across all columns
+    merges.push({
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: totalCols - 1 }
+    });
+
+    // Merge cells for shift type headers (row 1, offset by title row)
     let colIndex = 1;
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
         if (slots.length > 1) {
             merges.push({
-                s: { r: 0, c: colIndex },
-                e: { r: 0, c: colIndex + slots.length - 1 }
+                s: { r: 1, c: colIndex },
+                e: { r: 1, c: colIndex + slots.length - 1 }
             });
         }
         colIndex += slots.length;
@@ -1803,9 +1882,20 @@ function generateExcel(year, month, type) {
     // Add styling
     const range = XLSX.utils.decode_range(ws['!ref']);
 
-    // Style header rows
+    // Style title row (row 0)
     for (let col = range.s.c; col <= range.e.c; col++) {
-        for (let row = 0; row <= 1; row++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
+        ws[cellAddress].s = {
+            font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: 'C62828' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+
+    // Style header rows (rows 1 and 2, shift types and time slots)
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        for (let row = 1; row <= 2; row++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
             ws[cellAddress].s = {
@@ -1816,8 +1906,8 @@ function generateExcel(year, month, type) {
         }
     }
 
-    // Style data cells based on time slot and weekend
-    for (let row = 2; row <= range.e.r; row++) {
+    // Style data cells based on time slot and weekend (starting from row 3, offset by title row)
+    for (let row = 3; row <= range.e.r; row++) {
         const dateCell = ws[XLSX.utils.encode_cell({ r: row, c: 0 })];
         const dayText = dateCell ? dateCell.v : '';
         const isWeekend = dayText.includes('Sab') || dayText.includes('Dom');
@@ -1826,7 +1916,13 @@ function generateExcel(year, month, type) {
         ws[XLSX.utils.encode_cell({ r: row, c: 0 })].s = {
             font: { bold: true },
             fill: { fgColor: { rgb: isWeekend ? 'ADB9CA' : 'FFFFFF' } },
-            alignment: { horizontal: 'left' }
+            alignment: { horizontal: 'left' },
+            border: {
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } }
+            }
         };
 
         let colIndex = 1;
@@ -1870,12 +1966,224 @@ function generateExcel(year, month, type) {
     }
 
     // Add worksheet to workbook
-    const typeText = type === 'draft' ? 'BOZZA' : 'DEFINITIVO';
     XLSX.utils.book_append_sheet(wb, ws, `${ITALIAN_MONTHS[month]} ${year}`);
 
     // Generate and download file
     XLSX.writeFile(wb, `turni_${ITALIAN_MONTHS[month]}_${year}_${typeText}.xlsx`);
     showToast('Excel esportato con successo', 'success');
+}
+
+// ===========================
+// Version Management
+// ===========================
+function loadVersions() {
+    return JSON.parse(localStorage.getItem('shiftVersions')) || [];
+}
+
+function saveVersions(versions) {
+    localStorage.setItem('shiftVersions', JSON.stringify(versions));
+}
+
+function saveNewVersion(name, year, month) {
+    const versions = loadVersions();
+
+    // Get all shifts for the specified month
+    const monthShifts = {};
+    const daysInMonth = getDaysInMonth(year, month);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDate(year, month, day);
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+            slots.forEach(slot => {
+                const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                if (AppState.shifts[shiftKey]) {
+                    monthShifts[shiftKey] = AppState.shifts[shiftKey];
+                }
+            });
+        });
+    }
+
+    // Get ambulatori status for the month
+    const monthAmbulatori = {};
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDate(year, month, day);
+        SHIFT_TYPES.forEach(shiftType => {
+            const ambulatoriKey = `${dateKey}_${shiftType}`;
+            if (AppState.ambulatoriStatus[ambulatoriKey]) {
+                monthAmbulatori[ambulatoriKey] = AppState.ambulatoriStatus[ambulatoriKey];
+            }
+        });
+    }
+
+    const version = {
+        id: Date.now().toString(),
+        name,
+        year,
+        month,
+        shifts: monthShifts,
+        ambulatoriStatus: monthAmbulatori,
+        savedAt: new Date().toISOString(),
+        savedBy: AppState.currentUser.name
+    };
+
+    versions.push(version);
+    saveVersions(versions);
+
+    return version;
+}
+
+function loadVersion(versionId) {
+    const versions = loadVersions();
+    const version = versions.find(v => v.id === versionId);
+
+    if (!version) {
+        showToast('Versione non trovata', 'error');
+        return;
+    }
+
+    // Clear existing shifts for that month
+    const daysInMonth = getDaysInMonth(version.year, version.month);
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDate(version.year, version.month, day);
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+            slots.forEach(slot => {
+                const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                delete AppState.shifts[shiftKey];
+            });
+            const ambulatoriKey = `${dateKey}_${shiftType}`;
+            delete AppState.ambulatoriStatus[ambulatoriKey];
+        });
+    }
+
+    // Load shifts from version
+    Object.assign(AppState.shifts, version.shifts);
+    Object.assign(AppState.ambulatoriStatus, version.ambulatoriStatus);
+
+    saveToStorage('shifts', AppState.shifts);
+    saveToStorage('ambulatoriStatus', AppState.ambulatoriStatus);
+
+    showToast(`Versione "${version.name}" caricata`, 'success');
+
+    // Refresh current view
+    const activeView = document.querySelector('.view.active');
+    if (activeView) {
+        if (activeView.id === 'calendarView') renderCalendar();
+        if (activeView.id === 'shiftsView') renderShiftsManagement();
+    }
+}
+
+function deleteVersion(versionId) {
+    if (!confirm('Sei sicuro di voler eliminare questa versione?')) return;
+
+    const versions = loadVersions();
+    const filtered = versions.filter(v => v.id !== versionId);
+    saveVersions(filtered);
+
+    showToast('Versione eliminata', 'success');
+    renderVersionsGrid();
+}
+
+function renameVersion(versionId, newName) {
+    const versions = loadVersions();
+    const version = versions.find(v => v.id === versionId);
+
+    if (version) {
+        version.name = newName;
+        saveVersions(versions);
+        showToast('Versione rinominata', 'success');
+        renderVersionsGrid();
+    }
+}
+
+function renderVersionsGrid() {
+    const select = document.getElementById('versionMonth');
+    const [year, month] = select.value.split('-').map(Number);
+
+    const versions = loadVersions();
+    const monthVersions = versions.filter(v => v.year === year && v.month === month);
+
+    const grid = document.getElementById('versionsGrid');
+
+    if (monthVersions.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Nessuna versione salvata per questo mese.</p>';
+        return;
+    }
+
+    grid.innerHTML = monthVersions.map(version => `
+        <div class="version-card">
+            <div class="version-card-header">
+                <h3 class="version-name">${version.name}</h3>
+            </div>
+            <div class="version-meta">Salvata il: ${new Date(version.savedAt).toLocaleString('it-IT')}</div>
+            <div class="version-meta">Da: ${version.savedBy}</div>
+            <div class="version-meta">Turni: ${Object.keys(version.shifts).length} assegnazioni</div>
+            <div class="version-actions">
+                <button class="btn btn-secondary" onclick="loadVersion('${version.id}')">
+                    <span class="material-icons">restore</span>
+                    Carica
+                </button>
+                <button class="btn btn-secondary" onclick="
+                    const newName = prompt('Nuovo nome:', '${version.name}');
+                    if (newName && newName !== '${version.name}') renameVersion('${version.id}', newName);
+                ">
+                    <span class="material-icons">edit</span>
+                    Rinomina
+                </button>
+                <button class="btn btn-danger" onclick="deleteVersion('${version.id}')">
+                    <span class="material-icons">delete</span>
+                    Elimina
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function handleSaveVersion(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('versionName').value.trim();
+    const select = document.getElementById('versionMonthSelect');
+    const [year, month] = select.value.split('-').map(Number);
+
+    if (!name) {
+        document.getElementById('saveVersionError').textContent = 'Inserisci un nome per la versione';
+        return;
+    }
+
+    try {
+        saveNewVersion(name, year, month);
+        showToast('Versione salvata con successo', 'success');
+        closeModal('saveVersionModal');
+
+        // Clear form
+        document.getElementById('versionName').value = '';
+
+        // Refresh versions grid if on that view
+        const activeView = document.querySelector('.view.active');
+        if (activeView && activeView.id === 'versionsView') {
+            renderVersionsGrid();
+        }
+    } catch (error) {
+        document.getElementById('saveVersionError').textContent = 'Errore nel salvataggio della versione';
+        console.error(error);
+    }
+}
+
+function updateVersionMonthSelectors() {
+    const now = new Date();
+    let html = '';
+
+    for (let i = 0; i <= 3; i++) {
+        const month = (now.getMonth() + i) % 12;
+        const year = now.getFullYear() + Math.floor((now.getMonth() + i) / 12);
+        const selected = month === AppState.currentMonth && year === AppState.currentYear ? 'selected' : '';
+        html += `<option value="${year}-${month}" ${selected}>${ITALIAN_MONTHS[month]} ${year}</option>`;
+    }
+
+    document.getElementById('versionMonth').innerHTML = html;
+    document.getElementById('versionMonthSelect').innerHTML = html;
 }
 
 // ===========================
@@ -1927,6 +2235,11 @@ function initializeEventListeners() {
     // Availability Overview
     document.getElementById('exportAvailabilityPdfBtn').addEventListener('click', exportAvailabilityPdf);
     document.getElementById('exportAvailabilityExcelBtn').addEventListener('click', exportAvailabilityExcel);
+
+    // Version Management
+    document.getElementById('saveVersionBtn').addEventListener('click', () => openModal('saveVersionModal'));
+    document.getElementById('saveVersionForm').addEventListener('submit', handleSaveVersion);
+    document.getElementById('versionMonth').addEventListener('change', renderVersionsGrid);
 
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {
@@ -2199,3 +2512,6 @@ window.assignShift = assignShift;
 window.runAutoAssignment = runAutoAssignment;
 window.openModal = openModal;
 window.closeModal = closeModal;
+window.loadVersion = loadVersion;
+window.deleteVersion = deleteVersion;
+window.renameVersion = renameVersion;
