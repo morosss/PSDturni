@@ -906,6 +906,7 @@ function editUser(userId) {
 
     document.getElementById('userModalTitle').textContent = 'Modifica Utente';
     document.getElementById('userName').value = user.name;
+    document.getElementById('userCode').value = user.code || '';
     document.getElementById('userIdInput').value = user.id;
     document.getElementById('userIdInput').disabled = true;
     document.getElementById('userRole').value = user.role;
@@ -940,6 +941,7 @@ async function handleUserFormSubmit(e) {
 
     const mode = e.target.dataset.mode;
     const name = sanitizeInput(document.getElementById('userName').value.trim());
+    const code = sanitizeInput(document.getElementById('userCode').value.trim().toUpperCase());
     const userId = sanitizeInput(document.getElementById('userIdInput').value.toLowerCase().trim());
     const role = document.getElementById('userRole').value;
     const specialty = sanitizeInput(document.getElementById('userSpecialty').value.trim());
@@ -980,6 +982,7 @@ async function handleUserFormSubmit(e) {
         const newUser = {
             id: userId,
             name: name,
+            code: code || userId.toUpperCase().substring(0, 5),
             role: role,
             specialty: specialty,
             email: email || null,
@@ -995,6 +998,7 @@ async function handleUserFormSubmit(e) {
         if (userIndex === -1) return;
 
         AppState.users[userIndex].name = name;
+        AppState.users[userIndex].code = code || userId.toUpperCase().substring(0, 5);
         AppState.users[userIndex].role = role;
         AppState.users[userIndex].specialty = specialty;
         AppState.users[userIndex].email = email || null;
