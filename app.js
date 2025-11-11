@@ -2484,57 +2484,102 @@ function renderAvailabilityOverviewGrid() {
     const container = document.getElementById('availabilityOverviewGrid');
     const daysInMonth = getDaysInMonth(year, month);
 
-    // Create matrix: rows = users, columns = days
-    let html = '<div class="overview-matrix">';
+    // NEW LAYOUT: rows = days (with M/P/N sub-rows), columns = users (nicknames)
+    let html = '<div class="overview-matrix-transposed">';
 
-    // Header row with days
-    html += '<div class="overview-header-row">';
-    html += '<div class="overview-user-header">Medico</div>';
+    // Header row with user nicknames
+    html += '<div class="overview-header-row-transposed">';
+    html += '<div class="overview-day-column-header">Giorno</div>';
+    html += '<div class="overview-slot-column-header">Fascia</div>';
+
+    AppState.users.forEach(user => {
+        const userCode = user.code || user.id.toUpperCase();
+        html += `<div class="overview-user-header-cell" title="${user.name}">${userCode}</div>`;
+    });
+    html += '</div>';
+
+    // Day rows (each day has 3 sub-rows: M, P, N)
+    const slots = [
+        { key: 'mattina', label: 'M', title: 'Mattina' },
+        { key: 'pomeriggio', label: 'P', title: 'Pomeriggio' },
+        { key: 'notte', label: 'N', title: 'Notte' }
+    ];
+
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
-        const dayName = DAY_NAMES[date.getDay()].substring(0, 3);
+        const dayName = DAY_NAMES[date.getDay()];
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-        html += `<div class="overview-day-header ${isWeekend ? 'weekend' : ''}">
-            <div class="day-num">${day}</div>
-            <div class="day-name">${dayName}</div>
-        </div>`;
+        const dateKey = formatDate(year, month, day);
+
+        slots.forEach((slot, slotIndex) => {
+            html += `<div class="overview-day-row-transposed ${isWeekend ? 'weekend-row' : ''}">`;
+
+            // Day number cell (rowspan effect with CSS)
+            if (slotIndex === 0) {
+                html += `<div class="overview-day-cell-label" data-rowspan="3">
+                    <div class="day-number">${day}</div>
+                    <div class="day-name-small">${dayName}</div>
+                </div>`;
+            } else {
+                html += `<div class="overview-day-cell-label hidden"></div>`;
+            }
+
+            // Slot label
+            html += `<div class="overview-slot-cell-label" title="${slot.title}">${slot.label}</div>`;
+
+            // User availability cells
+            AppState.users.forEach(user => {
+                const userAvailabilityKey = `${user.id}_${year}_${month}`;
+                const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+                const daySlots = unavailableSlots[dateKey] || {};
+
+                // Check if user is unavailable for this specific slot
+                let isUnavailable = false;
+                if (slot.key === 'mattina') {
+                    isUnavailable = daySlots.mattina === true || daySlots.MATT === true;
+                } else if (slot.key === 'pomeriggio') {
+                    isUnavailable = daySlots.pomeriggio === true || daySlots.POM === true;
+                } else if (slot.key === 'notte') {
+                    isUnavailable = daySlots.notte === true || daySlots.NTT === true;
+                }
+
+                const cellClass = isUnavailable ? 'unavailable-cell' : 'available-cell';
+                const userCode = user.code || user.id.toUpperCase();
+                html += `<div class="${cellClass}" title="${userCode} - ${slot.title}: ${isUnavailable ? 'Non disponibile' : 'Disponibile'}"></div>`;
+            });
+
+            html += '</div>';
+        });
     }
-    html += '</div>';
-
-    // User rows
-    AppState.users.forEach(user => {
-        const userAvailabilityKey = `${user.id}_${year}_${month}`;
-        const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
-
-        html += '<div class="overview-user-row">';
-        html += `<div class="overview-user-name">
-            <div class="user-code">${user.code || user.id.toUpperCase()}</div>
-            <div class="user-fullname">${user.name}</div>
-        </div>`;
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = formatDate(year, month, day);
-            const daySlots = unavailableSlots[dateKey] || {};
-
-            const hasMatt = daySlots.MATT === true;
-            const hasPom = daySlots.POM === true;
-            const hasNtt = daySlots.NTT === true;
-
-            // Build cell class based on combination of unavailable slots
-            let cellClasses = ['overview-day-cell'];
-            if (hasMatt) cellClasses.push('unavail-matt');
-            if (hasPom) cellClasses.push('unavail-pom');
-            if (hasNtt) cellClasses.push('unavail-ntt');
-
-            html += `<div class="${cellClasses.join(' ')}" title="${
-                [hasMatt && 'Mattina', hasPom && 'Pomeriggio', hasNtt && 'Notte'].filter(Boolean).join(', ') || 'Disponibile'
-            }"></div>`;
-        }
-
-        html += '</div>';
-    });
 
     html += '</div>';
+
+    // Add legend
+    html += `
+        <div class="overview-legend">
+            <h4>Legenda:</h4>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color unavailable-cell"></div>
+                    <span>Non disponibile (rosso)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color available-cell"></div>
+                    <span>Disponibile (bianco)</span>
+                </div>
+                <div class="legend-item">
+                    <span><strong>M</strong> = Mattina</span>
+                </div>
+                <div class="legend-item">
+                    <span><strong>P</strong> = Pomeriggio</span>
+                </div>
+                <div class="legend-item">
+                    <span><strong>N</strong> = Notte</span>
+                </div>
+            </div>
+        </div>
+    `;
+
     container.innerHTML = html;
 }
 
@@ -2544,46 +2589,108 @@ function exportAvailabilityPdf() {
     const daysInMonth = getDaysInMonth(year, month);
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape');
+    const doc = new jsPDF('landscape', 'mm', 'a4');
 
-    doc.setFontSize(16);
-    doc.text(`Panoramica Indisponibilità - ${ITALIAN_MONTHS[month]} ${year}`, 14, 15);
+    // Title
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Panoramica Indisponibilità - ${ITALIAN_MONTHS[month]} ${year}`, 148, 12, { align: 'center' });
 
-    // Create table data
-    const headers = ['Medico'];
+    // NEW TRANSPOSED LAYOUT: Rows = Days (with M/P/N), Columns = Users
+    const headers = ['Giorno', 'Fascia'];
+    AppState.users.forEach(user => {
+        headers.push(user.code || user.id.toUpperCase());
+    });
+
+    const rows = [];
+    const slots = [
+        { key: 'mattina', label: 'M' },
+        { key: 'pomeriggio', label: 'P' },
+        { key: 'notte', label: 'N' }
+    ];
+
     for (let day = 1; day <= daysInMonth; day++) {
-        headers.push(day.toString());
+        const dateKey = formatDate(year, month, day);
+        const date = new Date(year, month, day);
+        const dayName = DAY_NAMES[date.getDay()];
+
+        slots.forEach((slot, index) => {
+            const row = [
+                index === 0 ? `${day} ${dayName}` : '', // Day only on first row
+                slot.label
+            ];
+
+            AppState.users.forEach(user => {
+                const userAvailabilityKey = `${user.id}_${year}_${month}`;
+                const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
+                const daySlots = unavailableSlots[dateKey] || {};
+
+                // Check if unavailable
+                let isUnavailable = false;
+                if (slot.key === 'mattina') {
+                    isUnavailable = daySlots.mattina === true || daySlots.MATT === true;
+                } else if (slot.key === 'pomeriggio') {
+                    isUnavailable = daySlots.pomeriggio === true || daySlots.POM === true;
+                } else if (slot.key === 'notte') {
+                    isUnavailable = daySlots.notte === true || daySlots.NTT === true;
+                }
+
+                // Use X for unavailable, empty for available
+                row.push(isUnavailable ? 'X' : '');
+            });
+
+            rows.push(row);
+        });
     }
 
-    const rows = AppState.users.map(user => {
-        const userAvailabilityKey = `${user.id}_${year}_${month}`;
-        const unavailableSlots = AppState.availability[userAvailabilityKey] || {};
-
-        const row = [user.code || user.id.toUpperCase()];
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = formatDate(year, month, day);
-            const daySlots = unavailableSlots[dateKey] || {};
-
-            const slots = [];
-            if (daySlots.MATT) slots.push('M');
-            if (daySlots.POM) slots.push('P');
-            if (daySlots.NTT) slots.push('N');
-
-            row.push(slots.join(','));
-        }
-
-        return row;
-    });
+    // Calculate optimal font size based on number of users
+    const numUsers = AppState.users.length;
+    let fontSize = 6;
+    if (numUsers > 20) fontSize = 5;
+    if (numUsers > 25) fontSize = 4;
 
     doc.autoTable({
         head: [headers],
         body: rows,
-        startY: 20,
-        styles: { fontSize: 7, cellPadding: 1 },
-        headStyles: { fillColor: [198, 40, 40] },
-        margin: { left: 14, right: 14 }
+        startY: 18,
+        styles: {
+            fontSize: fontSize,
+            cellPadding: 0.5,
+            lineWidth: 0.1,
+            lineColor: [200, 200, 200]
+        },
+        headStyles: {
+            fillColor: [198, 40, 40],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: fontSize + 1
+        },
+        columnStyles: {
+            0: { cellWidth: 18, fontStyle: 'bold' }, // Giorno
+            1: { cellWidth: 8, halign: 'center' }     // Fascia
+        },
+        didParseCell: function(data) {
+            // Color unavailable cells (X) with bright red background
+            if (data.section === 'body' && data.column.index > 1 && data.cell.text[0] === 'X') {
+                data.cell.styles.fillColor = [255, 0, 0]; // Bright red
+                data.cell.styles.textColor = [255, 255, 255]; // White text
+                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.halign = 'center';
+            }
+            // Center align all user columns
+            if (data.column.index > 1) {
+                data.cell.styles.halign = 'center';
+            }
+        },
+        margin: { left: 10, right: 10, top: 18, bottom: 10 },
+        tableWidth: 'auto'
     });
+
+    // Add legend at bottom
+    const finalY = doc.lastAutoTable.finalY + 5;
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text('Legenda: X = Non disponibile (rosso) | Vuoto = Disponibile | M = Mattina | P = Pomeriggio | N = Notte', 148, finalY, { align: 'center' });
 
     doc.save(`indisponibilita_${ITALIAN_MONTHS[month]}_${year}.pdf`);
     showToast('PDF esportato con successo', 'success');
