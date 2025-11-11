@@ -1662,23 +1662,45 @@ function runAutoAssignment() {
                         }
                     }
 
-                    // LOAD BALANCING: Sort users by number of assigned shifts
-                    // This ensures more even distribution of shifts across all doctors
+                    // ENHANCED LOAD BALANCING (Option A): Balance per ambulatorio + overall
+                    // This ensures even distribution within each ambulatorio type
                     availableUsers.sort((a, b) => {
-                        const aCount = Object.values(AppState.shifts).filter(id => id === a.id).length;
-                        const bCount = Object.values(AppState.shifts).filter(id => id === b.id).length;
+                        // Count total shifts for each user
+                        const aTotalCount = Object.values(AppState.shifts).filter(id => id === a.id).length;
+                        const bTotalCount = Object.values(AppState.shifts).filter(id => id === b.id).length;
 
-                        // If it's a preferred shift (Friday night or Sunday day), prioritize even more
-                        if ((dayOfWeek === 5 && slot === 'NTT') || (dayOfWeek === 0 && slot === 'GG')) {
-                            return aCount - bCount;
+                        // Count shifts in THIS SPECIFIC ambulatorio for each user
+                        let aAmbulatoriCount = 0;
+                        let bAmbulatoriCount = 0;
+
+                        Object.keys(AppState.shifts).forEach(key => {
+                            const parts = key.split('_');
+                            if (parts.length >= 4) {
+                                const keyShiftType = parts.slice(3, -1).join('_');
+                                if (keyShiftType === shiftType) {
+                                    if (AppState.shifts[key] === a.id) aAmbulatoriCount++;
+                                    if (AppState.shifts[key] === b.id) bAmbulatoriCount++;
+                                }
+                            }
+                        });
+
+                        // PRIORITY 1: Ambulatorio-specific balance (most important)
+                        // Prefer users with fewer shifts in this specific ambulatorio
+                        const ambulatorioDiff = aAmbulatoriCount - bAmbulatoriCount;
+                        if (ambulatorioDiff !== 0) {
+                            return ambulatorioDiff;
                         }
 
-                        // Add some randomness for same count to avoid always picking the first user
-                        if (aCount === bCount) {
-                            return Math.random() - 0.5;
+                        // PRIORITY 2: Overall balance (secondary)
+                        // If ambulatorio count is equal, prefer user with fewer total shifts
+                        const totalDiff = aTotalCount - bTotalCount;
+                        if (totalDiff !== 0) {
+                            return totalDiff;
                         }
 
-                        return aCount - bCount;
+                        // PRIORITY 3: Randomization (for fairness when all else equal)
+                        // Add randomness to avoid always picking the same user
+                        return Math.random() - 0.5;
                     });
 
                     if (availableUsers.length > 0) {
