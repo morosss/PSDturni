@@ -222,57 +222,163 @@
             <div id="autoassignView" class="view">
                 <div class="view-header">
                     <h2>Assegnazione Automatica Turni</h2>
+                    <p class="view-subtitle">Genera turni in modo intelligente con bilanciamento automatico</p>
                 </div>
 
-                <div class="auto-assign-controls">
-                    <div class="input-group">
-                        <label>Mese:</label>
-                        <select id="autoAssignMonth"></select>
-                    </div>
+                <div class="auto-assign-container">
+                    <!-- Configuration Card -->
+                    <div class="config-card">
+                        <div class="card-header">
+                            <span class="material-icons">settings</span>
+                            <h3>Configurazione</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="input-group">
+                                <label>Mese da Generare</label>
+                                <select id="autoAssignMonth" class="select-input"></select>
+                            </div>
 
-                    <div class="input-group">
-                        <label>Modalità Generazione:</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="assignMode" value="all" checked>
-                                <span>Tutti i turni</span>
-                            </label>
-                            <label>
-                                <input type="radio" name="assignMode" value="remaining">
-                                <span>Solo slot vuoti</span>
-                            </label>
+                            <div class="input-group">
+                                <label>Modalità Generazione</label>
+                                <div class="radio-group-cards">
+                                    <label class="radio-card">
+                                        <input type="radio" name="assignMode" value="all" checked>
+                                        <div class="radio-card-content">
+                                            <span class="material-icons">refresh</span>
+                                            <div>
+                                                <strong>Tutti i turni</strong>
+                                                <small>Rigenera completamente il mese</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="radio-card">
+                                        <input type="radio" name="assignMode" value="remaining">
+                                        <div class="radio-card-content">
+                                            <span class="material-icons">playlist_add</span>
+                                            <div>
+                                                <strong>Solo slot vuoti</strong>
+                                                <small>Riempie solo gli slot mancanti</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <label>Tipologia Turni:</label>
-                        <div class="checkbox-grid">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="assignSALA" checked>
-                                <span>SALA (Senior + Junior)</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="assignREPARTO" checked>
-                                <span>REPARTO</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="assignECO" checked>
-                                <span>ECO (tutte)</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="assignOthers" checked>
-                                <span>Altri (UTIC, PS, ecc.)</span>
-                            </label>
+                    <!-- Shift Types Selection Card -->
+                    <div class="config-card">
+                        <div class="card-header">
+                            <span class="material-icons">list_alt</span>
+                            <h3>Tipologie Turni</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="shift-type-grid">
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignSALA" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">local_hospital</span>
+                                        <div class="shift-type-info">
+                                            <strong>SALA</strong>
+                                            <small>Senior + Junior</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignREPARTO" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">hotel</span>
+                                        <div class="shift-type-info">
+                                            <strong>REPARTO</strong>
+                                            <small>RAP</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignECO" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">favorite</span>
+                                        <div class="shift-type-info">
+                                            <strong>ECO</strong>
+                                            <small>206, 214, 230</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignOthers" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">more_horiz</span>
+                                        <div class="shift-type-info">
+                                            <strong>Altri</strong>
+                                            <small>UTIC, PS, AMB, ecc.</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <button id="runAutoAssign" class="btn btn-primary">
-                        <span class="material-icons">auto_fix_high</span>
-                        Genera Turni Automatici
-                    </button>
-                </div>
+                    <!-- Advanced Options Card (Collapsible) -->
+                    <div class="config-card">
+                        <div class="card-header clickable" onclick="toggleAdvancedOptions()">
+                            <span class="material-icons">tune</span>
+                            <h3>Opzioni Avanzate</h3>
+                            <span class="material-icons expand-icon" id="advancedExpandIcon">expand_more</span>
+                        </div>
+                        <div class="card-content" id="advancedOptionsContent" style="display: none;">
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="respectUserLimits" checked>
+                                    <span>Rispetta limiti mensili utenti</span>
+                                </label>
+                                <small class="helper-text">Se attivo, rispetta i limiti min/max configurati per ogni utente</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="balanceAmbulatori" checked>
+                                    <span>Bilanciamento per ambulatorio</span>
+                                </label>
+                                <small class="helper-text">Distribuisce equamente i turni per ogni ambulatorio</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="respectUnavailability" checked>
+                                    <span>Rispetta indisponibilità</span>
+                                </label>
+                                <small class="helper-text">Evita di assegnare turni a utenti non disponibili</small>
+                            </div>
+                        </div>
+                    </div>
 
-                <div id="autoAssignResults" class="auto-assign-results"></div>
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button id="runAutoAssignPreview" class="btn btn-secondary btn-lg">
+                            <span class="material-icons">visibility</span>
+                            Anteprima Generazione
+                        </button>
+                        <button id="runAutoAssign" class="btn btn-primary btn-lg">
+                            <span class="material-icons">auto_fix_high</span>
+                            Genera Turni
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="autoAssignProgress" class="progress-container" style="display: none;">
+                        <div class="progress-content">
+                            <div class="spinner"></div>
+                            <div class="progress-text">
+                                <h4>Generazione in corso...</h4>
+                                <p id="progressMessage">Analisi delle disponibilità...</p>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="progressBarFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="autoAssignResults" class="auto-assign-results"></div>
+                </div>
             </div>
 
             <!-- Availability Overview View (Admin Only) -->

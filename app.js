@@ -1405,6 +1405,19 @@ function renderAutoAssign() {
     updateAutoAssignMonthSelector();
 }
 
+function toggleAdvancedOptions() {
+    const content = document.getElementById('advancedOptionsContent');
+    const icon = document.getElementById('advancedExpandIcon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = 'expand_less';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = 'expand_more';
+    }
+}
+
 function updateAutoAssignMonthSelector() {
     const select = document.getElementById('autoAssignMonth');
     const now = new Date();
@@ -1524,14 +1537,39 @@ function runAutoAssignment() {
     }
 
     if (selectedTypes.length === 0) {
-        resultsContainer.innerHTML = '<p class="error-message">Seleziona almeno una tipologia di turni da generare.</p>';
+        resultsContainer.innerHTML = '<div class="error-message active">Seleziona almeno una tipologia di turni da generare.</div>';
         return;
     }
 
-    resultsContainer.innerHTML = '<p>Generazione turni in corso...</p>';
+    // Show progress indicator
+    const progressContainer = document.getElementById('autoAssignProgress');
+    const progressMessage = document.getElementById('progressMessage');
+    const progressBarFill = document.getElementById('progressBarFill');
+    resultsContainer.innerHTML = '';
+    progressContainer.style.display = 'block';
+
+    // Simulate progress updates
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 10;
+        progressBarFill.style.width = `${Math.min(progress, 90)}%`;
+
+        if (progress === 20) {
+            progressMessage.textContent = 'Verifica disponibilità utenti...';
+        } else if (progress === 40) {
+            progressMessage.textContent = 'Applicazione regole di assegnazione...';
+        } else if (progress === 60) {
+            progressMessage.textContent = 'Bilanciamento carichi di lavoro...';
+        } else if (progress === 80) {
+            progressMessage.textContent = 'Finalizzazione assegnazioni...';
+        }
+    }, 100);
 
     // Enhanced auto-assignment algorithm with shift rules
     setTimeout(() => {
+        clearInterval(progressInterval);
+        progressBarFill.style.width = '100%';
+        progressMessage.textContent = 'Completato!';
         const daysInMonth = getDaysInMonth(year, month);
         let assignedCount = 0;
         let errorCount = 0;
@@ -1718,42 +1756,166 @@ function runAutoAssignment() {
 
         saveToStorage('shifts', AppState.shifts);
 
-        let html = `
-            <div class="results-summary">
-                <h4>Risultati Assegnazione Automatica</h4>
-                <div class="stat-grid">
-                    <div class="stat-item">
-                        <div class="stat-value">${assignedCount}</div>
-                        <div class="stat-label">Turni Assegnati</div>
+        // Calculate statistics by user
+        const userStats = {};
+        AppState.users.forEach(user => {
+            userStats[user.id] = {
+                name: user.name,
+                code: user.code || user.id.toUpperCase(),
+                total: 0,
+                byType: {}
+            };
+        });
+
+        Object.keys(AppState.shifts).forEach(shiftKey => {
+            const userId = AppState.shifts[shiftKey];
+            const parts = shiftKey.split('_');
+            if (parts.length >= 4) {
+                const shiftType = parts.slice(3, -1).join('_');
+                if (userStats[userId]) {
+                    userStats[userId].total++;
+                    userStats[userId].byType[shiftType] = (userStats[userId].byType[shiftType] || 0) + 1;
+                }
+            }
+        });
+
+        // Sort users by total shifts
+        const sortedUsers = Object.values(userStats).sort((a, b) => b.total - a.total);
+
+        // Calculate success rate
+        const totalAttempted = assignedCount + errorCount;
+        const successRate = totalAttempted > 0 ? Math.round((assignedCount / totalAttempted) * 100) : 0;
+
+        // Hide progress, show results
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+
+            let html = `
+                <div class="results-card success">
+                    <div class="results-header">
+                        <span class="material-icons">check_circle</span>
+                        <h3>Generazione Completata</h3>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${errorCount}</div>
-                        <div class="stat-label">Turni Non Assegnati</div>
+                    <div class="results-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <span class="material-icons">event_available</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${assignedCount}</div>
+                                <div class="stat-label">Turni Assegnati</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon ${errorCount > 0 ? 'warning' : 'success'}">
+                                <span class="material-icons">${errorCount > 0 ? 'warning' : 'check'}</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${errorCount}</div>
+                                <div class="stat-label">Turni Non Assegnati</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <span class="material-icons">analytics</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${successRate}%</div>
+                                <div class="stat-label">Tasso di Successo</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
 
-        if (errors.length > 0 && errors.length <= 20) {
-            html += '<div class="error-message active"><h4>Turni non assegnati:</h4><ul>';
-            errors.forEach(error => {
-                html += `<li>${error}</li>`;
+                <div class="results-card">
+                    <div class="results-header">
+                        <span class="material-icons">people</span>
+                        <h3>Distribuzione per Utente</h3>
+                    </div>
+                    <div class="distribution-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Utente</th>
+                                    <th>Totale Turni</th>
+                                    <th>Distribuzione</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            sortedUsers.slice(0, 10).forEach(user => {
+                if (user.total > 0) {
+                    const maxTotal = sortedUsers[0].total;
+                    const barWidth = (user.total / maxTotal) * 100;
+
+                    html += `
+                        <tr>
+                            <td><strong>${user.code}</strong></td>
+                            <td>${user.total}</td>
+                            <td>
+                                <div class="distribution-bar">
+                                    <div class="distribution-fill" style="width: ${barWidth}%"></div>
+                                    <span class="distribution-label">${user.total} turni</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
             });
-            html += '</ul></div>';
-        } else if (errors.length > 20) {
-            html += `<div class="error-message active">${errorCount} turni non possono essere assegnati per mancanza di personale disponibile.</div>`;
-        }
 
-        html += `
-            <div class="form-actions mt-3">
-                <button class="btn btn-primary" onclick="switchView('shifts')">
-                    <span class="material-icons">edit</span>
-                    Modifica Turni
-                </button>
-            </div>
-        `;
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
 
-        resultsContainer.innerHTML = html;
+            if (errors.length > 0 && errors.length <= 20) {
+                html += `
+                    <div class="results-card warning">
+                        <div class="results-header">
+                            <span class="material-icons">warning</span>
+                            <h3>Turni Non Assegnati</h3>
+                        </div>
+                        <div class="error-list">
+                            <ul>
+                `;
+                errors.forEach(error => {
+                    html += `<li>${error}</li>`;
+                });
+                html += `
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else if (errors.length > 20) {
+                html += `
+                    <div class="results-card warning">
+                        <div class="results-header">
+                            <span class="material-icons">warning</span>
+                            <h3>Attenzione</h3>
+                        </div>
+                        <p>${errorCount} turni non possono essere assegnati per mancanza di personale disponibile.</p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="switchView('calendar')">
+                        <span class="material-icons">calendar_today</span>
+                        Visualizza Calendario
+                    </button>
+                    <button class="btn btn-primary" onclick="switchView('shifts')">
+                        <span class="material-icons">edit</span>
+                        Modifica Turni
+                    </button>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = html;
+        }, 500);
     }, 500);
 }
 
@@ -2444,6 +2606,9 @@ function initializeEventListeners() {
 
     // Auto Assignment
     document.getElementById('runAutoAssign').addEventListener('click', runAutoAssignment);
+    document.getElementById('runAutoAssignPreview').addEventListener('click', () => {
+        showToast('Funzionalità anteprima in sviluppo. Per ora puoi generare i turni e poi modificarli manualmente.', 'info', 4000);
+    });
 
     // Availability Overview
     document.getElementById('exportAvailabilityPdfBtn').addEventListener('click', exportAvailabilityPdf);
