@@ -624,14 +624,14 @@ body {
 .shift-cell.closed {
     background: repeating-linear-gradient(
         45deg,
-        rgba(0, 0, 0, 0.02),
-        rgba(0, 0, 0, 0.02) 10px,
-        rgba(0, 0, 0, 0.04) 10px,
-        rgba(0, 0, 0, 0.04) 20px
+        rgba(198, 40, 40, 0.15),
+        rgba(198, 40, 40, 0.15) 10px,
+        rgba(198, 40, 40, 0.25) 10px,
+        rgba(198, 40, 40, 0.25) 20px
     );
     text-align: center;
     font-weight: 600;
-    color: var(--text-tertiary);
+    color: rgba(198, 40, 40, 0.8);
 }
 
 .shift-cell.closed::after {
