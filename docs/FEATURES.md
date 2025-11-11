@@ -1115,6 +1115,145 @@ function getUserColorCached(userId) {
 
 ---
 
+## Recent Improvements (November 2025)
+
+### Ultra-Compact Calendar View
+**Location**: app.js (lines 499-621), styles.css (lines 549-668)
+
+The calendario has been optimized for modern 16:9 widescreen displays:
+- **Excel-Perfect Match**: Headers, colors, and layout match the sample Excel file exactly
+- **Ultra-Compact Layout**:
+  - Font sizes reduced: 7-9px (headers), 8px (cells)
+  - Minimal padding: 1-2px throughout
+  - Cell sizes: 30-45px width
+- **Numbered Ambulatori**: Slots show only numbers (1, 2, 3) instead of "MATT 1"
+- **Time Range Simplification**: "h 8-13" displayed as "8-13"
+- **Exact Color Coding**:
+  - Morning (MATT): #FFFFFF (white)
+  - Afternoon (POM): #FFF2CC (light yellow)
+  - Night (NTT): #BFBFBF (gray)
+  - All-day (GG): #E7E6E6 (light gray)
+  - Special (SPEC): #CCCCFF (light purple)
+  - Weekends: #ADB9CA (light blue) - uniform across all slots
+- **Entire Month Visible**: No horizontal scrolling needed on 16:9 displays
+
+### Individual Slot Closure
+**Location**: app.js (lines 1139-1174), styles.css (lines 1211-1287)
+
+Granular control over ambulatorio availability:
+- **Per-Slot Closure**: Close individual time slots (e.g., ENI MATT) independently
+- **Lock Icons**: Each slot has a lock button (admin only)
+- **Visual Indicators**: Closed slots show diagonal stripes and lock icon
+- **Status Tracking**: Both whole-ambulatorio and individual-slot closure supported
+- **Prevents Assignment**: Closed slots cannot be assigned
+
+**Bug Fixes**:
+- Fixed calendario to check both ambulatorio-wide AND individual slot closure
+- Fixed CSS class generation for slots with spaces ("MATT 1" → "slot-type-matt-1")
+- Morning slots no longer close entire day when individually closed
+
+### Dynamic Column Management
+**Location**: app.js (lines 8-46, 3106-3230), index.html (lines 615-653)
+
+Administrators can now create custom shift type columns:
+- **Manage Columns Button**: In Gestione Turni view header
+- **Add Custom Columns**:
+  - Custom shift type name
+  - Custom slot configuration (comma-separated)
+  - Supports: MATT, POM, NTT, GG, SPEC, SS, or fully custom slots
+- **Delete Custom Columns**: Remove user-created columns (default columns protected)
+- **Dynamic Integration**: Custom columns instantly appear in:
+  - Gestione Turni grid
+  - Calendario view
+  - User capability selection
+  - Auto-assignment options
+  - Excel/PDF exports
+- **Persistent Storage**: Custom columns saved in localStorage
+- **Validation**: Prevents duplicate names and requires at least one slot
+
+**Implementation Details**:
+- `DEFAULT_SHIFT_TYPES` and `DEFAULT_TIME_SLOTS`: Immutable built-in types
+- `SHIFT_TYPES` and `TIME_SLOTS`: Dynamic arrays that merge default + custom
+- `refreshShiftTypes()`: Loads custom types from localStorage on app initialization
+- Custom types format: `[{name: "TYPE_NAME", slots: ["MATT", "POM"]}]`
+
+### Compact Gestione Utenti
+**Location**: styles.css (lines 647-753)
+
+User management interface optimized for efficiency:
+- **Reduced Card Sizes**: 320px → 260px minimum width
+- **Smaller Fonts**:
+  - User names: 18px → 15px
+  - User IDs: 13px → 11px
+  - Role badges: 11px → 9px
+  - Capabilities: 11px → 9px
+- **Tighter Spacing**:
+  - Card padding: 24px → 14px
+  - Grid gap: 24px → 12px
+  - Element margins reduced throughout
+- **More Content**: Fits 4-5 user cards per row on 1920px displays
+
+### Excel Export Enhancement
+**Location**: app.js (lines 2140-2389)
+
+Professional Excel exports matching sample format exactly:
+- **Excel Blue Headers**: #4472C4 (matches Microsoft Excel default)
+- **Simplified Title**: Just month name in uppercase (NOVEMBRE)
+- **Exact Abbreviations**: SALAsenior, SALAjunior, VIS 201, ECO 206, etc.
+- **Numbered Slots**: Display 1, 2, 3 instead of "MATT 1", "POM 1"
+- **Excel Date Format**: Proper date objects with "d ddd" format (1 sab, 2 dom)
+- **Perfect Colors**: Weekend #ADB9CA, night #BFBFBF match sample exactly
+- **Professional Layout**: Merged cells, borders, center alignment
+
+### PDF Orientation Fix
+**Location**: app.js (line 2792)
+
+Panoramica Indisponibilità now exports correctly:
+- **Portrait A4**: Changed from landscape to portrait orientation
+- **Proper Centering**: Title position adjusted for portrait layout
+- **Better Printing**: Standard A4 vertical format for filing
+
+### Tipologie Turni Corrections
+**Location**: index.html (lines 269-349), app.js (lines 1476-1498)
+
+Fixed and enhanced shift type labeling in Auto-Assignment:
+- **Accurate Labels**:
+  - RAP correctly labeled as "Reperibilità (Emodinamisti)"
+  - Removed non-existent "ECO 230"
+  - Proper categorization: UTIC/PS, RAP, ECO, VISITE
+- **Card-Based UI**: Modern card layout with icons
+- **Advanced Options**: 7 checkboxes for sophisticated constraints:
+  - Avoid consecutive nights
+  - Enforce REP rule
+  - Weekend continuity
+  - Balance weekend shifts
+  - Fair distribution
+  - Respect capabilities
+  - Minimize conflicts
+
+### Critical Bug Fixes
+**Location**: app.js (lines 1269-1275, 1720-1749)
+
+**Warnings System Fix**:
+- Fixed `selectUserForShift()` date parsing bug
+- Was showing false warnings for ALL users
+- Now correctly identifies only incompatible assignments
+
+**Distribuzione per Utente Fix**:
+- Now shows only shifts from selected month (not all months)
+- Displays top 15 users instead of 10
+- Added division-by-zero protection
+
+### Color Coding Accuracy
+**Location**: styles.css (lines 1075-1140)
+
+All views now use exact Excel colors:
+- **Gestione Turni**: Slot colors match Excel perfectly
+- **Calendario**: Weekend and time slot colors harmonized
+- **Consistency**: Same color scheme across entire application
+
+---
+
 ## Future Feature Roadmap
 
 ### Planned Enhancements
