@@ -528,15 +528,28 @@ function renderCalendar() {
         'RISERVE': 'RIS'
     };
 
-    // Excel-style slot abbreviations - very compact
+    // Excel-style slot abbreviations - very compact, numbers only for ambulatori
     const slotAbbrev = (slot) => {
+        // Extract just the number from slots like "MATT 1", "POM 2", etc.
+        const numberMatch = slot.match(/\s+(\d+)$/);
+        if (numberMatch) {
+            return numberMatch[1]; // Return just "1", "2", "3"
+        }
+
+        // For time ranges like "h 8-13", simplify to "8-13"
+        if (slot.startsWith('h ')) {
+            return slot.replace('h ', '');
+        }
+
+        // Standard slots
         if (slot === 'MATT') return 'MAT';
         if (slot === 'POM') return 'POM';
         if (slot === 'NTT') return 'NOT';
         if (slot === 'GG') return 'GG';
         if (slot === 'SS') return 'SS';
         if (slot === 'SPEC') return 'SPEC';
-        return slot; // Return as-is for numbers like 1, 2, 3
+
+        return slot; // Return as-is for anything else
     };
 
     let html = '<table class="calendar-table compact-calendar"><thead><tr>';
