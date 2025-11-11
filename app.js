@@ -501,112 +501,60 @@ function renderCalendar() {
     document.getElementById('currentMonth').textContent = monthText;
 
     const container = document.getElementById('calendarGrid');
-    const year = AppState.currentYear;
-    const month = AppState.currentMonth;
-    const daysInMonth = getDaysInMonth(year, month);
+    const daysInMonth = getDaysInMonth(AppState.currentYear, AppState.currentMonth);
 
     // Check if user should see shifts for this month
-    const canSeeShifts = shouldShowShiftsForUser(year, month);
+    const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
 
-    // Create visual grid calendar (same as Gestione Turni)
-    let html = '<div class="visual-shift-calendar">';
+    let html = '<table class="calendar-table"><thead><tr>';
+    html += '<th>Data</th>';
 
-    // Header with shift types
-    html += '<div class="shift-calendar-header">';
-    html += '<div class="shift-date-column">Data</div>';
+    // Add shift type headers
     SHIFT_TYPES.forEach(shiftType => {
-        html += `<div class="shift-column-header">${shiftType}</div>`;
+        const slots = TIME_SLOTS[shiftType];
+        slots.forEach(slot => {
+            html += `<th>${shiftType}<br><small>${slot}</small></th>`;
+        });
     });
-    html += '</div>';
+    html += '</tr></thead><tbody>';
 
-    // Days grid
+    // Add days
     for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
+        const date = new Date(AppState.currentYear, AppState.currentMonth, day);
         const dayName = DAY_NAMES[date.getDay()];
-        const dateKey = formatDate(year, month, day);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const dateKey = formatDate(AppState.currentYear, AppState.currentMonth, day);
 
-        html += `<div class="shift-calendar-row ${isWeekend ? 'weekend-row' : ''}">`;
-        html += `<div class="shift-date-cell">
-            <div class="date-number">${day}</div>
-            <div class="date-name">${dayName}</div>
-        </div>`;
+        html += `<tr>`;
+        html += `<td class="date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
 
+        // Add shift cells
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
-            const ambulatoriKey = `${dateKey}_${shiftType}`;
+            slots.forEach(slot => {
+                const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                const assignedUserId = AppState.shifts[shiftKey] || '';
+                const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
 
-            // Weekend logic: only UTIC, PS, RAP are open by default
-            const weekendAllowedTypes = ['UTIC', 'PS', 'RAP'];
-            const isAutoClosedForWeekend = isWeekend && !weekendAllowedTypes.includes(shiftType);
-
-            // Check if manually closed or auto-closed for weekend
-            const isClosed = AppState.ambulatoriStatus[ambulatoriKey] === 'closed' || isAutoClosedForWeekend;
-            const isAdmin = AppState.currentUser.role === 'admin';
-
-            html += `<div class="shift-cell-container ${isClosed ? 'closed-cell' : ''}" data-ambulatori="${ambulatoriKey}">`;
-
-            if (isClosed) {
-                html += `
-                    <div class="closed-indicator">
-                        <span class="material-icons">block</span>
-                        <span>CHIUSO</span>
-                    </div>
-                    ${isAdmin ? `<button class="toggle-ambulatori-btn" onclick="toggleAmbulatorio('${ambulatoriKey}', false)">
-                        <span class="material-icons">lock_open</span>
-                    </button>` : ''}
-                `;
-            } else {
-                html += `<div class="shift-slots">`;
-
-                slots.forEach(slot => {
-                    const shiftKey = `${dateKey}_${shiftType}_${slot}`;
-                    const assignedUserId = AppState.shifts[shiftKey] || '';
-                    const assignedUser = (canSeeShifts && assignedUserId) ? AppState.users.find(u => u.id === assignedUserId) : null;
-
-                    const isUnavailable = assignedUser ? isUserUnavailableForSlot(assignedUserId, dateKey, slot) : false;
-                    const canWork = assignedUser ? assignedUser.capabilities.includes(shiftType) : true;
-
-                    const hasError = assignedUser && (!canWork || isUnavailable);
-                    const colorClass = assignedUser ? getColorForUser(assignedUserId) : '';
-                    const userCode = assignedUser ? (assignedUser.code || assignedUser.id.toUpperCase()) : '';
-
-                    const slotTypeClass = `slot-type-${slot.toLowerCase()}`;
-                    html += `
-                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${slotTypeClass} ${!isAdmin ? 'read-only' : ''}"
-                             ${isAdmin ? `onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')"` : ''}>
-                            <div class="slot-time">${slot}</div>
-                            ${assignedUser ? `
-                                <div class="assigned-person">
-                                    <div class="person-avatar">${userCode}</div>
-                                    <div class="person-name">${userCode}</div>
-                                    ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
-                                </div>
-                            ` : `
-                                <div class="empty-slot-indicator">
-                                    ${isAdmin ? '<span class="material-icons">person_add</span>' : ''}
-                                    ${isAdmin ? '<span>Assegna</span>' : '<span>-</span>'}
-                                </div>
-                            `}
-                        </div>
-                    `;
-                });
-
-                html += `</div>`;
-                if (isAdmin) {
-                    html += `<button class="toggle-ambulatori-btn close" onclick="toggleAmbulatorio('${ambulatoriKey}', true)">
-                        <span class="material-icons">lock</span>
-                    </button>`;
+                let displayValue = '';
+                // Only show assignments if user has permission
+                if (canSeeShifts && assignedUserId) {
+                    const user = AppState.users.find(u => u.id === assignedUserId);
+                    displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
                 }
-            }
 
-            html += `</div>`;
+                if (isClosed) {
+                    html += `<td class="shift-cell closed"></td>`;
+                } else {
+                    html += `<td class="shift-cell"><input type="text" value="${displayValue}" readonly></td>`;
+                }
+            });
         });
 
-        html += '</div>';
+        html += '</tr>';
     }
 
-    html += '</div>';
+    html += '</tbody></table>';
     container.innerHTML = html;
 
     // Update approval UI
@@ -1130,7 +1078,7 @@ function renderShiftsGrid() {
                             <div class="slot-time">${slot}</div>
                             ${assignedUser ? `
                                 <div class="assigned-person">
-                                    <div class="person-avatar">${userCode}</div>
+                                    <div class="person-avatar"></div>
                                     <div class="person-name">${userCode}</div>
                                     ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
                                 </div>
