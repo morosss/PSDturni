@@ -2145,8 +2145,8 @@ function generateExcel(year, month, type) {
     // Create data array for all shifts
     const data = [];
 
-    // Title row
-    const titleRow = [`Turni ${ITALIAN_MONTHS[month]} ${year} - ${typeText}`];
+    // Title row - Excel-style format (just month name in uppercase)
+    const titleRow = [ITALIAN_MONTHS[month].toUpperCase()];
     // Fill rest of title row with empty strings
     let totalCols = 1;
     SHIFT_TYPES.forEach(shiftType => {
@@ -2157,22 +2157,63 @@ function generateExcel(year, month, type) {
     }
     data.push(titleRow);
 
+    // Excel-style abbreviations for shift types and slots
+    const shiftAbbrev = {
+        'SALA Senior': 'SALAsenior',
+        'SALA Junior': 'SALAjunior',
+        'REPARTO': 'REPARTO',
+        'UTIC': 'UTIC',
+        'PS': 'PS',
+        'RAP': 'RAP',
+        'ENI': 'ENI',
+        'VIS 201': 'VIS 201',
+        'VISITE 208': 'VIS 208',
+        'TDS 207': 'TDS 207',
+        'ECOTT 205': 'ECOTT',
+        'ECO 206': 'ECO 206',
+        'ECO spec 204': 'ECO 204',
+        'ECO INT': 'ECO INT',
+        'CARDIOCHIR': 'CARD',
+        'Vicenza': 'VICE',
+        'Ricerca': 'RIC',
+        'RISERVE': 'RIS'
+    };
+
+    const slotAbbrev = (slot) => {
+        // Extract just the number from slots like "MATT 1", "POM 2"
+        const numberMatch = slot.match(/\s+(\d+)$/);
+        if (numberMatch) return numberMatch[1];
+
+        // Simplify time ranges
+        if (slot.startsWith('h ')) return slot.replace('h ', '');
+
+        // Standard abbreviations
+        if (slot === 'MATT') return 'MAT';
+        if (slot === 'POM') return 'POM';
+        if (slot === 'NTT') return 'NOT';
+        if (slot === 'GG') return 'GG';
+        if (slot === 'SS') return 'SS';
+        if (slot === 'SPEC') return 'SPEC';
+        return slot;
+    };
+
     // Header row 1: Shift types (offset by 1 due to title)
     const header1 = ['Data'];
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
+        const abbrev = shiftAbbrev[shiftType] || shiftType;
         slots.forEach(() => {
-            header1.push(shiftType);
+            header1.push(abbrev);
         });
     });
     data.push(header1);
 
-    // Header row 2: Time slots (offset by 1 due to title)
+    // Header row 2: Time slots (offset by 1 due to title) - numbers only for ambulatori
     const header2 = [''];
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
         slots.forEach(slot => {
-            header2.push(slot);
+            header2.push(slotAbbrev(slot));
         });
     });
     data.push(header2);
@@ -2180,11 +2221,13 @@ function generateExcel(year, month, type) {
     // Data rows - one for each day
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
-        const dayName = DAY_NAMES[date.getDay()];
+        const dayName = DAY_NAMES[date.getDay()]; // Already lowercase
         const dateKey = formatDate(year, month, day);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
-        const row = [`${day} ${dayName}`];
+        // Excel format: date object for proper Excel date handling
+        const excelDate = new Date(year, month, day);
+        const row = [excelDate];
 
         SHIFT_TYPES.forEach(shiftType => {
             const slots = TIME_SLOTS[shiftType];
@@ -2252,25 +2295,25 @@ function generateExcel(year, month, type) {
     // Add styling
     const range = XLSX.utils.decode_range(ws['!ref']);
 
-    // Style title row (row 0)
+    // Style title row (row 0) - Excel blue header
     for (let col = range.s.c; col <= range.e.c; col++) {
         const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
         if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
         ws[cellAddress].s = {
-            font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } },
-            fill: { fgColor: { rgb: 'C62828' } },
-            alignment: { horizontal: 'center', vertical: 'center' }
+            font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '4472C4' } },
+            alignment: { horizontal: 'left', vertical: 'center' }
         };
     }
 
-    // Style header rows (rows 1 and 2, shift types and time slots)
+    // Style header rows (rows 1 and 2, shift types and time slots) - Excel blue
     for (let col = range.s.c; col <= range.e.c; col++) {
         for (let row = 1; row <= 2; row++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             if (!ws[cellAddress]) ws[cellAddress] = { t: 's', v: '' };
             ws[cellAddress].s = {
-                font: { bold: true, color: { rgb: 'FFFFFF' } },
-                fill: { fgColor: { rgb: 'C62828' } },
+                font: { bold: true, sz: 9, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: '4472C4' } },
                 alignment: { horizontal: 'center', vertical: 'center' }
             };
         }
@@ -2278,15 +2321,20 @@ function generateExcel(year, month, type) {
 
     // Style data cells based on time slot and weekend (starting from row 3, offset by title row)
     for (let row = 3; row <= range.e.r; row++) {
+        // Determine weekend status from actual date value
         const dateCell = ws[XLSX.utils.encode_cell({ r: row, c: 0 })];
-        const dayText = dateCell ? dateCell.v : '';
-        const isWeekend = dayText.includes('Sab') || dayText.includes('Dom');
+        let isWeekend = false;
+        if (dateCell && dateCell.v) {
+            const cellDate = new Date(dateCell.v);
+            isWeekend = cellDate.getDay() === 0 || cellDate.getDay() === 6;
+        }
 
-        // Date column styling
+        // Date column styling - Excel number format for dates
         ws[XLSX.utils.encode_cell({ r: row, c: 0 })].s = {
             font: { bold: true },
             fill: { fgColor: { rgb: isWeekend ? 'ADB9CA' : 'FFFFFF' } },
-            alignment: { horizontal: 'left' },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            numFmt: 'd ddd', // Excel date format: "1 sab", "2 dom", etc.
             border: {
                 top: { style: 'thin', color: { rgb: '000000' } },
                 bottom: { style: 'thin', color: { rgb: '000000' } },
@@ -2304,19 +2352,17 @@ function generateExcel(year, month, type) {
 
                 let bgColor;
                 if (isWeekend) {
-                    // Weekend colors
-                    if (slot === 'MATT') bgColor = 'D0DAE6';
-                    else if (slot === 'POM') bgColor = 'C9D6E3';
-                    else if (slot === 'NTT') bgColor = 'BEC9D6';
-                    else if (slot === 'GG') bgColor = 'C5D3E0';
-                    else if (slot === 'SPEC') bgColor = 'C5D3E0';
+                    // Exact Excel weekend color - uniform light blue
+                    bgColor = 'ADB9CA';
                 } else {
-                    // Weekday colors
-                    if (slot === 'MATT') bgColor = 'FFFFFF';
-                    else if (slot === 'POM') bgColor = 'FFF2CC';
-                    else if (slot === 'NTT') bgColor = 'D9D9D9';
-                    else if (slot === 'GG') bgColor = 'E7E6E6';
+                    // Exact Excel weekday colors
+                    if (slot.includes('MATT') || slot === 'MATT') bgColor = 'FFFFFF';
+                    else if (slot.includes('POM') || slot === 'POM') bgColor = 'FFF2CC';
+                    else if (slot === 'NTT') bgColor = 'BFBFBF'; // Exact Excel gray
+                    else if (slot === 'GG') bgColor = 'FFFFFF';
+                    else if (slot === 'SS') bgColor = 'FFFFFF';
                     else if (slot === 'SPEC') bgColor = 'CCCCFF';
+                    else bgColor = 'FFFFFF'; // Default for numbered slots
                 }
 
                 ws[cellAddress].s = {
