@@ -5,13 +5,13 @@
 // ===========================
 // Constants & Configuration
 // ===========================
-const SHIFT_TYPES = [
+const DEFAULT_SHIFT_TYPES = [
     'SALA Senior', 'SALA Junior', 'REPARTO', 'UTIC', 'PS', 'RAP', 'ENI',
     'VIS 201', 'VISITE 208', 'TDS 207', 'ECOTT 205', 'ECO 206',
     'ECO spec 204', 'ECO INT', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE'
 ];
 
-const TIME_SLOTS = {
+const DEFAULT_TIME_SLOTS = {
     'SALA Senior': ['MATT', 'POM'],
     'SALA Junior': ['MATT', 'POM'],
     'REPARTO': ['MATT 1', 'MATT 2', 'MATT 3', 'POM 1', 'POM 2', 'POM 3'],
@@ -31,6 +31,19 @@ const TIME_SLOTS = {
     'Ricerca': ['GG'],
     'RISERVE': ['MATT', 'POM']
 };
+
+// Dynamic getters for shift types and slots (includes custom ones)
+let SHIFT_TYPES = [...DEFAULT_SHIFT_TYPES];
+let TIME_SLOTS = {...DEFAULT_TIME_SLOTS};
+
+function refreshShiftTypes() {
+    const customShiftTypes = JSON.parse(localStorage.getItem('customShiftTypes') || '[]');
+    SHIFT_TYPES = [...DEFAULT_SHIFT_TYPES, ...customShiftTypes.map(st => st.name)];
+    TIME_SLOTS = {...DEFAULT_TIME_SLOTS};
+    customShiftTypes.forEach(st => {
+        TIME_SLOTS[st.name] = st.slots;
+    });
+}
 
 const ITALIAN_MONTHS = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -3074,6 +3087,7 @@ function exportAvailabilityExcel() {
 // Initialize Application
 // ===========================
 document.addEventListener('DOMContentLoaded', () => {
+    refreshShiftTypes(); // Load custom shift types
     initializeDefaultData();
     initializeEventListeners();
 
@@ -3089,6 +3103,116 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('loginScreen');
 });
 
+// ===========================
+// Column Management
+// ===========================
+function openManageColumnsModal() {
+    refreshCustomColumnsList();
+    openModal('manageColumnsModal');
+}
+
+function refreshCustomColumnsList() {
+    const customShiftTypes = JSON.parse(localStorage.getItem('customShiftTypes') || '[]');
+    const container = document.getElementById('customColumnsList');
+
+    if (customShiftTypes.length === 0) {
+        container.innerHTML = '<p class="helper-text">Nessuna colonna personalizzata ancora creata.</p>';
+        return;
+    }
+
+    let html = '<div class="custom-columns-list">';
+    customShiftTypes.forEach((st, index) => {
+        html += `
+            <div class="custom-column-item">
+                <div class="custom-column-info">
+                    <strong>${st.name}</strong>
+                    <span class="helper-text">Slot: ${st.slots.join(', ')}</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="deleteCustomColumn(${index})">
+                    <span class="material-icons">delete</span>
+                    Elimina
+                </button>
+            </div>
+        `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function addCustomColumn() {
+    const nameInput = document.getElementById('newColumnName');
+    const slotsInput = document.getElementById('newColumnSlots');
+
+    const name = nameInput.value.trim();
+    const slotsText = slotsInput.value.trim();
+
+    if (!name || !slotsText) {
+        showToast('Inserisci nome e slot per la nuova colonna', 'error');
+        return;
+    }
+
+    // Parse slots (comma-separated)
+    const slots = slotsText.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+    if (slots.length === 0) {
+        showToast('Inserisci almeno uno slot', 'error');
+        return;
+    }
+
+    // Check if name already exists
+    const customShiftTypes = JSON.parse(localStorage.getItem('customShiftTypes') || '[]');
+    if (DEFAULT_SHIFT_TYPES.includes(name) || customShiftTypes.some(st => st.name === name)) {
+        showToast('Una colonna con questo nome esiste già', 'error');
+        return;
+    }
+
+    // Add new custom shift type
+    customShiftTypes.push({ name, slots });
+    localStorage.setItem('customShiftTypes', JSON.stringify(customShiftTypes));
+
+    // Refresh shift types
+    refreshShiftTypes();
+
+    // Clear inputs
+    nameInput.value = '';
+    slotsInput.value = '';
+
+    // Refresh list
+    refreshCustomColumnsList();
+
+    // Refresh the grid if we're on the shifts view
+    if (document.getElementById('shiftsView').classList.contains('active')) {
+        renderShiftsGrid();
+    }
+
+    showToast('Colonna aggiunta con successo', 'success');
+}
+
+function deleteCustomColumn(index) {
+    if (!confirm('Sei sicuro di voler eliminare questa colonna personalizzata?')) {
+        return;
+    }
+
+    const customShiftTypes = JSON.parse(localStorage.getItem('customShiftTypes') || '[]');
+    const deletedColumn = customShiftTypes[index];
+
+    customShiftTypes.splice(index, 1);
+    localStorage.setItem('customShiftTypes', JSON.stringify(customShiftTypes));
+
+    // Refresh shift types
+    refreshShiftTypes();
+
+    // Refresh list
+    refreshCustomColumnsList();
+
+    // Refresh the grid if we're on the shifts view
+    if (document.getElementById('shiftsView').classList.contains('active')) {
+        renderShiftsGrid();
+    }
+
+    showToast(`Colonna "${deletedColumn.name}" eliminata`, 'success');
+}
+
 // Export functions for global access
 window.switchView = switchView;
 window.editUser = editUser;
@@ -3101,3 +3225,6 @@ window.closeModal = closeModal;
 window.loadVersion = loadVersion;
 window.deleteVersion = deleteVersion;
 window.renameVersion = renameVersion;
+window.openManageColumnsModal = openManageColumnsModal;
+window.addCustomColumn = addCustomColumn;
+window.deleteCustomColumn = deleteCustomColumn;

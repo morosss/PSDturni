@@ -211,6 +211,10 @@
                 <div class="view-header">
                     <h2>Gestione Turni</h2>
                     <div class="view-actions">
+                        <button class="btn btn-secondary" onclick="openManageColumnsModal()">
+                            <span class="material-icons">view_column</span>
+                            Gestisci Colonne
+                        </button>
                         <select id="shiftMonth" class="select-input"></select>
                     </div>
                 </div>
@@ -605,6 +609,46 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Manage Columns Modal -->
+    <div id="manageColumnsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Gestione Colonne Turni</h3>
+                <button type="button" class="modal-close" data-modal="manageColumnsModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="form">
+                <div class="info-box">
+                    <span class="material-icons">info</span>
+                    <p>Aggiungi nuove colonne (turni) personalizzate. Le colonne predefinite non possono essere eliminate.</p>
+                </div>
+
+                <h4>Colonne Personalizzate</h4>
+                <div id="customColumnsList"></div>
+
+                <h4 style="margin-top: 20px;">Aggiungi Nuova Colonna</h4>
+                <div class="input-group">
+                    <label for="newColumnName">Nome Turno</label>
+                    <input type="text" id="newColumnName" placeholder="es. NUOVA SEDE, TURNO SPECIALE">
+                </div>
+                <div class="input-group">
+                    <label for="newColumnSlots">Slot (separati da virgola)</label>
+                    <input type="text" id="newColumnSlots" placeholder="es. MATT, POM, NTT">
+                    <span class="helper-text">Usa MATT (mattina), POM (pomeriggio), NTT (notte), GG (giornata), SPEC (speciale), o slot personalizzati</span>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addCustomColumn()">
+                    <span class="material-icons">add</span>
+                    Aggiungi Colonna
+                </button>
+
+                <div class="modal-actions" style="margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" data-modal="manageColumnsModal">Chiudi</button>
+                </div>
+            </div>
         </div>
     </div>
 
