@@ -1252,16 +1252,128 @@ All views now use exact Excel colors:
 - **Calendario**: Weekend and time slot colors harmonized
 - **Consistency**: Same color scheme across entire application
 
+### Email Management (NEW - November 2025)
+**Location**: app.js (lines 3216-3477), index.html (lines 490-575), styles.css (lines 3346-3512)
+
+Complete email composition system for sending shift schedules to staff:
+
+**Key Features**:
+- Admin-only "Gestione Email" page with full email composer
+- Recipient selection: individual users or all users at once
+- Multi-select dropdown with user names and email addresses
+- Subject and body composition with full text editor
+- Live email preview showing recipients, subject, attachments, and formatted body
+- Attachment management:
+  * Add current month's Excel file
+  * Add current month's PDF file
+  * Upload custom files from computer
+  * Remove attachments before sending
+- Email options:
+  * Include link to online calendar
+  * Request read confirmation
+- Mailto URL generation with proper encoding
+- Auto-generation of Excel/PDF files before opening email client
+- Instructions modal for manual attachment addition
+
+**Technical Implementation**:
+- `initializeEmailView()`: Populates recipient list with all users
+- `updateEmailPreview()`: Real-time preview as user types
+- `addEmailAttachment()`: Adds Excel/PDF to attachment list
+- `handleCustomAttachments()`: Handles file uploads
+- `sendEmail()`: Validates, builds mailto URL, generates files, opens email client
+- Professional UI with Material Design icons and card-based layout
+- Responsive design with mobile support
+
+**User Flow**:
+1. Admin navigates to "Gestione Email"
+2. Selects recipients (Ctrl/Cmd+click for multiple)
+3. Enters subject and message
+4. Optionally adds attachments (Excel, PDF, or custom files)
+5. Reviews live preview
+6. Clicks "Invia Email" - opens default email client with pre-filled content
+7. Manually adds generated Excel/PDF files to email
+8. Sends email from their client
+
+**Benefits**:
+- Quick communication with entire staff
+- Consistent email templates
+- Automatic file generation
+- No need to manually export then attach
+- Professional appearance
+
+### Statistics and Analytics (NEW - November 2025)
+**Location**: app.js (lines 3479-3854), index.html (lines 577-663), styles.css (lines 3514-3693)
+
+Comprehensive analytics dashboard for shift distribution analysis:
+
+**Key Features**:
+- Admin-only "Statistiche" page with full analytics suite
+- Month selector for historical analysis (current + 3 future months)
+- Four summary cards showing:
+  * Total shifts in month
+  * Active users (users with at least one shift)
+  * Assigned shifts with percentage
+  * Empty shifts (unassigned)
+- Four interactive Chart.js visualizations:
+  1. **Bar Chart**: Top 10 users by shift count
+  2. **Doughnut Chart**: Distribution by shift type (SALA, PS, UTIC, etc.)
+  3. **Pie Chart**: Distribution by time slot (Morning, Afternoon, Night, Day, Special)
+  4. **Line Chart**: Daily assignment trends throughout the month
+- Detailed data table with per-user breakdown:
+  * User name and code
+  * Total shifts assigned
+  * Breakdown by each shift type
+  * Sortable by total shifts (descending)
+
+**Technical Implementation**:
+- Chart.js 4.4.0 via CDN for professional charts
+- `calculateStatistics()`: Comprehensive data aggregation
+  * Iterates through all shifts in selected month
+  * Counts by user, shift type, time slot, and day
+  * Calculates percentages and active user count
+- Chart rendering functions:
+  * `renderUserDistributionChart()`: Bar chart with top 10 users
+  * `renderShiftTypeChart()`: Doughnut with dynamic color generation
+  * `renderTimeSlotChart()`: Pie chart with predefined colors
+  * `renderMonthTrendChart()`: Line chart showing daily patterns
+- `renderStatsTable()`: Dynamic HTML table generation
+- Chart instance management: destroys old charts before creating new ones
+- Responsive grid layouts for mobile/tablet/desktop
+
+**Use Cases**:
+- **Workload Analysis**: Identify users with heavy/light workloads
+- **Balance Check**: Ensure fair shift distribution
+- **Capacity Planning**: See which shift types are most used
+- **Trend Analysis**: Identify patterns in daily assignments
+- **Reporting**: Generate insights for administration
+- **Optimization**: Make data-driven decisions for auto-assignment
+
+**Metrics Calculated**:
+- Total shifts: Every slot across all days and shift types
+- Assigned shifts: Slots with a user assigned
+- Empty shifts: Slots without assignment
+- Assignment percentage: (Assigned / Total) * 100
+- Active users: Unique users with at least one shift
+- Per-user totals and breakdowns
+- Daily assignment counts for trend analysis
+
+**Visual Design**:
+- Material Design cards with hover effects
+- Professional color schemes matching shift types
+- Responsive charts that scale to screen size
+- Sticky table headers for easy scrolling
+- Loading states and empty state messages
+
 ---
 
 ## Future Feature Roadmap
 
 ### Planned Enhancements
 1. Mobile app (React Native)
-2. Email notifications
+2. ~~Email notifications~~ ✅ **IMPLEMENTED** (Email Management - November 2025)
 3. SMS reminders
 4. Calendar sync (Google Calendar, iCal)
-5. Advanced analytics dashboard
+5. ~~Advanced analytics dashboard~~ ✅ **IMPLEMENTED** (Statistics - November 2025)
 6. Shift swap requests
 7. Time-off management integration
 8. Multi-hospital support
@@ -1290,9 +1402,19 @@ Export & Reports
 
 ## Conclusion
 
-PSDturni provides a comprehensive shift management solution with 7 main feature areas, 18 shift types, and intelligent automation. The system is designed for hospital cardiology departments with 20-50 medical staff members.
+PSDturni provides a comprehensive shift management solution with 9 main feature areas (including Email Management and Statistics), 18+ shift types with dynamic column management, and intelligent automation. The system is designed for hospital cardiology departments with 20-50 medical staff members.
+
+**Major Features**:
+- User and shift management
+- Availability tracking
+- Auto-assignment with constraints
+- Excel/PDF export
+- Email communication
+- Analytics and statistics
+- Dynamic shift type management
+- Version control
 
 For questions or feature requests, contact the system administrator.
 
 **Last Updated**: November 2025
-**Version**: 1.0.0
+**Version**: 1.1.0
