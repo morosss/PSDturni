@@ -2705,14 +2705,14 @@ function renderAvailabilityOverviewGrid() {
         slots.forEach((slot, slotIndex) => {
             html += `<div class="overview-day-row-transposed ${isWeekend ? 'weekend-row' : ''}">`;
 
-            // Day number cell (rowspan effect with CSS)
+            // Day number cell (shown only on first row)
             if (slotIndex === 0) {
-                html += `<div class="overview-day-cell-label" data-rowspan="3">
+                html += `<div class="overview-day-cell-label">
                     <div class="day-number">${day}</div>
                     <div class="day-name-small">${dayName}</div>
                 </div>`;
             } else {
-                html += `<div class="overview-day-cell-label hidden"></div>`;
+                html += `<div class="overview-day-cell-label empty-day-cell"></div>`;
             }
 
             // Slot label

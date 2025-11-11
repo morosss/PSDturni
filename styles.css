@@ -2466,7 +2466,7 @@ body {
 }
 
 .overview-day-cell-label {
-    padding: 8px;
+    padding: 4px 6px;
     font-weight: 500;
     text-align: center;
     border-right: 1px solid var(--divider);
@@ -2475,6 +2475,8 @@ body {
     justify-content: center;
     align-items: center;
     background: #fafafa;
+    height: 25px;
+    min-height: 25px;
 }
 
 .overview-day-cell-label.hidden {
@@ -2484,19 +2486,21 @@ body {
 }
 
 .overview-day-cell-label .day-number {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: var(--primary-color);
+    line-height: 1;
 }
 
 .overview-day-cell-label .day-name-small {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--text-secondary);
-    margin-top: 2px;
+    margin-top: 1px;
+    line-height: 1;
 }
 
 .overview-slot-cell-label {
-    padding: 8px;
+    padding: 4px 6px;
     text-align: center;
     font-weight: bold;
     border-right: 1px solid var(--divider);
@@ -2504,19 +2508,30 @@ body {
     align-items: center;
     justify-content: center;
     background: #e3f2fd;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    height: 25px;
+    min-height: 25px;
 }
 
 .unavailable-cell {
     background-color: #ff0000 !important; /* Bright red */
     border-right: 1px solid #ccc;
-    min-height: 35px;
+    min-height: 25px;
+    height: 25px;
 }
 
 .available-cell {
     background-color: #ffffff;
     border-right: 1px solid #e0e0e0;
-    min-height: 35px;
+    min-height: 25px;
+    height: 25px;
+}
+
+.empty-day-cell {
+    border-right: 1px solid var(--divider);
+    background: #fafafa;
+    height: 25px;
+    min-height: 25px;
 }
 
 .overview-legend {
