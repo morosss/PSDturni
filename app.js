@@ -506,14 +506,48 @@ function renderCalendar() {
     // Check if user should see shifts for this month
     const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
 
-    let html = '<table class="calendar-table"><thead><tr>';
-    html += '<th>Data</th>';
+    // Abbreviate shift type names for compact view
+    const shiftAbbrev = {
+        'SALA Senior': 'SAL Sr',
+        'SALA Junior': 'SAL Jr',
+        'REPARTO': 'REP',
+        'UTIC': 'UTIC',
+        'PS': 'PS',
+        'RAP': 'RAP',
+        'ENI': 'ENI',
+        'VIS 201': 'V201',
+        'VISITE 208': 'V208',
+        'TDS 207': 'TDS',
+        'ECOTT 205': 'E205',
+        'ECO 206': 'E206',
+        'ECO spec 204': 'E204',
+        'ECO INT': 'EINT',
+        'CARDIOCHIR': 'CARD',
+        'Vicenza': 'VIC',
+        'Ricerca': 'RIC',
+        'RISERVE': 'RIS'
+    };
 
-    // Add shift type headers
+    // Abbreviate slot names
+    const slotAbbrev = (slot) => {
+        if (slot === 'MATT') return 'M';
+        if (slot === 'POM') return 'P';
+        if (slot === 'NTT') return 'N';
+        if (slot === 'GG') return 'G';
+        if (slot === 'SS') return 'S';
+        if (slot === 'SPEC') return 'SP';
+        return slot; // Return as-is for numbers like 1, 2, 3
+    };
+
+    let html = '<table class="calendar-table compact-calendar"><thead><tr>';
+    html += '<th class="date-header">GG</th>';
+
+    // Add shift type headers - compact format
     SHIFT_TYPES.forEach(shiftType => {
         const slots = TIME_SLOTS[shiftType];
+        const abbrev = shiftAbbrev[shiftType] || shiftType;
         slots.forEach(slot => {
-            html += `<th>${shiftType}<br><small>${slot}</small></th>`;
+            html += `<th class="compact-header">${abbrev}<br>${slotAbbrev(slot)}</th>`;
         });
     });
     html += '</tr></thead><tbody>';
@@ -522,11 +556,12 @@ function renderCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(AppState.currentYear, AppState.currentMonth, day);
         const dayName = DAY_NAMES[date.getDay()];
+        const dayAbbrev = dayName.substring(0, 2); // Lu, Ma, Me, Gi, Ve, Sa, Do
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const dateKey = formatDate(AppState.currentYear, AppState.currentMonth, day);
 
         html += `<tr>`;
-        html += `<td class="date-cell ${isWeekend ? 'weekend' : ''}">${day} ${dayName}</td>`;
+        html += `<td class="date-cell compact-date ${isWeekend ? 'weekend' : ''}">${day}<br><small>${dayAbbrev}</small></td>`;
 
         // Add shift cells
         SHIFT_TYPES.forEach(shiftType => {
@@ -543,10 +578,21 @@ function renderCalendar() {
                     displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
                 }
 
+                // Determine slot color class
+                const slotClass = slot.includes('MATT') || slot === '1' || slot === '2' || slot === '3' ? 'slot-matt' :
+                                  slot.includes('POM') ? 'slot-pom' :
+                                  slot === 'NTT' ? 'slot-ntt' :
+                                  slot === 'GG' ? 'slot-gg' :
+                                  slot === 'SS' || slot === 'SPEC' ? 'slot-spec' : '';
+
+                const isEmpty = !displayValue && !isClosed;
+
                 if (isClosed) {
-                    html += `<td class="shift-cell closed"></td>`;
+                    html += `<td class="shift-cell closed compact-cell"></td>`;
+                } else if (isEmpty) {
+                    html += `<td class="shift-cell empty-cell compact-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><div class="compact-shift-content"></div></td>`;
                 } else {
-                    html += `<td class="shift-cell"><input type="text" value="${displayValue}" readonly></td>`;
+                    html += `<td class="shift-cell compact-cell ${slotClass} ${isWeekend ? 'weekend-slot' : ''}"><div class="compact-shift-content">${displayValue}</div></td>`;
                 }
             });
         });
@@ -1222,9 +1268,10 @@ function createShiftAssignModal() {
 
 function selectUserForShift(shiftKey, userId) {
     // Parse shift key to get details
+    // shiftKey format: "2025-11-15_SALA Senior_MATT"
     const parts = shiftKey.split('_');
-    const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
-    const shiftType = parts.slice(3, -1).join('_');
+    const dateKey = parts[0]; // Date is already formatted: "2025-11-15"
+    const shiftType = parts.slice(1, -1).join('_'); // Join middle parts for multi-word shift types
     const slot = parts[parts.length - 1];
 
     const user = AppState.users.find(u => u.id === userId);
@@ -1479,13 +1526,22 @@ function runAutoAssignment() {
         selectedTypes.push('SALA Senior', 'SALA Junior');
     }
     if (document.getElementById('assignREPARTO').checked) {
+        selectedTypes.push('REPARTO');
+    }
+    if (document.getElementById('assignUTICPS') && document.getElementById('assignUTICPS').checked) {
+        selectedTypes.push('UTIC', 'PS');
+    }
+    if (document.getElementById('assignRAP') && document.getElementById('assignRAP').checked) {
         selectedTypes.push('RAP');
     }
     if (document.getElementById('assignECO').checked) {
-        selectedTypes.push('ECO 206', 'ECO 214', 'ECO 230');
+        selectedTypes.push('ECO 206', 'ECO spec 204', 'ECO INT');
+    }
+    if (document.getElementById('assignVISITE') && document.getElementById('assignVISITE').checked) {
+        selectedTypes.push('VIS 201', 'VISITE 208', 'TDS 207', 'ECOTT 205');
     }
     if (document.getElementById('assignOthers').checked) {
-        selectedTypes.push('UTIC', 'PS', 'PDD', 'SCC', 'VAD', 'AMB 201', 'AMB 203', 'AMB 207', 'AMB 210', 'AMB 213', 'AMB 228');
+        selectedTypes.push('ENI', 'CARDIOCHIR', 'Vicenza', 'Ricerca', 'RISERVE');
     }
 
     if (selectedTypes.length === 0) {
@@ -1708,7 +1764,7 @@ function runAutoAssignment() {
 
         saveToStorage('shifts', AppState.shifts);
 
-        // Calculate statistics by user
+        // Calculate statistics by user (for this month only)
         const userStats = {};
         AppState.users.forEach(user => {
             userStats[user.id] = {
@@ -1719,19 +1775,24 @@ function runAutoAssignment() {
             };
         });
 
+        // Count shifts only for the generated month
         Object.keys(AppState.shifts).forEach(shiftKey => {
             const userId = AppState.shifts[shiftKey];
             const parts = shiftKey.split('_');
-            if (parts.length >= 4) {
-                const shiftType = parts.slice(3, -1).join('_');
-                if (userStats[userId]) {
-                    userStats[userId].total++;
-                    userStats[userId].byType[shiftType] = (userStats[userId].byType[shiftType] || 0) + 1;
+            // Check if shift belongs to current month (parts[0] = year-month-day)
+            if (parts.length >= 4 && parts[0]) {
+                const [shiftYear, shiftMonth] = parts[0].split('-').map(Number);
+                if (shiftYear === year && shiftMonth === month) {
+                    const shiftType = parts.slice(3, -1).join('_');
+                    if (userStats[userId]) {
+                        userStats[userId].total++;
+                        userStats[userId].byType[shiftType] = (userStats[userId].byType[shiftType] || 0) + 1;
+                    }
                 }
             }
         });
 
-        // Sort users by total shifts
+        // Sort users by total shifts (show all users, even with 0 shifts)
         const sortedUsers = Object.values(userStats).sort((a, b) => b.total - a.total);
 
         // Calculate success rate
@@ -1796,24 +1857,25 @@ function runAutoAssignment() {
                             <tbody>
             `;
 
-            sortedUsers.slice(0, 10).forEach(user => {
-                if (user.total > 0) {
-                    const maxTotal = sortedUsers[0].total;
-                    const barWidth = (user.total / maxTotal) * 100;
+            // Show top 15 users (or all if less than 15)
+            const usersToShow = sortedUsers.slice(0, 15);
+            const maxTotal = Math.max(...sortedUsers.map(u => u.total), 1); // Avoid division by zero
 
-                    html += `
-                        <tr>
-                            <td><strong>${user.code}</strong></td>
-                            <td>${user.total}</td>
-                            <td>
-                                <div class="distribution-bar">
-                                    <div class="distribution-fill" style="width: ${barWidth}%"></div>
-                                    <span class="distribution-label">${user.total} turni</span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
+            usersToShow.forEach(user => {
+                const barWidth = maxTotal > 0 ? (user.total / maxTotal) * 100 : 0;
+
+                html += `
+                    <tr>
+                        <td><strong>${user.code}</strong></td>
+                        <td>${user.total}</td>
+                        <td>
+                            <div class="distribution-bar">
+                                <div class="distribution-fill" style="width: ${barWidth}%"></div>
+                                <span class="distribution-label">${user.total} turni</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
 
             html += `
@@ -2728,12 +2790,12 @@ function exportAvailabilityPdf() {
     const daysInMonth = getDaysInMonth(year, month);
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape', 'mm', 'a4');
+    const doc = new jsPDF('portrait', 'mm', 'a4');
 
     // Title
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text(`Panoramica Indisponibilità - ${ITALIAN_MONTHS[month]} ${year}`, 148, 12, { align: 'center' });
+    doc.text(`Panoramica Indisponibilità - ${ITALIAN_MONTHS[month]} ${year}`, 105, 12, { align: 'center' });
 
     // NEW TRANSPOSED LAYOUT: Rows = Days (with M/P/N), Columns = Users
     const headers = ['Giorno', 'Fascia'];

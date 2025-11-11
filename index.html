@@ -290,7 +290,27 @@
                                         <span class="material-icons">hotel</span>
                                         <div class="shift-type-info">
                                             <strong>REPARTO</strong>
-                                            <small>RAP</small>
+                                            <small>REPARTO</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignUTICPS" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">emergency</span>
+                                        <div class="shift-type-info">
+                                            <strong>UTIC/PS</strong>
+                                            <small>UTIC, PS</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignRAP" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">phone_in_talk</span>
+                                        <div class="shift-type-info">
+                                            <strong>Reperibilità</strong>
+                                            <small>RAP (Emodinamisti)</small>
                                         </div>
                                     </div>
                                 </label>
@@ -300,7 +320,17 @@
                                         <span class="material-icons">favorite</span>
                                         <div class="shift-type-info">
                                             <strong>ECO</strong>
-                                            <small>206, 214, 230</small>
+                                            <small>206, 204, INT</small>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="shift-type-card">
+                                    <input type="checkbox" id="assignVISITE" checked>
+                                    <div class="shift-type-content">
+                                        <span class="material-icons">assignment</span>
+                                        <div class="shift-type-info">
+                                            <strong>VISITE</strong>
+                                            <small>201, 208, TDS 207</small>
                                         </div>
                                     </div>
                                 </label>
@@ -310,7 +340,7 @@
                                         <span class="material-icons">more_horiz</span>
                                         <div class="shift-type-info">
                                             <strong>Altri</strong>
-                                            <small>UTIC, PS, AMB, ecc.</small>
+                                            <small>ENI, ECOTT, CARDIOCHIR, ecc.</small>
                                         </div>
                                     </div>
                                 </label>
@@ -346,6 +376,34 @@
                                     <span>Rispetta indisponibilità</span>
                                 </label>
                                 <small class="helper-text">Evita di assegnare turni a utenti non disponibili</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="avoidConsecutiveNights" checked>
+                                    <span>Evita notti consecutive</span>
+                                </label>
+                                <small class="helper-text">Non assegna turni di notte consecutivi allo stesso utente</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enforceREPRule" checked>
+                                    <span>Applica regola REP per turni notturni</span>
+                                </label>
+                                <small class="helper-text">Assicura che i turni notturni abbiano emodinamisti REP-capable</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="weekendContinuity" checked>
+                                    <span>Continuità emodinamista weekend</span>
+                                </label>
+                                <small class="helper-text">Mantiene lo stesso emodinamista per tutto il weekend</small>
+                            </div>
+                            <div class="input-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="balanceWeekendShifts">
+                                    <span>Bilancia turni weekend</span>
+                                </label>
+                                <small class="helper-text">Distribuisce equamente i turni nei weekend tra gli utenti</small>
                             </div>
                         </div>
                     </div>
