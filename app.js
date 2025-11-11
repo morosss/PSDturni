@@ -37,7 +37,7 @@ const ITALIAN_MONTHS = [
     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
 ];
 
-const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const DAY_NAMES = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
 
 // ===========================
 // Toast Notifications
@@ -506,36 +506,36 @@ function renderCalendar() {
     // Check if user should see shifts for this month
     const canSeeShifts = shouldShowShiftsForUser(AppState.currentYear, AppState.currentMonth);
 
-    // Abbreviate shift type names for compact view
+    // Use exact Excel column names - very compact
     const shiftAbbrev = {
-        'SALA Senior': 'SAL Sr',
-        'SALA Junior': 'SAL Jr',
-        'REPARTO': 'REP',
+        'SALA Senior': 'SALAsenior',
+        'SALA Junior': 'SALAjunior',
+        'REPARTO': 'REPARTO',
         'UTIC': 'UTIC',
         'PS': 'PS',
         'RAP': 'RAP',
         'ENI': 'ENI',
-        'VIS 201': 'V201',
-        'VISITE 208': 'V208',
-        'TDS 207': 'TDS',
-        'ECOTT 205': 'E205',
-        'ECO 206': 'E206',
-        'ECO spec 204': 'E204',
-        'ECO INT': 'EINT',
+        'VIS 201': 'VIS 201',
+        'VISITE 208': 'VIS 208',
+        'TDS 207': 'TDS 207',
+        'ECOTT 205': 'ECOTT',
+        'ECO 206': 'ECO 206',
+        'ECO spec 204': 'ECO 204',
+        'ECO INT': 'ECO INT',
         'CARDIOCHIR': 'CARD',
-        'Vicenza': 'VIC',
+        'Vicenza': 'VICE',
         'Ricerca': 'RIC',
         'RISERVE': 'RIS'
     };
 
-    // Abbreviate slot names
+    // Excel-style slot abbreviations - very compact
     const slotAbbrev = (slot) => {
-        if (slot === 'MATT') return 'M';
-        if (slot === 'POM') return 'P';
-        if (slot === 'NTT') return 'N';
-        if (slot === 'GG') return 'G';
-        if (slot === 'SS') return 'S';
-        if (slot === 'SPEC') return 'SP';
+        if (slot === 'MATT') return 'MAT';
+        if (slot === 'POM') return 'POM';
+        if (slot === 'NTT') return 'NOT';
+        if (slot === 'GG') return 'GG';
+        if (slot === 'SS') return 'SS';
+        if (slot === 'SPEC') return 'SPEC';
         return slot; // Return as-is for numbers like 1, 2, 3
     };
 
@@ -1106,8 +1106,12 @@ function renderShiftsGrid() {
 
                 slots.forEach(slot => {
                     const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                    const slotKey = shiftKey; // Individual slot key for closing
                     const assignedUserId = AppState.shifts[shiftKey] || '';
                     const assignedUser = assignedUserId ? AppState.users.find(u => u.id === assignedUserId) : null;
+
+                    // Check if this individual slot is closed
+                    const isSlotClosed = AppState.ambulatoriStatus[slotKey] === 'closed';
 
                     const isUnavailable = assignedUser ? isUserUnavailableForSlot(assignedUserId, dateKey, slot) : false;
                     const canWork = assignedUser ? assignedUser.capabilities.includes(shiftType) : true;
@@ -1118,24 +1122,43 @@ function renderShiftsGrid() {
 
                     const isAdmin = AppState.currentUser.role === 'admin';
                     const slotTypeClass = `slot-type-${slot.toLowerCase()}`;
-                    html += `
-                        <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${slotTypeClass} ${!isAdmin ? 'read-only' : ''}"
-                             ${isAdmin ? `onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')"` : ''}>
-                            <div class="slot-time">${slot}</div>
-                            ${assignedUser ? `
-                                <div class="assigned-person">
-                                    <div class="person-avatar"></div>
-                                    <div class="person-name">${userCode}</div>
-                                    ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
+
+                    if (isSlotClosed) {
+                        // Render closed slot
+                        html += `
+                            <div class="shift-slot closed-slot ${slotTypeClass}">
+                                <div class="slot-time">${slot}</div>
+                                <div class="closed-indicator-small">
+                                    <span class="material-icons">block</span>
                                 </div>
-                            ` : `
-                                <div class="empty-slot-indicator">
-                                    <span class="material-icons">person_add</span>
-                                    <span>Assegna</span>
-                                </div>
-                            `}
-                        </div>
-                    `;
+                                ${isAdmin ? `<button class="toggle-slot-btn" onclick="event.stopPropagation(); toggleAmbulatorio('${slotKey}', false);" title="Riapri slot">
+                                    <span class="material-icons">lock_open</span>
+                                </button>` : ''}
+                            </div>
+                        `;
+                    } else {
+                        // Render open slot
+                        html += `
+                            <div class="shift-slot ${assignedUser ? 'assigned' : 'empty'} ${hasError ? 'has-error' : ''} ${colorClass} ${slotTypeClass} ${!isAdmin ? 'read-only' : ''}"
+                                 ${isAdmin ? `onclick="openShiftModal('${shiftKey}', '${shiftType}', '${dateKey}', '${slot}')"` : ''}>
+                                <div class="slot-time">${slot}</div>
+                                ${assignedUser ? `
+                                    <div class="assigned-person">
+                                        <div class="person-name">${userCode}</div>
+                                        ${hasError ? '<span class="material-icons error-icon" title="Attenzione">warning</span>' : ''}
+                                    </div>
+                                ` : `
+                                    <div class="empty-slot-indicator">
+                                        <span class="material-icons">person_add</span>
+                                        <span>Assegna</span>
+                                    </div>
+                                `}
+                                ${isAdmin ? `<button class="toggle-slot-btn close-slot" onclick="event.stopPropagation(); toggleAmbulatorio('${slotKey}', true);" title="Chiudi slot">
+                                    <span class="material-icons">lock</span>
+                                </button>` : ''}
+                            </div>
+                        `;
+                    }
                 });
 
                 html += `</div>`;

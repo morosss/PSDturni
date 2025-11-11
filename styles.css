@@ -514,18 +514,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 24px;
-    margin-bottom: 32px;
-    padding: 20px;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding: 12px;
     background: var(--surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
 
 .calendar-controls h3 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
-    min-width: 240px;
+    min-width: 200px;
     text-align: center;
     letter-spacing: -0.5px;
 }
@@ -534,7 +534,7 @@ body {
     background: var(--surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: 24px;
+    padding: 12px;
     overflow-x: auto;
     border: 1px solid rgba(0, 0, 0, 0.04);
 }
@@ -544,6 +544,127 @@ body {
     border-collapse: separate;
     border-spacing: 0;
     font-size: 13px;
+}
+
+/* Compact Calendar - Excel-style for 16:9 screen fit */
+.compact-calendar {
+    font-size: 10px;
+    font-family: 'Calibri', 'Arial', sans-serif;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.compact-calendar th,
+.compact-calendar td {
+    padding: 3px 4px;
+    border: 1px solid #d0d0d0;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.compact-calendar th {
+    background: #4472C4;
+    color: white;
+    font-weight: 600;
+    font-size: 9px;
+    padding: 4px 2px;
+    white-space: nowrap;
+}
+
+.compact-calendar .date-header {
+    background: #4472C4;
+    font-weight: bold;
+}
+
+.compact-calendar .compact-header {
+    font-size: 8px;
+    padding: 2px 1px;
+    line-height: 1.1;
+}
+
+.compact-calendar .compact-date {
+    font-weight: 600;
+    background: #FFFFFF;
+    font-size: 11px;
+    min-width: 45px;
+    padding: 4px;
+}
+
+.compact-calendar .compact-date small {
+    display: block;
+    font-size: 8px;
+    font-weight: 500;
+    color: #666;
+    margin-top: 1px;
+}
+
+.compact-calendar .compact-cell {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 2px;
+    min-width: 40px;
+    max-width: 55px;
+}
+
+.compact-calendar .compact-shift-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Excel-accurate color coding for calendario */
+.compact-calendar .slot-matt {
+    background: #FFFFFF !important;
+}
+
+.compact-calendar .slot-pom {
+    background: #FFF2CC !important;
+}
+
+.compact-calendar .slot-ntt {
+    background: #BFBFBF !important;
+}
+
+.compact-calendar .slot-gg {
+    background: #E7E6E6 !important;
+}
+
+.compact-calendar .slot-spec {
+    background: #CCCCFF !important;
+}
+
+/* Weekend rows - light blue for all cells */
+.compact-calendar .weekend-slot {
+    background: #ADB9CA !important;
+}
+
+.compact-calendar .weekend.compact-date {
+    background: #ADB9CA !important;
+}
+
+.compact-calendar .closed {
+    background: repeating-linear-gradient(
+        45deg,
+        #ff6b6b,
+        #ff6b6b 5px,
+        #ff9999 5px,
+        #ff9999 10px
+    ) !important;
+}
+
+.compact-calendar .empty-cell {
+    background-color: #FFFFFF;
+}
+
+/* Ensure proper text visibility on colored backgrounds */
+.compact-calendar .slot-ntt {
+    color: #000000;
+}
+
+.compact-calendar .weekend-slot {
+    color: #000000;
 }
 
 .calendar-table th,
