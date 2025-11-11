@@ -1208,6 +1208,84 @@ body {
     opacity: 1;
 }
 
+/* Individual slot close/open buttons */
+.toggle-slot-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-slot-btn:hover {
+    background: var(--error);
+    transform: scale(1.1);
+}
+
+.toggle-slot-btn.close-slot .material-icons {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.toggle-slot-btn.close-slot:hover .material-icons {
+    color: white;
+}
+
+.toggle-slot-btn:not(.close-slot) {
+    background: rgba(198, 40, 40, 0.1);
+}
+
+.toggle-slot-btn:not(.close-slot):hover {
+    background: var(--success);
+}
+
+.toggle-slot-btn:not(.close-slot) .material-icons {
+    font-size: 14px;
+    color: var(--error);
+}
+
+.toggle-slot-btn:not(.close-slot):hover .material-icons {
+    color: white;
+}
+
+.closed-slot {
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(198, 40, 40, 0.08),
+        rgba(198, 40, 40, 0.08) 8px,
+        rgba(198, 40, 40, 0.15) 8px,
+        rgba(198, 40, 40, 0.15) 16px
+    ) !important;
+    position: relative;
+}
+
+.closed-indicator-small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 4px;
+    color: var(--error);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.closed-indicator-small .material-icons {
+    font-size: 18px;
+    opacity: 0.6;
+}
+
 /* Color Classes for Users */
 .color-1 .person-avatar {
     background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
