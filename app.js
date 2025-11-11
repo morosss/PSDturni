@@ -582,7 +582,11 @@ function renderCalendar() {
             slots.forEach(slot => {
                 const shiftKey = `${dateKey}_${shiftType}_${slot}`;
                 const assignedUserId = AppState.shifts[shiftKey] || '';
-                const isClosed = AppState.ambulatoriStatus[`${dateKey}_${shiftType}`] === 'closed';
+                // Check if EITHER the whole ambulatorio OR the individual slot is closed
+                const ambulatoriKey = `${dateKey}_${shiftType}`;
+                const isAmbulatorioClosedWhole = AppState.ambulatoriStatus[ambulatoriKey] === 'closed';
+                const isIndividualSlotClosed = AppState.ambulatoriStatus[shiftKey] === 'closed';
+                const isClosed = isAmbulatorioClosedWhole || isIndividualSlotClosed;
 
                 let displayValue = '';
                 // Only show assignments if user has permission
@@ -591,7 +595,7 @@ function renderCalendar() {
                     displayValue = user ? (user.code || user.id.toUpperCase()) : assignedUserId.toUpperCase();
                 }
 
-                // Determine slot color class
+                // Determine slot color class - handle slots with spaces
                 const slotClass = slot.includes('MATT') || slot === '1' || slot === '2' || slot === '3' ? 'slot-matt' :
                                   slot.includes('POM') ? 'slot-pom' :
                                   slot === 'NTT' ? 'slot-ntt' :
@@ -1134,7 +1138,8 @@ function renderShiftsGrid() {
                     const userCode = assignedUser ? (assignedUser.code || assignedUser.id.toUpperCase()) : '';
 
                     const isAdmin = AppState.currentUser.role === 'admin';
-                    const slotTypeClass = `slot-type-${slot.toLowerCase()}`;
+                    // Fix slot type class - replace spaces with hyphens for valid CSS
+                    const slotTypeClass = `slot-type-${slot.toLowerCase().replace(/\s+/g, '-')}`;
 
                     if (isSlotClosed) {
                         // Render closed slot

@@ -546,9 +546,9 @@ body {
     font-size: 13px;
 }
 
-/* Compact Calendar - Excel-style for 16:9 screen fit */
+/* Compact Calendar - Excel-style for 16:9 screen fit - ULTRA COMPACT */
 .compact-calendar {
-    font-size: 10px;
+    font-size: 9px;
     font-family: 'Calibri', 'Arial', sans-serif;
     border-collapse: collapse;
     border-spacing: 0;
@@ -558,54 +558,55 @@ body {
 
 .compact-calendar th,
 .compact-calendar td {
-    padding: 3px 4px;
+    padding: 1px 2px;
     border: 1px solid #d0d0d0;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .compact-calendar th {
     background: #4472C4;
     color: white;
     font-weight: 600;
-    font-size: 9px;
-    padding: 4px 2px;
+    font-size: 7px;
+    padding: 2px 1px;
     white-space: nowrap;
 }
 
 .compact-calendar .date-header {
     background: #4472C4;
     font-weight: bold;
+    font-size: 8px;
 }
 
 .compact-calendar .compact-header {
-    font-size: 8px;
-    padding: 2px 1px;
-    line-height: 1.1;
+    font-size: 7px;
+    padding: 1px;
+    line-height: 1;
 }
 
 .compact-calendar .compact-date {
     font-weight: 600;
     background: #FFFFFF;
-    font-size: 11px;
-    min-width: 45px;
-    padding: 4px;
+    font-size: 9px;
+    min-width: 35px;
+    padding: 2px;
 }
 
 .compact-calendar .compact-date small {
     display: block;
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 500;
     color: #666;
-    margin-top: 1px;
+    margin-top: 0;
 }
 
 .compact-calendar .compact-cell {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 500;
-    padding: 3px 2px;
-    min-width: 40px;
-    max-width: 55px;
+    padding: 1px;
+    min-width: 30px;
+    max-width: 45px;
 }
 
 .compact-calendar .compact-shift-content {
