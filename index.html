@@ -129,6 +129,10 @@
                 <span class="material-icons">history</span>
                 <span>Versioni</span>
             </button>
+            <button class="nav-btn admin-only" data-view="email" style="display: none;">
+                <span class="material-icons">email</span>
+                <span>Gestione Email</span>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -481,6 +485,88 @@
                 </div>
 
                 <div id="versionsGrid" class="versions-grid"></div>
+            </div>
+
+            <!-- Email Management View (Admin Only) -->
+            <div id="emailView" class="view">
+                <div class="view-header">
+                    <h2>Gestione Email</h2>
+                    <div class="view-actions">
+                        <button id="sendEmailBtn" class="btn btn-primary">
+                            <span class="material-icons">send</span>
+                            Invia Email
+                        </button>
+                    </div>
+                </div>
+
+                <div class="email-composer">
+                    <div class="info-box">
+                        <span class="material-icons">info</span>
+                        <p>Crea email per inviare turni agli utenti. Puoi allegare file Excel, PDF o altri documenti. L'email si aprirà nel tuo client predefinito.</p>
+                    </div>
+
+                    <form id="emailForm" class="form">
+                        <div class="input-group">
+                            <label for="emailRecipients">Destinatari</label>
+                            <select id="emailRecipients" multiple size="8">
+                                <option value="all">Tutti gli Utenti</option>
+                                <option disabled>───────────────</option>
+                            </select>
+                            <span class="helper-text">Tieni premuto Ctrl (Cmd su Mac) per selezionare più utenti</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="emailSubject">Oggetto</label>
+                            <input type="text" id="emailSubject" placeholder="es. Turni di Novembre 2025">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="emailBody">Messaggio</label>
+                            <textarea id="emailBody" rows="8" placeholder="Scrivi il messaggio dell'email..."></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Allegati</label>
+                            <div class="attachment-controls">
+                                <button type="button" class="btn btn-secondary" onclick="addEmailAttachment('excel')">
+                                    <span class="material-icons">table_chart</span>
+                                    Allega Excel Corrente
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="addEmailAttachment('pdf')">
+                                    <span class="material-icons">picture_as_pdf</span>
+                                    Allega PDF Corrente
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('customAttachment').click()">
+                                    <span class="material-icons">attach_file</span>
+                                    Allega File Personalizzato
+                                </button>
+                                <input type="file" id="customAttachment" style="display: none;" multiple onchange="handleCustomAttachments(event)">
+                            </div>
+                            <div id="attachmentsList" class="attachments-list"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Opzioni Email</label>
+                            <div class="email-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="emailIncludeCalendar" checked>
+                                    <span>Includi riferimento al calendario turni</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="emailRequestConfirmation">
+                                    <span>Richiedi conferma di lettura</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="email-preview">
+                        <h4>Anteprima Email</h4>
+                        <div id="emailPreview" class="email-preview-content">
+                            <p class="preview-placeholder">Compila i campi sopra per vedere l'anteprima dell'email</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

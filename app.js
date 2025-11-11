@@ -489,6 +489,9 @@ function switchView(viewName) {
             updateVersionMonthSelectors();
             renderVersionsGrid();
             break;
+        case 'email':
+            initializeEmailView();
+            break;
     }
 }
 
@@ -2736,6 +2739,9 @@ function initializeEventListeners() {
     // Approval System
     document.getElementById('toggleApprovalBtn').addEventListener('click', toggleMonthApproval);
 
+    // Email Management
+    document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
+
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -3213,6 +3219,263 @@ function deleteCustomColumn(index) {
     showToast(`Colonna "${deletedColumn.name}" eliminata`, 'success');
 }
 
+// ===========================
+// Email Management
+// ===========================
+
+// State for email attachments
+let emailAttachments = [];
+
+function initializeEmailView() {
+    // Populate recipients list with users
+    const recipientsSelect = document.getElementById('emailRecipients');
+
+    // Clear existing options (except "All" and separator)
+    while (recipientsSelect.options.length > 2) {
+        recipientsSelect.remove(2);
+    }
+
+    // Add all users
+    AppState.users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.email || user.id;
+        option.textContent = `${user.name}${user.email ? ' (' + user.email + ')' : ''}`;
+        recipientsSelect.appendChild(option);
+    });
+
+    // Initialize email preview
+    updateEmailPreview();
+
+    // Add event listeners for live preview
+    document.getElementById('emailSubject').addEventListener('input', updateEmailPreview);
+    document.getElementById('emailBody').addEventListener('input', updateEmailPreview);
+    document.getElementById('emailRecipients').addEventListener('change', updateEmailPreview);
+    document.getElementById('emailIncludeCalendar').addEventListener('change', updateEmailPreview);
+}
+
+function updateEmailPreview() {
+    const subject = document.getElementById('emailSubject').value;
+    const body = document.getElementById('emailBody').value;
+    const recipients = Array.from(document.getElementById('emailRecipients').selectedOptions).map(opt => opt.text);
+    const includeCalendar = document.getElementById('emailIncludeCalendar').checked;
+
+    const previewDiv = document.getElementById('emailPreview');
+
+    if (!subject && !body && recipients.length === 0) {
+        previewDiv.innerHTML = '<p class="preview-placeholder">Compila i campi sopra per vedere l\'anteprima dell\'email</p>';
+        return;
+    }
+
+    let previewHTML = '<div class="email-preview-fields">';
+
+    // To field
+    if (recipients.length > 0) {
+        previewHTML += `<div class="preview-field"><strong>A:</strong> ${recipients.join(', ')}</div>`;
+    }
+
+    // Subject field
+    if (subject) {
+        previewHTML += `<div class="preview-field"><strong>Oggetto:</strong> ${subject}</div>`;
+    }
+
+    // Attachments
+    if (emailAttachments.length > 0) {
+        previewHTML += `<div class="preview-field"><strong>Allegati:</strong> ${emailAttachments.length} file</div>`;
+    }
+
+    // Body
+    if (body || includeCalendar) {
+        previewHTML += '<div class="preview-field"><strong>Messaggio:</strong></div>';
+        previewHTML += '<div class="preview-body">';
+        if (body) {
+            previewHTML += body.replace(/\n/g, '<br>');
+        }
+        if (includeCalendar) {
+            previewHTML += '<br><br>---<br>';
+            previewHTML += `<em>Calendario turni disponibile su: ${window.location.href}</em>`;
+        }
+        previewHTML += '</div>';
+    }
+
+    previewHTML += '</div>';
+    previewDiv.innerHTML = previewHTML;
+}
+
+function addEmailAttachment(type) {
+    const currentMonth = AppState.currentMonth;
+    const currentYear = AppState.currentYear;
+    const monthName = ITALIAN_MONTHS[currentMonth];
+
+    if (type === 'excel') {
+        const attachment = {
+            type: 'excel',
+            name: `turni_${monthName}_${currentYear}.xlsx`,
+            description: `Excel dei turni - ${monthName} ${currentYear}`
+        };
+        emailAttachments.push(attachment);
+        showToast('Excel aggiunto agli allegati', 'success');
+    } else if (type === 'pdf') {
+        const attachment = {
+            type: 'pdf',
+            name: `turni_${monthName}_${currentYear}.pdf`,
+            description: `PDF dei turni - ${monthName} ${currentYear}`
+        };
+        emailAttachments.push(attachment);
+        showToast('PDF aggiunto agli allegati', 'success');
+    }
+
+    renderAttachmentsList();
+    updateEmailPreview();
+}
+
+function handleCustomAttachments(event) {
+    const files = Array.from(event.target.files);
+
+    files.forEach(file => {
+        const attachment = {
+            type: 'custom',
+            name: file.name,
+            description: file.name,
+            file: file
+        };
+        emailAttachments.push(attachment);
+    });
+
+    if (files.length > 0) {
+        showToast(`${files.length} file aggiunti agli allegati`, 'success');
+        renderAttachmentsList();
+        updateEmailPreview();
+    }
+
+    // Reset file input
+    event.target.value = '';
+}
+
+function renderAttachmentsList() {
+    const listDiv = document.getElementById('attachmentsList');
+
+    if (emailAttachments.length === 0) {
+        listDiv.innerHTML = '<p class="no-attachments">Nessun allegato</p>';
+        return;
+    }
+
+    let html = '<div class="attachments-items">';
+    emailAttachments.forEach((attachment, index) => {
+        const icon = attachment.type === 'excel' ? 'table_chart' :
+                     attachment.type === 'pdf' ? 'picture_as_pdf' : 'attach_file';
+
+        html += `
+            <div class="attachment-item">
+                <span class="material-icons">${icon}</span>
+                <span class="attachment-name">${attachment.description}</span>
+                <button type="button" class="btn-icon-small" onclick="removeEmailAttachment(${index})" title="Rimuovi">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    listDiv.innerHTML = html;
+}
+
+function removeEmailAttachment(index) {
+    emailAttachments.splice(index, 1);
+    renderAttachmentsList();
+    updateEmailPreview();
+}
+
+function sendEmail() {
+    const subject = document.getElementById('emailSubject').value;
+    const body = document.getElementById('emailBody').value;
+    const recipients = Array.from(document.getElementById('emailRecipients').selectedOptions);
+    const includeCalendar = document.getElementById('emailIncludeCalendar').checked;
+    const requestConfirmation = document.getElementById('emailRequestConfirmation').checked;
+
+    // Validation
+    if (recipients.length === 0) {
+        showToast('Seleziona almeno un destinatario', 'error');
+        return;
+    }
+
+    if (!subject) {
+        showToast('Inserisci un oggetto per l\'email', 'error');
+        return;
+    }
+
+    // Build recipient list
+    let emailAddresses = [];
+    recipients.forEach(opt => {
+        if (opt.value === 'all') {
+            // Add all users with email
+            AppState.users.forEach(user => {
+                if (user.email) {
+                    emailAddresses.push(user.email);
+                }
+            });
+        } else {
+            emailAddresses.push(opt.value);
+        }
+    });
+
+    // Remove duplicates
+    emailAddresses = [...new Set(emailAddresses)];
+
+    if (emailAddresses.length === 0) {
+        showToast('Nessun indirizzo email valido trovato per i destinatari selezionati', 'error');
+        return;
+    }
+
+    // Build email body
+    let fullBody = body;
+    if (includeCalendar) {
+        fullBody += '\n\n---\n';
+        fullBody += `Calendario turni disponibile su: ${window.location.href}\n`;
+    }
+
+    if (emailAttachments.length > 0) {
+        fullBody += '\n\nAllegati:\n';
+        emailAttachments.forEach(att => {
+            fullBody += `- ${att.description}\n`;
+        });
+        fullBody += '\n(Nota: Gli allegati devono essere aggiunti manualmente dal tuo client email)\n';
+    }
+
+    // Build mailto URL
+    let mailtoURL = `mailto:${emailAddresses.join(',')}`;
+    mailtoURL += `?subject=${encodeURIComponent(subject)}`;
+    mailtoURL += `&body=${encodeURIComponent(fullBody)}`;
+
+    if (requestConfirmation) {
+        mailtoURL += `&disposition-notification-to=${encodeURIComponent(AppState.currentUser.email || '')}`;
+    }
+
+    // Generate attachments if needed
+    const currentMonth = AppState.currentMonth;
+    const currentYear = AppState.currentYear;
+
+    // Generate Excel/PDF attachments before opening email
+    emailAttachments.forEach(attachment => {
+        if (attachment.type === 'excel') {
+            generateExcel(currentYear, currentMonth, 'definitivo');
+        } else if (attachment.type === 'pdf') {
+            generatePDF(currentMonth, currentYear, 'definitivo');
+        }
+    });
+
+    // Open email client
+    window.location.href = mailtoURL;
+
+    showToast('Client email aperto. Aggiungi manualmente gli allegati generati.', 'info');
+
+    // Show instructions for attachments
+    if (emailAttachments.length > 0) {
+        setTimeout(() => {
+            alert('I file Excel e PDF sono stati generati e scaricati.\n\nPer allegare i file all\'email:\n1. Apri il tuo client email\n2. Trova l\'email creata automaticamente\n3. Aggiungi i file scaricati come allegati\n4. Invia l\'email');
+        }, 1000);
+    }
+}
+
 // Export functions for global access
 window.switchView = switchView;
 window.editUser = editUser;
@@ -3228,3 +3491,7 @@ window.renameVersion = renameVersion;
 window.openManageColumnsModal = openManageColumnsModal;
 window.addCustomColumn = addCustomColumn;
 window.deleteCustomColumn = deleteCustomColumn;
+window.addEmailAttachment = addEmailAttachment;
+window.handleCustomAttachments = handleCustomAttachments;
+window.removeEmailAttachment = removeEmailAttachment;
+window.sendEmail = sendEmail;

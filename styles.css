@@ -3342,3 +3342,171 @@ body {
 .btn-sm .material-icons {
     font-size: 16px;
 }
+
+/* ===========================
+   Email Management
+   =========================== */
+.email-composer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.attachment-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.attachments-list {
+    margin-top: 12px;
+}
+
+.no-attachments {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin: 8px 0;
+}
+
+.attachments-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--background);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.attachment-item:hover {
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.attachment-item .material-icons {
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.attachment-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.btn-icon-small {
+    padding: 4px;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-small:hover {
+    background: var(--error-light);
+}
+
+.btn-icon-small .material-icons {
+    font-size: 18px;
+    color: var(--error);
+}
+
+.email-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.email-preview {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+}
+
+.email-preview h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.email-preview-content {
+    min-height: 100px;
+}
+
+.preview-placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.email-preview-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-field {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.preview-field strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.preview-body {
+    margin-top: 8px;
+    padding: 16px;
+    background: var(--background);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+}
+
+#emailRecipients {
+    font-family: var(--font-family);
+    font-size: 14px;
+    padding: 8px;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+#emailRecipients option {
+    padding: 8px;
+}
+
+#emailRecipients option:checked {
+    background: var(--primary);
+    color: white;
+}
+
+#emailBody {
+    font-family: var(--font-family);
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 150px;
+}
