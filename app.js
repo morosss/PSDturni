@@ -492,6 +492,9 @@ function switchView(viewName) {
         case 'email':
             initializeEmailView();
             break;
+        case 'statistics':
+            initializeStatisticsView();
+            break;
     }
 }
 
@@ -2742,6 +2745,10 @@ function initializeEventListeners() {
     // Email Management
     document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
 
+    // Statistics
+    document.getElementById('refreshStatsBtn').addEventListener('click', renderStatistics);
+    document.getElementById('statsMonth').addEventListener('change', renderStatistics);
+
     // Modal close buttons
     document.querySelectorAll('.modal-close, [data-modal]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -3474,6 +3481,383 @@ function sendEmail() {
             alert('I file Excel e PDF sono stati generati e scaricati.\n\nPer allegare i file all\'email:\n1. Apri il tuo client email\n2. Trova l\'email creata automaticamente\n3. Aggiungi i file scaricati come allegati\n4. Invia l\'email');
         }, 1000);
     }
+}
+
+// ===========================
+// Statistics
+// ===========================
+
+// Chart instances
+let chartInstances = {
+    userDistribution: null,
+    shiftType: null,
+    timeSlot: null,
+    monthTrend: null
+};
+
+function initializeStatisticsView() {
+    updateStatsMonthSelector();
+    renderStatistics();
+}
+
+function updateStatsMonthSelector() {
+    const select = document.getElementById('statsMonth');
+    const now = new Date();
+    let html = '';
+
+    for (let i = 0; i <= 3; i++) {
+        const month = (now.getMonth() + i) % 12;
+        const year = now.getFullYear() + Math.floor((now.getMonth() + i) / 12);
+        const selected = month === AppState.currentMonth && year === AppState.currentYear ? 'selected' : '';
+        html += `<option value="${year}-${month}" ${selected}>${ITALIAN_MONTHS[month]} ${year}</option>`;
+    }
+
+    select.innerHTML = html;
+}
+
+function renderStatistics() {
+    const select = document.getElementById('statsMonth');
+    const [year, month] = select.value.split('-').map(Number);
+
+    const stats = calculateStatistics(year, month);
+
+    // Update summary cards
+    document.getElementById('statTotalShifts').textContent = stats.totalShifts;
+    document.getElementById('statActiveUsers').textContent = stats.activeUsers;
+    document.getElementById('statAssignedShifts').textContent = `${stats.assignedShifts} (${stats.assignmentPercentage}%)`;
+    document.getElementById('statEmptyShifts').textContent = stats.emptyShifts;
+
+    // Render charts
+    renderUserDistributionChart(stats.userDistribution);
+    renderShiftTypeChart(stats.shiftTypeDistribution);
+    renderTimeSlotChart(stats.timeSlotDistribution);
+    renderMonthTrendChart(stats.dailyAssignments, year, month);
+
+    // Render detailed table
+    renderStatsTable(stats.userDetails);
+}
+
+function calculateStatistics(year, month) {
+    const daysInMonth = getDaysInMonth(year, month);
+    let totalShifts = 0;
+    let assignedShifts = 0;
+    const userShiftCounts = {};
+    const shiftTypeCounts = {};
+    const timeSlotCounts = { MATT: 0, POM: 0, NTT: 0, GG: 0, SPEC: 0 };
+    const dailyAssignments = [];
+    const userDetails = {};
+
+    // Initialize user details
+    AppState.users.forEach(user => {
+        userDetails[user.id] = {
+            name: user.name,
+            code: user.code || user.id.toUpperCase(),
+            shiftsByType: {},
+            total: 0
+        };
+    });
+
+    // Count assignments by day for trend
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDate(year, month, day);
+        let dayAssignments = 0;
+
+        SHIFT_TYPES.forEach(shiftType => {
+            const slots = TIME_SLOTS[shiftType];
+
+            slots.forEach(slot => {
+                const shiftKey = `${dateKey}_${shiftType}_${slot}`;
+                totalShifts++;
+
+                const userId = AppState.shifts[shiftKey];
+                if (userId) {
+                    assignedShifts++;
+                    dayAssignments++;
+
+                    // Count by user
+                    userShiftCounts[userId] = (userShiftCounts[userId] || 0) + 1;
+
+                    // Count by shift type
+                    shiftTypeCounts[shiftType] = (shiftTypeCounts[shiftType] || 0) + 1;
+
+                    // Count by time slot category
+                    if (slot.includes('MATT') || slot === 'MATT') timeSlotCounts.MATT++;
+                    else if (slot.includes('POM') || slot === 'POM') timeSlotCounts.POM++;
+                    else if (slot === 'NTT') timeSlotCounts.NTT++;
+                    else if (slot === 'GG') timeSlotCounts.GG++;
+                    else if (slot === 'SPEC') timeSlotCounts.SPEC++;
+
+                    // Update user details
+                    if (userDetails[userId]) {
+                        userDetails[userId].total++;
+                        userDetails[userId].shiftsByType[shiftType] = (userDetails[userId].shiftsByType[shiftType] || 0) + 1;
+                    }
+                }
+            });
+        });
+
+        dailyAssignments.push({ day, count: dayAssignments });
+    }
+
+    const emptyShifts = totalShifts - assignedShifts;
+    const assignmentPercentage = totalShifts > 0 ? Math.round((assignedShifts / totalShifts) * 100) : 0;
+    const activeUsers = Object.keys(userShiftCounts).length;
+
+    // Sort user distribution by count
+    const userDistribution = Object.entries(userShiftCounts)
+        .map(([userId, count]) => {
+            const user = AppState.users.find(u => u.id === userId);
+            return {
+                userId,
+                name: user ? user.name : userId,
+                code: user ? (user.code || user.id.toUpperCase()) : userId,
+                count
+            };
+        })
+        .sort((a, b) => b.count - a.count);
+
+    return {
+        totalShifts,
+        assignedShifts,
+        emptyShifts,
+        assignmentPercentage,
+        activeUsers,
+        userDistribution,
+        shiftTypeDistribution: shiftTypeCounts,
+        timeSlotDistribution: timeSlotCounts,
+        dailyAssignments,
+        userDetails
+    };
+}
+
+function renderUserDistributionChart(userDistribution) {
+    const ctx = document.getElementById('userDistributionChart');
+
+    // Destroy existing chart
+    if (chartInstances.userDistribution) {
+        chartInstances.userDistribution.destroy();
+    }
+
+    const top10 = userDistribution.slice(0, 10);
+
+    chartInstances.userDistribution = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top10.map(u => u.code),
+            datasets: [{
+                label: 'Turni Assegnati',
+                data: top10.map(u => u.count),
+                backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                borderColor: 'rgba(33, 150, 243, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderShiftTypeChart(shiftTypeDistribution) {
+    const ctx = document.getElementById('shiftTypeChart');
+
+    if (chartInstances.shiftType) {
+        chartInstances.shiftType.destroy();
+    }
+
+    const labels = Object.keys(shiftTypeDistribution);
+    const data = Object.values(shiftTypeDistribution);
+
+    // Generate colors
+    const colors = labels.map((_, i) => {
+        const hue = (i * 360 / labels.length);
+        return `hsla(${hue}, 70%, 60%, 0.7)`;
+    });
+
+    chartInstances.shiftType = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 8,
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderTimeSlotChart(timeSlotDistribution) {
+    const ctx = document.getElementById('timeSlotChart');
+
+    if (chartInstances.timeSlot) {
+        chartInstances.timeSlot.destroy();
+    }
+
+    const labels = ['Mattina', 'Pomeriggio', 'Notte', 'Giornata', 'Speciale'];
+    const data = [
+        timeSlotDistribution.MATT,
+        timeSlotDistribution.POM,
+        timeSlotDistribution.NTT,
+        timeSlotDistribution.GG,
+        timeSlotDistribution.SPEC
+    ];
+
+    chartInstances.timeSlot = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(255, 152, 0, 0.7)',
+                    'rgba(63, 81, 181, 0.7)',
+                    'rgba(76, 175, 80, 0.7)',
+                    'rgba(156, 39, 176, 0.7)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 8,
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderMonthTrendChart(dailyAssignments, year, month) {
+    const ctx = document.getElementById('monthTrendChart');
+
+    if (chartInstances.monthTrend) {
+        chartInstances.monthTrend.destroy();
+    }
+
+    chartInstances.monthTrend = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dailyAssignments.map(d => d.day),
+            datasets: [{
+                label: 'Turni Assegnati',
+                data: dailyAssignments.map(d => d.count),
+                borderColor: 'rgba(76, 175, 80, 1)',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Giorno del Mese'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Numero Turni'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderStatsTable(userDetails) {
+    const container = document.getElementById('statsTable');
+
+    // Sort users by total shifts
+    const sortedUsers = Object.entries(userDetails)
+        .map(([userId, details]) => ({ userId, ...details }))
+        .filter(u => u.total > 0)
+        .sort((a, b) => b.total - a.total);
+
+    if (sortedUsers.length === 0) {
+        container.innerHTML = '<p class="no-data">Nessun turno assegnato in questo mese</p>';
+        return;
+    }
+
+    let html = '<table class="stats-table"><thead><tr>';
+    html += '<th>Utente</th>';
+    html += '<th>Codice</th>';
+    html += '<th>Totale Turni</th>';
+
+    // Get all shift types that have assignments
+    const activeShiftTypes = [...new Set(sortedUsers.flatMap(u => Object.keys(u.shiftsByType)))];
+    activeShiftTypes.forEach(type => {
+        html += `<th>${type}</th>`;
+    });
+
+    html += '</tr></thead><tbody>';
+
+    sortedUsers.forEach(user => {
+        html += '<tr>';
+        html += `<td>${user.name}</td>`;
+        html += `<td><strong>${user.code}</strong></td>`;
+        html += `<td class="stat-total"><strong>${user.total}</strong></td>`;
+
+        activeShiftTypes.forEach(type => {
+            const count = user.shiftsByType[type] || 0;
+            html += `<td>${count > 0 ? count : '-'}</td>`;
+        });
+
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
 }
 
 // Export functions for global access
