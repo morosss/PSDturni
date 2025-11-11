@@ -1193,67 +1193,71 @@ body {
     transform: none;
 }
 
-/* Excel-style color coding for time slots */
+/* Excel-style color coding for time slots - Exact match to Novembre 2025.xlsx */
 .shift-slot.slot-type-matt {
-    background: #FFFFFF; /* White for morning shifts */
+    background: #FFFFFF !important; /* White for morning shifts */
 }
 
 .shift-slot.slot-type-pom {
-    background: #FFF2CC; /* Light orange for afternoon shifts */
+    background: #FFF2CC !important; /* Light yellow/orange for afternoon shifts */
 }
 
 .shift-slot.slot-type-ntt {
-    background: #D9D9D9; /* Light gray for night shifts */
+    background: #BFBFBF !important; /* Gray for night shifts - exact Excel match */
 }
 
 .shift-slot.slot-type-gg {
-    background: #E7E6E6; /* Light gray for all-day shifts */
+    background: #E7E6E6 !important; /* Light gray for all-day shifts */
 }
 
 .shift-slot.slot-type-spec {
-    background: #CCCCFF; /* Light purple for special shifts */
+    background: #CCCCFF !important; /* Light purple for special shifts */
 }
 
-/* Weekend row override - light blue background for all slots */
+/* Weekend row override - light blue background for all slots - exact Excel match */
 .weekend-row .shift-slot {
-    background: #D0DAE6; /* Light blue for weekend shifts */
+    background: #ADB9CA !important; /* Light blue for weekend shifts - exact Excel color */
 }
 
 .weekend-row .shift-slot.slot-type-matt {
-    background: #D0DAE6;
+    background: #ADB9CA !important;
 }
 
 .weekend-row .shift-slot.slot-type-pom {
-    background: #C9D6E3;
+    background: #ADB9CA !important;
 }
 
 .weekend-row .shift-slot.slot-type-ntt {
-    background: #BEC9D6;
+    background: #ADB9CA !important;
 }
 
 .weekend-row .shift-slot.slot-type-gg {
-    background: #C5D3E0;
+    background: #ADB9CA !important;
+}
+
+.weekend-row .shift-slot.slot-type-spec {
+    background: #ADB9CA !important;
 }
 
 /* Empty slots maintain slightly lighter color */
 .shift-slot.empty.slot-type-pom {
-    background: #FFF8E1;
+    background: #FFF8E1 !important;
 }
 
 .shift-slot.empty.slot-type-ntt {
-    background: #E8E8E8;
+    background: #D0D0D0 !important;
 }
 
 .shift-slot.empty.slot-type-gg {
-    background: #F0F0F0;
+    background: #F0F0F0 !important;
 }
 
 .shift-slot.empty.slot-type-spec {
-    background: #E6E6FF;
+    background: #E6E6FF !important;
 }
 
 .weekend-row .shift-slot.empty {
-    background: #E3EBF3;
+    background: #C0CDD9 !important;
 }
 
 .slot-time {
